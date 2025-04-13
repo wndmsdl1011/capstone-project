@@ -126,7 +126,7 @@ const PersonalRegisterPage = () => {
       password: '',
       name: '',
       birthYear: '',
-      gender: 'Man',
+      gender: 'MAN',
       phone: '',
       major: '',
       education: '',
@@ -236,13 +236,13 @@ const PersonalRegisterPage = () => {
             value={formik.values.gender}
             onChange={formik.handleChange}
           >
-            <option value="Man">남성</option>
-            <option value="Female">여성</option>
+            <option value="MAN">남성</option>
+            <option value="FEMALE">여성</option>
           </Select>
           <Input
             name="birthYear"
             type="number"
-            placeholder="나이"
+            placeholder="생년월일 예:1999"
             value={formik.values.birthYear}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}

@@ -70,14 +70,14 @@ export const registerUser = createAsyncThunk(
     { values, navigate },
     { dispatch, rejectWithValue }
   ) => {
-    console.log("values", values);
+    
 
     try {
       
-      const response = await api.post("/api/register", {
+      const response = await api.post("/api/register", 
         values,
-      });
-      console.log("values2", values);
+      );
+      
       dispatch(
         showToastMessage({
           message: "회원가입을 성공했습니다!",
