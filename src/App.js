@@ -1,12 +1,15 @@
-import './App.css';
-import AppRouter from './routes/AppRouter';
+import "./App.css";
+import AppRouter from "./routes/AppRouter";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-// npm install axios 
+// npm install axios
 
 function App() {
   return (
     <div>
-      <AppRouter/>
+      <AppRouter />
+      <ToastContainer />
     </div>
   );
 }

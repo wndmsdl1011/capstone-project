@@ -14,9 +14,9 @@ import { showToastMessage } from "../common/uiSlice";
 // page나 라우터도 어떤 대략적인 페이지들만 설정해논거라 알아서 유동적으로 페이지 추가시 라우터도 수정 바람.
 export const loginWithEmail = createAsyncThunk(
   "user/loginWithEmail",
-  async ({ email, userPassword }, { rejectWithValue }) => {
+  async ({ email, password }, { rejectWithValue }) => {
     try {
-      const response = await api.post("/auth/login", { email, userPassword }); // post로 보내줌
+      const response = await api.post("/api/login", { email, password }); // post로 보내줌
       console.log(response);
       //성공
       //Loginpage에서 처리
@@ -47,7 +47,7 @@ export const logout = createAsyncThunk(
   "user/logout",
   async (_, { dispatch }) => {
     try {
-      await api.post("/auth/logout", {});
+      await api.post("/api/logout", {});
       sessionStorage.removeItem("access_token");
       dispatch(showToastMessage({
         message: "로그아웃을 완료했습니다!",
@@ -67,33 +67,17 @@ export const logout = createAsyncThunk(
 export const registerUser = createAsyncThunk(
   "user/registerUser",
   async (
-    {
-      userName,
-      email,
-      userPassword,
-      gender,
-      age,
-      nickname,
-      contact,
-      major,
-      location,
-      navigate,
-    },
+    { values, navigate },
     { dispatch, rejectWithValue }
   ) => {
-    try {
-      const response = await api.post("/auth/register", {
-        email,
-        userName,
-        userPassword,
-        gender,
-        age,
-        nickname,
-        contact,
-        major,
-        location,
-      });
+    
 
+    try {
+      
+      const response = await api.post("/api/register", 
+        values,
+      );
+      
       dispatch(
         showToastMessage({
           message: "회원가입을 성공했습니다!",
@@ -101,7 +85,6 @@ export const registerUser = createAsyncThunk(
         })
       );
       navigate("/login");
-
       return response.data;
     } catch (error) {
       dispatch(
