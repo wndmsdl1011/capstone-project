@@ -67,7 +67,7 @@ const ToggleButton = styled.button`
 
 const CardWrapper = styled.div`
   width: 90%;
-  max-width: 400px;
+  max-width: 420px;
   height: auto;
   position: relative;
   perspective: 1200px;
@@ -147,6 +147,7 @@ const LoginPage = () => {
 
   const handleLoginWithEmail = (event) => {
     event.preventDefault();
+    console.log(userPassword)
     dispatch(loginWithEmail({ email, userPassword }));
   };
 

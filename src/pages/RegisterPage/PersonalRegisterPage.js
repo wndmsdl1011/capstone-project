@@ -41,7 +41,7 @@ const FormWrapper = styled.div`
   border-radius: 16px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   width: 90%;
-  max-width: 400px;
+  max-width: 420px;
   text-align: center;
   margin-bottom: 10px;
 `;
@@ -200,14 +200,6 @@ const PersonalRegisterPage = () => {
       <FormWrapper>
         <form onSubmit={handleSubmit}>
           <Input
-            name="name"
-            type="text"
-            placeholder="이름"
-            value={formik.values.name}
-            onChange={formik.handleChange}
-            ref={nameInputRef}
-          />
-          <Input
             name="email"
             type="email"
             placeholder="이메일"
@@ -230,6 +222,14 @@ const PersonalRegisterPage = () => {
             value={formik.values.checkPw}
             onChange={formik.handleChange}
             ref={pwCheckInputRef}
+          />
+          <Input
+            name="name"
+            type="text"
+            placeholder="이름"
+            value={formik.values.name}
+            onChange={formik.handleChange}
+            ref={nameInputRef}
           />
           <Select
             name="gender"

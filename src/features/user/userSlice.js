@@ -15,8 +15,9 @@ import { showToastMessage } from "../common/uiSlice";
 export const loginWithEmail = createAsyncThunk(
   "user/loginWithEmail",
   async ({ email, userPassword }, { rejectWithValue }) => {
+    
     try {
-      const response = await api.post("/api/login", { email, userPassword }); // post로 보내줌
+      const response = await api.post("/api/login",  {email, userPassword} ); // post로 보내줌
       console.log(response);
       //성공
       //Loginpage에서 처리
@@ -70,11 +71,41 @@ export const registerUser = createAsyncThunk(
     { values, navigate },
     { dispatch, rejectWithValue }
   ) => {
-    
-
     try {
       
-      const response = await api.post("/api/register", 
+      const response = await api.post("/api/register/account", 
+        values,
+      );
+      
+      dispatch(
+        showToastMessage({
+          message: "회원가입을 성공했습니다!",
+          status: "success",
+        })
+      );
+      navigate("/login");
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "회원가입에 실패했습니다.",
+          status: "error",
+        })
+      );
+      return rejectWithValue(error.response?.data || "회원가입 실패");
+    }
+  }
+);
+
+export const registerCompany = createAsyncThunk(
+  "user/registerCompany",
+  async (
+    { values, navigate },
+    { dispatch, rejectWithValue }
+  ) => {
+    try {
+      
+      const response = await api.post("/api/register/company", 
         values,
       );
       
@@ -203,6 +234,17 @@ const userSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.registrationError = action.payload;
       }) // 실패
+      .addCase(registerCompany.pending, (state) => {
+        // 데이터 기다림, state는 initialState를 넘겨줌
+        state.loading = true; // 로딩스피너
+      })
+      .addCase(registerCompany.fulfilled, (state) => {
+        state.loading = false;
+        state.registrationError = null;
+      }) // 성공
+      .addCase(registerCompany.rejected, (state, action) => {
+        state.registrationError = action.payload;
+      })
       .addCase(loginWithEmail.pending, (state) => {
         state.loading = true;
       })
