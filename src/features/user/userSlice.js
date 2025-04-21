@@ -129,6 +129,21 @@ export const registerCompany = createAsyncThunk(
   }
 );
 
+export const checkEmailAvailability = createAsyncThunk(
+  "user/checkEmailAvailability",
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/api/email/exist",{
+        params: { email: email }
+      });
+      console.log("중복 데이터 확인인",response.data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.error);
+    }
+  }
+);
+
 // 회원 정보 불러오기
 export const fetchUserProfile = createAsyncThunk(
   "user/fetchUserProfile",
@@ -208,6 +223,7 @@ const userSlice = createSlice({
     registrationError: null,
     success: false,
     profile: null,
+    emailmessage: "안녕하세요",
   },
   reducers: {
     // 직접적으로 호출
@@ -275,6 +291,18 @@ const userSlice = createSlice({
         state.loginError = null;
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.loginError = action.payload;
+      })
+      .addCase(checkEmailAvailability.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(checkEmailAvailability.fulfilled, (state, action) => {
+        state.loading = false;
+        state.emailmessage = action.payload
+        state.loginError = null;
+      })
+      .addCase(checkEmailAvailability.rejected, (state, action) => {
         state.loading = false;
         state.loginError = action.payload;
       })

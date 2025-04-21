@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerCompany, registerUser } from '../../features/user/userSlice';
+import { checkEmailAvailability, registerCompany, registerUser } from '../../features/user/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -108,7 +108,7 @@ const RegisterButton = styled.button`
 const PersonalRegisterPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const {user} = useSelector((state)=>state.user)
+  const {emailmessage} = useSelector((state)=>state.user.emailmessage)
   // 사용자 입력값 저장 state
   const [zonecode, setZonecode] = useState('');
   const [address, setAddress] = useState('');
@@ -234,7 +234,7 @@ const PersonalRegisterPage = () => {
   // console.log("user", user);
 
    // 모달 열기
-   const toggleHandler = () => {
+  const toggleHandler = () => {
     setIsOpen(true);
   };
 
@@ -257,7 +257,10 @@ const PersonalRegisterPage = () => {
   const closeHandler = () => {
     setIsOpen(false);
   };
-
+  const checkEmail = () => {
+    checkEmailAvailability();
+    console.log(emailmessage);
+  }
   
   return (
     <Container>
@@ -272,6 +275,10 @@ const PersonalRegisterPage = () => {
             onChange={formik.handleChange}
             ref={emailInputRef}
           />
+          <AddressButton type="button" onClick={checkEmail}>
+          중복검사
+        </AddressButton>
+        <div>{emailmessage}</div>
           <Input
             name="password"
             type="password"
