@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { checkEmailAvailability, registerCompany, registerUser } from '../../features/user/userSlice';
+import { registerCompany, registerUser } from '../../features/user/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -257,10 +257,10 @@ const PersonalRegisterPage = () => {
   const closeHandler = () => {
     setIsOpen(false);
   };
-  const checkEmail = () => {
-    checkEmailAvailability();
-    console.log(emailmessage);
-  }
+  // const checkEmail = () => {
+  //   checkEmailAvailability();
+  //   console.log(emailmessage);
+  // }
   
   return (
     <Container>
@@ -275,9 +275,9 @@ const PersonalRegisterPage = () => {
             onChange={formik.handleChange}
             ref={emailInputRef}
           />
-          <AddressButton type="button" onClick={checkEmail}>
+          {/* <AddressButton type="button" onClick={checkEmail}>
           중복검사
-        </AddressButton>
+        </AddressButton> */}
         <div>{emailmessage}</div>
           <Input
             name="password"

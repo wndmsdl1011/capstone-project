@@ -14,9 +14,10 @@ import { showToastMessage } from "../common/uiSlice";
 // page나 라우터도 어떤 대략적인 페이지들만 설정해논거라 알아서 유동적으로 페이지 추가시 라우터도 수정 바람.
 export const loginWithEmail = createAsyncThunk(
   "user/loginWithEmail",
-  async ({ email, userPassword }, { rejectWithValue }) => {
+  async ({ email, password, role }, { rejectWithValue }) => {
+    console.log("email,role", email, role)
     try {
-      const response = await api.post("/auth/login", { email, userPassword }); // post로 보내줌
+      const response = await api.post("/api/login",  {email, password, role} ); // post로 보내줌
       console.log(response);
       //성공
       //Loginpage에서 처리
@@ -47,7 +48,7 @@ export const logout = createAsyncThunk(
   "user/logout",
   async (_, { dispatch }) => {
     try {
-      await api.post("/auth/logout", {});
+      await api.post("/api/logout", {});
       sessionStorage.removeItem("access_token");
       dispatch(showToastMessage({
         message: "로그아웃을 완료했습니다!",
@@ -67,33 +68,15 @@ export const logout = createAsyncThunk(
 export const registerUser = createAsyncThunk(
   "user/registerUser",
   async (
-    {
-      userName,
-      email,
-      userPassword,
-      gender,
-      age,
-      nickname,
-      contact,
-      major,
-      location,
-      navigate,
-    },
+    { values, navigate },
     { dispatch, rejectWithValue }
   ) => {
     try {
-      const response = await api.post("/auth/register", {
-        email,
-        userName,
-        userPassword,
-        gender,
-        age,
-        nickname,
-        contact,
-        major,
-        location,
-      });
-
+      
+      const response = await api.post("/api/register/account", 
+        values,
+      );
+      
       dispatch(
         showToastMessage({
           message: "회원가입을 성공했습니다!",
@@ -101,7 +84,6 @@ export const registerUser = createAsyncThunk(
         })
       );
       navigate("/login");
-
       return response.data;
     } catch (error) {
       dispatch(
@@ -111,6 +93,53 @@ export const registerUser = createAsyncThunk(
         })
       );
       return rejectWithValue(error.response?.data || "회원가입 실패");
+    }
+  }
+);
+
+export const registerCompany = createAsyncThunk(
+  "user/registerCompany",
+  async (
+    { values, navigate },
+    { dispatch, rejectWithValue }
+  ) => {
+    try {
+      
+      const response = await api.post("/api/register/company", 
+        values,
+      );
+      
+      dispatch(
+        showToastMessage({
+          message: "회원가입을 성공했습니다!",
+          status: "success",
+        })
+      );
+      navigate("/login");
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "회원가입에 실패했습니다.",
+          status: "error",
+        })
+      );
+      return rejectWithValue(error.response?.data || "회원가입 실패");
+    }
+  }
+);
+
+export const checkEmailAvailability = createAsyncThunk(
+  "user/checkEmailAvailability",
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/api/email/exist",{
+        params: { email: email }
+      });
+      console.log("중복 데이터 확인인",response.data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.error);
     }
   }
 );
@@ -194,6 +223,7 @@ const userSlice = createSlice({
     registrationError: null,
     success: false,
     profile: null,
+    emailmessage: "안녕하세요",
   },
   reducers: {
     // 직접적으로 호출
@@ -220,6 +250,17 @@ const userSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.registrationError = action.payload;
       }) // 실패
+      .addCase(registerCompany.pending, (state) => {
+        // 데이터 기다림, state는 initialState를 넘겨줌
+        state.loading = true; // 로딩스피너
+      })
+      .addCase(registerCompany.fulfilled, (state) => {
+        state.loading = false;
+        state.registrationError = null;
+      }) // 성공
+      .addCase(registerCompany.rejected, (state, action) => {
+        state.registrationError = action.payload;
+      })
       .addCase(loginWithEmail.pending, (state) => {
         state.loading = true;
       })
@@ -250,6 +291,18 @@ const userSlice = createSlice({
         state.loginError = null;
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.loginError = action.payload;
+      })
+      .addCase(checkEmailAvailability.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(checkEmailAvailability.fulfilled, (state, action) => {
+        state.loading = false;
+        state.emailmessage = action.payload
+        state.loginError = null;
+      })
+      .addCase(checkEmailAvailability.rejected, (state, action) => {
         state.loading = false;
         state.loginError = action.payload;
       })
