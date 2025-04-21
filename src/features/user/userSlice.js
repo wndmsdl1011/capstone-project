@@ -14,10 +14,10 @@ import { showToastMessage } from "../common/uiSlice";
 // page나 라우터도 어떤 대략적인 페이지들만 설정해논거라 알아서 유동적으로 페이지 추가시 라우터도 수정 바람.
 export const loginWithEmail = createAsyncThunk(
   "user/loginWithEmail",
-  async ({ email, userPassword }, { rejectWithValue }) => {
-    
+  async ({ email, password, role }, { rejectWithValue }) => {
+    console.log("email,role", email, role)
     try {
-      const response = await api.post("/api/login",  {email, userPassword} ); // post로 보내줌
+      const response = await api.post("/api/login",  {email, password, role} ); // post로 보내줌
       console.log(response);
       //성공
       //Loginpage에서 처리

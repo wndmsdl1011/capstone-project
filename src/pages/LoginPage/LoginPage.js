@@ -132,9 +132,9 @@ const ErrorMessage = styled.div`
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
-  const [userPassword, setPassword] = useState("");
+  const [password, setPassword] = useState("");
   const [userType, setUserType] = useState("personal");
-
+  // const [role, setRole] = useState("USER");
   const { user, loginError } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -147,8 +147,10 @@ const LoginPage = () => {
 
   const handleLoginWithEmail = (event) => {
     event.preventDefault();
-    console.log(userPassword)
-    dispatch(loginWithEmail({ email, userPassword }));
+    console.log(password)
+    const role = userType === "business" ? "COMPANY" : "USER";
+    console.log("role",role);
+    dispatch(loginWithEmail({ email, password, role }));
   };
 
   if (user) {
