@@ -4,8 +4,13 @@ import AppLayOut from "../Layout/AppLayOut";
 import HomePage from "../pages/HomePage/HomePage";
 import LoginPage from "../pages/LoginPage/LoginPage";
 import MyPage from "../pages/MyPage/MyPage";
-import RegisterPage from "../pages/RegisterPage/RegisterPage";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
+import PersonalRegisterPage from "../pages/RegisterPage/PersonalRegisterPage";
+import CompanyRegisterPage from "../pages/RegisterPage/CompanyRegisterPage";
+import ProjectPage from "../pages/ProjectPage/ProjectPage";
+import ProjectRegisterPage from "../pages/ProjectPage/ProjectRegisterPage"
+import CommunityPage from "../pages/CommunityPage/CommunityPage";
+import ResumePage from "../pages/ResumePage/ResumePage";
 
 const AppRouter = () => {
   return (
@@ -15,7 +20,12 @@ const AppRouter = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/mypage" element={<MyPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/register/personal" element={<PersonalRegisterPage />} />
+        <Route path="/register/company" element={<CompanyRegisterPage />} />
+        <Route path="/projects" element={<ProjectPage />} />
+        <Route path="/projects/register" element={<ProjectRegisterPage />} />
+        <Route path="/community" element={<CommunityPage />} />
+        <Route path="/resume" element={<ResumePage />} />
       </Route>
 
       {/* NotFoundPage를 처리하는 라우트 */}
