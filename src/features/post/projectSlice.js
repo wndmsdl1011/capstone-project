@@ -6,7 +6,8 @@ export const postProject = createAsyncThunk(
   "project/postProject",
   async (formData, { rejectWithValue }) => {
     try {
-      const token = sessionStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("access_token");
+      console.log("accessToken:", token);
       const response = await axios.post(
         "http://localhost:8080/api/create/project",
         formData,
@@ -14,8 +15,12 @@ export const postProject = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          
         }
+        
       );
+      console.log(token); // 유효한 JWT인지 확인
+
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
