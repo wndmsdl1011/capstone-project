@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from '../../utils/api';  // api.js가 'src/utils/api.js'에 있을 경우
+import api from "../../utils/api"; // api.js가 'src/utils/api.js'에 있을 경우
 
 import { showToastMessage } from "../common/uiSlice";
 
@@ -15,9 +15,9 @@ import { showToastMessage } from "../common/uiSlice";
 export const loginWithEmail = createAsyncThunk(
   "user/loginWithEmail",
   async ({ email, password, role }, { rejectWithValue }) => {
-    console.log("email,role", email, role)
+    console.log("email,role", email, role);
     try {
-      const response = await api.post("/api/login",  {email, password, role} ); // post로 보내줌
+      const response = await api.post("/api/login", { email, password, role }); // post로 보내줌
       console.log(response);
       //성공
       //Loginpage에서 처리
@@ -41,7 +41,7 @@ export const loginWithEmail = createAsyncThunk(
 
 export const loginWithGoogle = createAsyncThunk(
   "user/loginWithGoogle",
-  async (token, { rejectWithValue }) => { }
+  async (token, { rejectWithValue }) => {}
 );
 
 export const logout = createAsyncThunk(
@@ -50,10 +50,12 @@ export const logout = createAsyncThunk(
     try {
       await api.post("/api/logout", {});
       sessionStorage.removeItem("access_token");
-      dispatch(showToastMessage({
-        message: "로그아웃을 완료했습니다!",
-        status: "success",
-      }))
+      dispatch(
+        showToastMessage({
+          message: "로그아웃을 완료했습니다!",
+          status: "success",
+        })
+      );
       window.location.href = "/login";
     } catch (error) {
       console.log("로그아웃 실패", error);
@@ -67,16 +69,10 @@ export const logout = createAsyncThunk(
 // 회원가입 요청 처리 (Redux 비동기 함수) - 주은 수정
 export const registerUser = createAsyncThunk(
   "user/registerUser",
-  async (
-    { values, navigate },
-    { dispatch, rejectWithValue }
-  ) => {
+  async ({ values, navigate }, { dispatch, rejectWithValue }) => {
     try {
-      
-      const response = await api.post("/api/register/account", 
-        values,
-      );
-      
+      const response = await api.post("/api/register/account", values);
+
       dispatch(
         showToastMessage({
           message: "회원가입을 성공했습니다!",
@@ -99,16 +95,10 @@ export const registerUser = createAsyncThunk(
 
 export const registerCompany = createAsyncThunk(
   "user/registerCompany",
-  async (
-    { values, navigate },
-    { dispatch, rejectWithValue }
-  ) => {
+  async ({ values, navigate }, { dispatch, rejectWithValue }) => {
     try {
-      
-      const response = await api.post("/api/register/company", 
-        values,
-      );
-      
+      const response = await api.post("/api/register/company", values);
+
       dispatch(
         showToastMessage({
           message: "회원가입을 성공했습니다!",
@@ -133,10 +123,10 @@ export const checkEmailAvailability = createAsyncThunk(
   "user/checkEmailAvailability",
   async (email, { rejectWithValue }) => {
     try {
-      const response = await api.get("/api/email/exist",{
-        params: { email: email }
+      const response = await api.get("/api/email/exist", {
+        params: { email: email },
       });
-      console.log("중복 데이터 확인인",response.data);
+      console.log("중복 데이터 확인인", response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.error);
@@ -287,7 +277,7 @@ const userSlice = createSlice({
       })
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.profile = action.payload
+        state.profile = action.payload;
         state.loginError = null;
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
@@ -299,7 +289,7 @@ const userSlice = createSlice({
       })
       .addCase(checkEmailAvailability.fulfilled, (state, action) => {
         state.loading = false;
-        state.emailmessage = action.payload
+        state.emailmessage = action.payload;
         state.loginError = null;
       })
       .addCase(checkEmailAvailability.rejected, (state, action) => {
@@ -313,10 +303,9 @@ const userSlice = createSlice({
           loginError: null,
           registrationError: null,
           success: false,
-        }
-      })
+        };
+      });
   },
-
 });
 export const { clearErrors } = userSlice.actions;
 export default userSlice.reducer;

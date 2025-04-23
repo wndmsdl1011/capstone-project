@@ -7,7 +7,7 @@ export const postProject = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("accessToken");
-      const response = await axios.post("/api/post/project", formData, {
+      const response = await axios.post("/api/create/project", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

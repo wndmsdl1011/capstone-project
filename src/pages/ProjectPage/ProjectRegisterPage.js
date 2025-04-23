@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { postProject } from "../../features/post/projectSlice";
 import styled from "styled-components";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -134,6 +138,9 @@ const Button = styled.button`
 
 const ProjectRegisterPage = () => {
   const [form, setForm] = useState({});
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { success, data } = useSelector((state) => state.project);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -161,6 +168,8 @@ const ProjectRegisterPage = () => {
       contact,
       title,
       description,
+      startDate,
+      endDate,
     } = form;
 
     // 필수 항목 누락 시 toast 알림 표시
@@ -178,10 +187,26 @@ const ProjectRegisterPage = () => {
       return toast.error("제목을 입력해주세요!");
     if (!description || description.trim() === "")
       return toast.error("내용을 입력해주세요!");
+    if (!startDate) return toast.error("시작일을 선택해주세요!");
+    if (!endDate) return toast.error("종료일을 선택해주세요!");
 
-    toast.success("등록이 완료되었습니다!");
-    setForm({}); //입력 폼 초기화
+    const postData = {
+      title,
+      description,
+      requiredSkill: stack,
+      startDate,
+      endDate,
+    };
+
+    dispatch(postProject(postData));
+    console.log("전송할 데이터:", postData); // 나중에 제거 가능
   };
+
+  useEffect(() => {
+    if (success && data?.projectId) {
+      navigate(`/projects/${data.projectId}`);
+    }
+  }, [success, data, navigate]);
 
   return (
     <Container>
@@ -264,6 +289,14 @@ const ProjectRegisterPage = () => {
         <div>
           <Label>모집 마감일</Label>
           <Input type="date" name="deadline" onChange={handleChange} />
+        </div>
+        <div>
+          <Label>시작일</Label>
+          <Input type="date" name="startDate" onChange={handleChange} />
+        </div>
+        <div>
+          <Label>종료일</Label>
+          <Input type="date" name="endDate" onChange={handleChange} />
         </div>
         <div>
           <Label>모집 포지션</Label>
