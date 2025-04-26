@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerCompany, registerUser } from '../../features/user/userSlice';
+import { checkEmailAvailability, registerCompany, registerUser } from '../../features/user/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -108,8 +108,9 @@ const RegisterButton = styled.button`
 const PersonalRegisterPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const {emailmessage} = useSelector((state)=>state.user.emailmessage)
+  const {emailmessage, checkEmailError} = useSelector((state)=>state.user)
   // 사용자 입력값 저장 state
+  const [showResult, setShowResult] = useState(false); // 클릭 여부 추적
   const [zonecode, setZonecode] = useState('');
   const [address, setAddress] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -257,10 +258,12 @@ const PersonalRegisterPage = () => {
   const closeHandler = () => {
     setIsOpen(false);
   };
-  // const checkEmail = () => {
-  //   checkEmailAvailability();
-  //   console.log(emailmessage);
-  // }
+  const checkEmail = () => {
+    dispatch(checkEmailAvailability(formik.values.email));
+    console.log("emailmessage",emailmessage);
+    console.log("emailerror", checkEmailError);
+    setShowResult(true);
+  }
   
   return (
     <Container>
@@ -275,10 +278,18 @@ const PersonalRegisterPage = () => {
             onChange={formik.handleChange}
             ref={emailInputRef}
           />
-          {/* <AddressButton type="button" onClick={checkEmail}>
+          <AddressButton type="button" onClick={checkEmail}>
           중복검사
-        </AddressButton> */}
-        <div>{emailmessage}</div>
+        </AddressButton>
+        {
+          showResult && (
+            <>
+          <div>{emailmessage}</div>
+          <div>{checkEmailError}</div>
+        </>
+          )
+        }
+        
           <Input
             name="password"
             type="password"

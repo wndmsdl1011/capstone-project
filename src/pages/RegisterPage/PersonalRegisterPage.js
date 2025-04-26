@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerUser } from '../../features/user/userSlice';
+import { checkEmailAvailability, registerUser } from '../../features/user/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -87,7 +87,7 @@ const Button = styled.button`
 const PersonalRegisterPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const {user} = useSelector((state)=>state.user)
+  const {emailmessage,registrationError} = useSelector((state)=>state.user)
   // 사용자 입력값 저장 state
   const [agreeTerms, setAgreeTerms] = useState(false); // 이용약관 동의 상태
   const nameInputRef = useRef(null);
@@ -193,7 +193,11 @@ const PersonalRegisterPage = () => {
     }
     formik.handleSubmit();
   };
-  // console.log("user", user);
+    const checkEmail = () => {
+      dispatch(checkEmailAvailability(formik.values.email));
+      console.log("emailmessage",emailmessage);
+      
+    }
   return (
     <Container>
       <SelectedTabStyle>개인회원</SelectedTabStyle>
@@ -207,6 +211,10 @@ const PersonalRegisterPage = () => {
             onChange={formik.handleChange}
             ref={emailInputRef}
           />
+          <Button type="button" onClick={checkEmail}>
+          중복검사
+        </Button>
+        <div>{emailmessage}</div>
           <Input
             name="password"
             type="password"
@@ -296,6 +304,7 @@ const PersonalRegisterPage = () => {
             onBlur={formik.handleBlur}
             required
           />
+          {registrationError}
           <Select
             name="education"
             value={formik.values.education}

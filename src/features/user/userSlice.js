@@ -14,7 +14,7 @@ import { showToastMessage } from "../common/uiSlice";
 // page나 라우터도 어떤 대략적인 페이지들만 설정해논거라 알아서 유동적으로 페이지 추가시 라우터도 수정 바람.
 export const loginWithEmail = createAsyncThunk(
   "user/loginWithEmail",
-  async ({ email, password, role }, { rejectWithValue }) => {
+  async ({ email, password, role, navigate }, { rejectWithValue }) => {
     console.log("email,role", email, role);
     try {
       const response = await api.post("/api/login", { email, password, role }); // post로 보내줌
@@ -29,7 +29,7 @@ export const loginWithEmail = createAsyncThunk(
 
       const accessToken = authHeader.replace("Bearer ", "").trim();
       sessionStorage.setItem("access_token", accessToken);
-
+      navigate("/");
       return response.data; // response.data.user이렇게 해도 됨
     } catch (error) {
       //실패
@@ -123,12 +123,14 @@ export const checkEmailAvailability = createAsyncThunk(
   "user/checkEmailAvailability",
   async (email, { rejectWithValue }) => {
     try {
+      console.log("email", email);
       const response = await api.get("/api/email/exist", {
         params: { email: email },
       });
-      console.log("중복 데이터 확인인", response.data);
+      console.log("중복 데이터 확인", response.data);
       return response.data;
     } catch (error) {
+      alert("이미 사용 중인 이메일입니다.")
       return rejectWithValue(error.error);
     }
   }
@@ -139,7 +141,13 @@ export const fetchUserProfile = createAsyncThunk(
   "user/fetchUserProfile",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get("/mypage");
+      const token = sessionStorage.getItem("access_token");
+      const response = await api.get("/api/mypage",  {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        
+      });
       console.log("Redux: 응답 데이터:", response.data);
       return response.data;
     } catch (error) {
@@ -210,10 +218,11 @@ const userSlice = createSlice({
     user: null,
     loading: false,
     loginError: null,
+    checkEmailError:null,
     registrationError: null,
     success: false,
     profile: null,
-    emailmessage: "안녕하세요",
+    emailmessage: "",
   },
   reducers: {
     // 직접적으로 호출
@@ -289,12 +298,13 @@ const userSlice = createSlice({
       })
       .addCase(checkEmailAvailability.fulfilled, (state, action) => {
         state.loading = false;
-        state.emailmessage = action.payload;
-        state.loginError = null;
+        state.emailmessage = action.payload.message;
+        state.checkEmailError = null;
       })
       .addCase(checkEmailAvailability.rejected, (state, action) => {
         state.loading = false;
-        state.loginError = action.payload;
+        state.emailmessage = null;
+        state.checkEmailError = action.payload;
       })
       .addCase(logout.fulfilled, () => {
         return {

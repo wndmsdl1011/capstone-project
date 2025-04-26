@@ -150,7 +150,7 @@ const LoginPage = () => {
     console.log(password)
     const role = userType === "business" ? "COMPANY" : "USER";
     console.log("role",role);
-    dispatch(loginWithEmail({ email, password, role }));
+    dispatch(loginWithEmail({ email, password, role, navigate }));
   };
 
   if (user) {
@@ -160,7 +160,7 @@ const LoginPage = () => {
   const isBusiness = userType === "business";
   const registerText = isBusiness ? "기업 회원가입" : "개인 회원가입";
   const registerLink = isBusiness ? "/register/company" : "/register/personal";
-
+  
   return (
     <Container>
       <MemberTypeToggle>

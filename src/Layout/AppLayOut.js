@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faBriefcase, faUserCircle, faFileAlt } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faBriefcase, faUserCircle, faFileAlt,faBell } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
-
+import ToastMessage from '../common/component/ToastMessage';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUserProfile, logout } from '../features/user/userSlice';
+import UserProfileBox from '../common/component/UserProfileBox'
 const Container = styled.div`
   margin: 0 auto;
   position: relative;
@@ -73,7 +76,46 @@ const NavButton = styled.button`
   font-size: 14px;
   cursor: pointer;
 `;
+const NavRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
 
+const NotificationButton = styled.button`
+  background: transparent;
+  border: none;
+  position: relative;
+  cursor: pointer;
+  font-size: 20px;
+  color: #2D3282;
+
+  &:hover {
+    opacity: 0.7;
+  }
+`;
+
+const NotificationDropdown = styled.div`
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  width: 240px;
+  padding: 12px;
+  z-index: 1000;
+`;
+
+const UserBox = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter';
+  font-size: 14px;
+  color: #2D3282;
+`;
 const Footer = styled.footer`
   background-color: #2D3282;
   color: #D1D5DB;
@@ -96,11 +138,23 @@ const FooterColumn = styled.div`
   margin-bottom: 24px;
 `;
 
-const AppLayout = ({ authenticate, setAuthenticate }) => {
+const AppLayout = ({ authenticate, setAuthenticate}) => {
   const navigate = useNavigate();
-
+  const dispatch = useDispatch()
+  const { user, profile } = useSelector((state) => state.user);
+  useEffect(() => {
+    dispatch(fetchUserProfile());
+  }, [dispatch]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  console.log("profile", profile);
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login"); // 로그아웃 후 로그인 페이지로 이동
+  };
+  
   return (
     <Container>
+      <ToastMessage/>
       <Navbar>
         <Logo to="/">J<span>ob</span> M<span>iddleware</span> P<span>latform</span></Logo>
         <NavCenter>
@@ -110,11 +164,30 @@ const AppLayout = ({ authenticate, setAuthenticate }) => {
         </NavCenter>
         <ButtonGroup>
           <NavButton onClick={() => alert("비즈니스 문의")}>비즈니스 문의</NavButton>
-          {authenticate ? (
-            <NavButton primary onClick={() => setAuthenticate(false)}>로그아웃</NavButton>
-          ) : (
-            <NavButton primary onClick={() => navigate("/login")}>로그인</NavButton>
-          )}
+          {profile ? (
+    <NavRight>
+      <div style={{ position: 'relative' }}>
+        <NotificationButton onClick={() => setShowNotifications(!showNotifications)}>
+          <FontAwesomeIcon icon={faBell} />
+        </NotificationButton>
+        {showNotifications && (
+          <NotificationDropdown>
+            <div>🔔 새로운 알림이 없습니다.</div>
+            {/* 여기에 알림 리스트를 map으로 출력 가능 */}
+          </NotificationDropdown>
+        )}
+      </div>
+
+      <UserBox>
+        <UserProfileBox user={profile} />
+        
+      </UserBox>
+
+      {/* <NavButton primary onClick={handleLogout}>로그아웃</NavButton> */}
+    </NavRight>
+  ) : (
+    <NavButton primary onClick={() => navigate("/login")}>로그인</NavButton>
+  )}
         </ButtonGroup>
       </Navbar>
 
