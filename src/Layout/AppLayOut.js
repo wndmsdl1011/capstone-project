@@ -114,7 +114,7 @@ const UserBox = styled.div`
   gap: 8px;
   font-family: 'Inter';
   font-size: 14px;
-  color: #2D3282;
+  
 `;
 const Footer = styled.footer`
   background-color: #2D3282;
@@ -142,15 +142,16 @@ const AppLayout = ({ authenticate, setAuthenticate}) => {
   const navigate = useNavigate();
   const dispatch = useDispatch()
   const { user, profile } = useSelector((state) => state.user);
+  
   useEffect(() => {
-    dispatch(fetchUserProfile());
+    const token = sessionStorage.getItem("access_token");
+    if (token) {
+      dispatch(fetchUserProfile());
+    }
   }, [dispatch]);
+  
   const [showNotifications, setShowNotifications] = useState(false);
-  console.log("profile", profile);
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/login"); // 로그아웃 후 로그인 페이지로 이동
-  };
+  console.log("profile", profile)
   
   return (
     <Container>
@@ -179,7 +180,7 @@ const AppLayout = ({ authenticate, setAuthenticate}) => {
       </div>
 
       <UserBox>
-        <UserProfileBox user={profile} />
+        <UserProfileBox />
         
       </UserBox>
 

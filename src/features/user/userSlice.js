@@ -14,7 +14,7 @@ import { showToastMessage } from "../common/uiSlice";
 // page나 라우터도 어떤 대략적인 페이지들만 설정해논거라 알아서 유동적으로 페이지 추가시 라우터도 수정 바람.
 export const loginWithEmail = createAsyncThunk(
   "user/loginWithEmail",
-  async ({ email, password, role, navigate }, { rejectWithValue }) => {
+  async ({ email, password, role, navigate }, { dispatch, rejectWithValue }) => {
     console.log("email,role", email, role);
     try {
       const response = await api.post("/api/login", { email, password, role }); // post로 보내줌
@@ -29,6 +29,7 @@ export const loginWithEmail = createAsyncThunk(
 
       const accessToken = authHeader.replace("Bearer ", "").trim();
       sessionStorage.setItem("access_token", accessToken);
+      await dispatch(fetchUserProfile());
       navigate("/");
       return response.data; // response.data.user이렇게 해도 됨
     } catch (error) {
@@ -46,16 +47,19 @@ export const loginWithGoogle = createAsyncThunk(
 
 export const logout = createAsyncThunk(
   "user/logout",
-  async (_, { dispatch }) => {
+  async (token, { dispatch }) => {
     try {
-      await api.post("/api/logout", {});
-      sessionStorage.removeItem("access_token");
-      dispatch(
-        showToastMessage({
-          message: "로그아웃을 완료했습니다!",
-          status: "success",
-        })
+      
+      const response = await api.post(
+        "/api/logout", 
+        {}, // POST 요청 body는 비워둠
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
+      sessionStorage.removeItem("access_token");
       window.location.href = "/login";
     } catch (error) {
       console.log("로그아웃 실패", error);
@@ -131,7 +135,8 @@ export const checkEmailAvailability = createAsyncThunk(
       return response.data;
     } catch (error) {
       alert("이미 사용 중인 이메일입니다.")
-      return rejectWithValue(error.error);
+      const errorMessage = error.response?.data|| "이미 사용 중인 이메일입니다.";
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -212,6 +217,20 @@ export const loginWithToken = createAsyncThunk(
   }
 );
 
+
+export const RefreshWithToken = createAsyncThunk(
+  "user/loginWithToken",
+  async (_, { rejectWithValue }) => {
+    
+    try {
+      const response = await api.post("/api/reissue");
+      console.log("refresh토큰", response.data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.error);
+    }
+  }
+);
 const userSlice = createSlice({
   name: "user",
   initialState: {
@@ -226,6 +245,12 @@ const userSlice = createSlice({
   },
   reducers: {
     // 직접적으로 호출
+    resetEmailMessage(state) {
+      state.emailmessage = '';
+    },
+    resetEmailError(state) {
+      state.checkEmailError = '';
+    },
     setUser: (state, action) => {
       state.user = action.payload; // user 정보 업데이트
     },
@@ -317,5 +342,5 @@ const userSlice = createSlice({
       });
   },
 });
-export const { clearErrors } = userSlice.actions;
+export const { resetEmailMessage, resetEmailError, clearErrors } = userSlice.actions;
 export default userSlice.reducer;

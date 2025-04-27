@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
@@ -7,8 +7,9 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 import Dropdown from 'react-bootstrap/Dropdown';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { logout } from '../../features/user/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUserProfile, logout } from '../../features/user/userSlice';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 const UserTab = styled.div`
   position: relative;
 `;
@@ -18,7 +19,7 @@ const UserProfile = styled.div`
   align-items: center;
   position: relative;
   gap: 0.6rem;
-
+  font-color: black;
   .user-profile-icon {
     color: #6c9466;
   }
@@ -26,11 +27,14 @@ const UserProfile = styled.div`
 
 const UserName = styled.span`
   font-weight: bold;
+  font-size : 16px;
+  font-color: black;
+  
 `;
 
 const DropdownToggle = styled.div`
   cursor: pointer;
-  margin-top: 10px;
+  
 `;
 
 const CustomDropdownMenu = styled.div`
@@ -38,7 +42,7 @@ const CustomDropdownMenu = styled.div`
   top: 40px;
   left: 0;
   z-index: 1050;
-  width: 10rem;
+  width: 7.3rem;
   border-radius: 0.7rem;
   background-color: #fff;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
@@ -65,27 +69,30 @@ const DropdownItem = styled.div`
   }
 `;
 
-const User = ({ user }) => {
+const User = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+const { profile } = useSelector((state) => state.user);
   const [notificationCount, setNotificationCount] = useState(2);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+  const token = sessionStorage.getItem("access_token");
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
   };
-
+  
   const handleLogout = () => {
-    dispatch(logout());
-    navigate("/login");
+    if (token) {
+      dispatch(logout(token));
+    } else {
+      navigate("/login");
+    }
   };
 
   return (
     <UserTab>
       <UserProfile>
-        <AccountCircleIcon className="user-profile-icon" />
-        <UserName>{user.name || "없음"}</UserName>
+        <AccountCircleIcon className="user-profile-icon" style={{marginTop:"2px"}} />
+        <UserName>{profile.name || "없음"}</UserName>
 
         <DropdownToggle onClick={toggleDropdown}>
           {isDropdownOpen ? (
