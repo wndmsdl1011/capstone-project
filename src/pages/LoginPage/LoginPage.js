@@ -48,7 +48,9 @@ const MemberTypeToggle = styled.div`
   padding: 10px 0px;
 `;
 
-const ToggleButton = styled.button`
+const ToggleButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active',
+})`
   background: none;
   width:200px;
   border-radius: 10px;
@@ -87,13 +89,15 @@ const CardWrapper = styled.div`
   perspective: 1200px;
 `;
 
-const CardInner = styled.div`
+const CardInner = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'selectBusiness',
+})`
   position: relative;
   width: 100%;
   transition: transform 0.5s ease-in-out;
   transform-style: preserve-3d;
-  transform: ${({ isBusiness }) =>
-    isBusiness ? 'rotateY(180deg)' : 'rotateY(0deg)'};
+  transform: ${({ selectBusiness }) =>
+    selectBusiness ? 'rotateY(180deg)' : 'rotateY(0deg)'};
 `;
 
 const CardFace = styled.div`
@@ -193,9 +197,9 @@ const LoginPage = () => {
   //   navigate("/");
   // }
 
-  const isBusiness = userType === 'business';
-  const registerText = isBusiness ? '기업 회원가입' : '개인 회원가입';
-  const registerLink = isBusiness ? '/register/company' : '/register/personal';
+  const selectBusiness = userType === 'business';
+  const registerText = selectBusiness ? '기업 회원가입' : '개인 회원가입';
+  const registerLink = selectBusiness ? '/register/company' : '/register/personal';
 
   return (
     <Container>
@@ -224,7 +228,7 @@ const LoginPage = () => {
       {loginError && <ErrorMessage>{loginError}</ErrorMessage>}
 
       <CardWrapper>
-        <CardInner isBusiness={isBusiness}>
+        <CardInner selectBusiness={selectBusiness}>
           {/* 앞면 - 개인회원 */}
           <CardFront>
             <form onSubmit={handleLoginWithEmail}>
@@ -249,7 +253,7 @@ const LoginPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
               />
               </InputWrapper>
-              <Button type="submit" isBusiness={false}>
+              <Button type="submit">
                 로그인
               </Button>
             </form>
@@ -283,7 +287,7 @@ const LoginPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
               />
               </InputWrapper>
-              <Button type="submit" isBusiness={true}>
+              <Button type="submit">
                 로그인
               </Button>
             </form>

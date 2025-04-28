@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   checkEmailAvailability,
+  clearErrors,
   registerUser,
   resetEmailError,
   resetEmailMessage,
@@ -247,9 +248,14 @@ const PersonalRegisterPage = () => {
   useEffect(() => {
     // 페이지 처음 들어올 때 초기화
     setIsEmailChecked(false);
-    dispatch(resetEmailMessage());
-    dispatch(resetEmailError());
+    dispatch(clearErrors());
+    
   }, []);
+  useEffect(() => {
+    if (registrationError === "전화번호 중복입니다.") {
+      middleInputRef.current?.focus();
+    }
+  }, [registrationError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -290,6 +296,8 @@ const PersonalRegisterPage = () => {
       educationSelectRef.current?.focus();
       return;
     }
+    
+
     formik.handleSubmit();
   };
   const checkEmail = async () => {
@@ -479,7 +487,7 @@ const PersonalRegisterPage = () => {
             <option value="LIBERAL_ARTS">자유전공학부</option>
             <option value="INTERNATIONAL_STUDIES">국제학부</option>
           </Select>
-          <StyledLabel>전화번호</StyledLabel>
+          <StyledLabel>연락처</StyledLabel>
           <InputWrapper>
             <PhoneInput
               value="010"
@@ -503,7 +511,6 @@ const PersonalRegisterPage = () => {
               ref={lastInputRef}
             />
           </InputWrapper>
-          {registrationError}
           <StyledLabel>학력</StyledLabel>
           <Select
             name="education"

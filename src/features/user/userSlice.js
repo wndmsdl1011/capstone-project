@@ -30,6 +30,12 @@ export const loginWithEmail = createAsyncThunk(
       const accessToken = authHeader.replace("Bearer ", "").trim();
       sessionStorage.setItem("access_token", accessToken);
       await dispatch(fetchUserProfile());
+      dispatch(
+        showToastMessage({
+          message: "로그인을 성공했습니다!",
+          status: "success",
+        })
+      );
       navigate("/");
       return response.data; // response.data.user이렇게 해도 됨
     } catch (error) {
@@ -86,13 +92,8 @@ export const registerUser = createAsyncThunk(
       navigate("/login");
       return response.data;
     } catch (error) {
-      dispatch(
-        showToastMessage({
-          message: "회원가입에 실패했습니다.",
-          status: "error",
-        })
-      );
-      return rejectWithValue(error.response?.data || "회원가입 실패");
+      alert("전화번호 중복입니다.")
+      return rejectWithValue(error.response?.data || "전화번호 중복입니다.");
     }
   }
 );
@@ -112,13 +113,8 @@ export const registerCompany = createAsyncThunk(
       navigate("/login");
       return response.data;
     } catch (error) {
-      dispatch(
-        showToastMessage({
-          message: "회원가입에 실패했습니다.",
-          status: "error",
-        })
-      );
-      return rejectWithValue(error.response?.data || "회원가입 실패");
+      alert("전화번호 및 사업자등록번호 중복입니다.")
+      return rejectWithValue(error.response?.data || "전화번호 및 사업자등록번호 중복입니다.");
     }
   }
 );
@@ -245,18 +241,14 @@ const userSlice = createSlice({
   },
   reducers: {
     // 직접적으로 호출
-    resetEmailMessage(state) {
-      state.emailmessage = '';
-    },
-    resetEmailError(state) {
-      state.checkEmailError = '';
-    },
     setUser: (state, action) => {
       state.user = action.payload; // user 정보 업데이트
     },
     clearErrors: (state) => {
       state.loginError = null;
       state.registrationError = null;
+      state.emailmessage = '';
+      state.checkEmailError = '';
     },
     logout,
   },
@@ -342,5 +334,5 @@ const userSlice = createSlice({
       });
   },
 });
-export const { resetEmailMessage, resetEmailError, clearErrors } = userSlice.actions;
+export const {clearErrors } = userSlice.actions;
 export default userSlice.reducer;

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   checkEmailAvailability,
+  clearErrors,
   registerCompany,
   registerUser,
   resetEmailError,
@@ -187,7 +188,7 @@ const RegisterButton = styled.button`
 const PersonalRegisterPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { emailmessage, checkEmailError } = useSelector((state) => state.user);
+  const { registrationError,emailmessage, checkEmailError } = useSelector((state) => state.user);
   // 사용자 입력값 저장 state
   const [isEmailChecked, setIsEmailChecked] = useState(false);
   const [showResult, setShowResult] = useState(false); // 클릭 여부 추적
@@ -278,10 +279,9 @@ const PersonalRegisterPage = () => {
   useEffect(() => {
     // 페이지 처음 들어올 때 초기화
     setIsEmailChecked(false);
-    dispatch(resetEmailMessage());
-    dispatch(resetEmailError());
+    dispatch(clearErrors());
   }, []);
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = await formik.validateForm();

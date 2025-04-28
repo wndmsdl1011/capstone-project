@@ -7,6 +7,7 @@ import ToastMessage from '../common/component/ToastMessage';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserProfile, logout } from '../features/user/userSlice';
 import UserProfileBox from '../common/component/UserProfileBox'
+import { useCookies } from 'react-cookie';
 const Container = styled.div`
   margin: 0 auto;
   position: relative;
@@ -67,7 +68,9 @@ const ButtonGroup = styled.div`
   gap: 12px;
 `;
 
-const NavButton = styled.button`
+const NavButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'primary',
+})`
   background-color: ${(props) => (props.primary ? '#2D3282' : 'transparent')};
   color: ${(props) => (props.primary ? '#ffffff' : '#2D3282')};
   border: ${(props) => (props.primary ? 'none' : '1px solid #2D3282')};
@@ -142,14 +145,17 @@ const AppLayout = ({ authenticate, setAuthenticate}) => {
   const navigate = useNavigate();
   const dispatch = useDispatch()
   const { user, profile } = useSelector((state) => state.user);
+  const [cookies] = useCookies(['refresh']);
   
   useEffect(() => {
     const token = sessionStorage.getItem("access_token");
+    
     if (token) {
       dispatch(fetchUserProfile());
     }
+
   }, [dispatch]);
-  
+
   const [showNotifications, setShowNotifications] = useState(false);
   console.log("profile", profile)
   
