@@ -12,6 +12,7 @@ const Container = styled.div`
   margin: 0 auto;
   position: relative;
   background-color: #f9fafb;
+  width:70%
 `;
 
 const Navbar = styled.nav`

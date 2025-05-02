@@ -4,6 +4,7 @@ import {
   clearErrors,
   fetchUserProfile,
   loginWithEmail,
+  setRole,
 } from '../../features/user/userSlice';
 import { useNavigate, Link } from 'react-router-dom';
 import styled, { css } from 'styled-components';
@@ -191,6 +192,7 @@ const LoginPage = () => {
     const role = userType === 'business' ? 'COMPANY' : 'USER';
     console.log('role', role);
     dispatch(loginWithEmail({ email, password, role, navigate }));
+    dispatch(setRole(role));
   };
 
   // if (user) {

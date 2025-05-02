@@ -3,7 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import AppLayOut from "../Layout/AppLayOut";
 import HomePage from "../pages/HomePage/HomePage";
 import LoginPage from "../pages/LoginPage/LoginPage";
-import MyPage from "../pages/MyPage/MyPage";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import PersonalRegisterPage from "../pages/RegisterPage/PersonalRegisterPage";
 import CompanyRegisterPage from "../pages/RegisterPage/CompanyRegisterPage";
@@ -11,6 +10,8 @@ import ProjectPage from "../pages/ProjectPage/ProjectPage";
 import ProjectRegisterPage from "../pages/ProjectPage/ProjectRegisterPage"
 import CommunityPage from "../pages/CommunityPage/CommunityPage";
 import ResumePage from "../pages/ResumePage/ResumePage";
+import CompanyMyPage from '../pages/MyPage/companyMypage/CompanyMyPage';
+import MyPage from '../pages/MyPage/personalMypage/MyPage';
 
 const AppRouter = () => {
   return (
@@ -19,7 +20,8 @@ const AppRouter = () => {
       <Route element={<AppLayOut />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/mypage/user" element={<MyPage />} />
+        <Route path="/mypage/company" element={<CompanyMyPage />} />
         <Route path="/register/personal" element={<PersonalRegisterPage />} />
         <Route path="/register/company" element={<CompanyRegisterPage />} />
         <Route path="/projects" element={<ProjectPage />} />
