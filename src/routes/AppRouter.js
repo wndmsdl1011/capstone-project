@@ -9,7 +9,7 @@ import CompanyRegisterPage from "../pages/RegisterPage/CompanyRegisterPage";
 import ProjectPage from "../pages/ProjectPage/ProjectPage";
 import ProjectRegisterPage from "../pages/ProjectPage/ProjectRegisterPage"
 import CommunityPage from "../pages/CommunityPage/CommunityPage";
-import ResumePage from "../pages/ResumePage/ResumePage";
+import ResumePage from "../pages/ResumePage/ResumeFormPage";
 import CompanyMyPage from '../pages/MyPage/companyMypage/CompanyMyPage';
 import MyPage from '../pages/MyPage/personalMypage/MyPage';
 

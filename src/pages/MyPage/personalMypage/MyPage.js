@@ -180,7 +180,7 @@ const MyPage = () => {
       ),
     },
     {
-      label: '내 이력서',
+      label: '이력서 관리',
       icon: (
         <FontAwesomeIcon
           icon={faIdBadge}
@@ -254,11 +254,12 @@ const MyPage = () => {
 
         <MainContent center={selectedMenu === '알림함'}>
           <ProjectGrid>
+            
             {selectedMenu === '지원한 프로젝트' && <AppliedProject />}
-            {selectedMenu === '내 이력서' && <MyResume />}
+            {selectedMenu === '이력서 관리' && <MyResume />}
             {selectedMenu === '스크랩한 프로젝트' && <ScrappedProjects />}
             {selectedMenu === '알림함' && <Notification />}
-            <Link to={'/mypage/company'}>마이페이지</Link>
+            
           </ProjectGrid>
         </MainContent>
       </GridWrapper>
