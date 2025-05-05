@@ -9,7 +9,8 @@ import CompanyRegisterPage from "../pages/RegisterPage/CompanyRegisterPage";
 import ProjectPage from "../pages/ProjectPage/ProjectPage";
 import ProjectRegisterPage from "../pages/ProjectPage/ProjectRegisterPage"
 import CommunityPage from "../pages/CommunityPage/CommunityPage";
-import ResumePage from "../pages/ResumePage/ResumeFormPage";
+import ResumeFormPage from "../pages/ResumePage/ResumeFormPage";
+import ResumePage from "../pages/ResumePage/ResumePage";
 import CompanyMyPage from '../pages/MyPage/companyMypage/CompanyMyPage';
 import MyPage from '../pages/MyPage/personalMypage/MyPage';
 
@@ -27,7 +28,8 @@ const AppRouter = () => {
         <Route path="/projects" element={<ProjectPage />} />
         <Route path="/projects/register" element={<ProjectRegisterPage />} />
         <Route path="/community" element={<CommunityPage />} />
-        <Route path="/resume" element={<ResumePage />} />
+        <Route path="/resume/:id" element={<ResumeFormPage />} />
+        <Route path="/resumelist" element={<ResumePage />} />
       </Route>
 
       {/* NotFoundPage를 처리하는 라우트 */}

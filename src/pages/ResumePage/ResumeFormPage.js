@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -9,8 +9,8 @@ import {
 import { useFormik } from 'formik';
 import Select from 'react-select';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { resumeRegister } from '../../features/resume/resumeSlice';
+import { useNavigate, useParams } from 'react-router-dom';
+import { resumeRegister, getResumeDetail, resumeUpdate } from '../../features/resume/resumeSlice';
 
 const Container = styled.div`
   max-width: 640px;
@@ -127,7 +127,9 @@ const SaveButton = styled.button`
 `;
 
 const ResumeFormPage = () => {
+  const { resumeId } = useParams();
   const { profile } = useSelector((state) => state.user);
+  const { currentResume } = useSelector((state) => state.resume);
   const [isPublic, setIsPublic] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -211,10 +213,36 @@ const ResumeFormPage = () => {
       devposition: '',
     },
     onSubmit: async (values) => {
-      console.log('이력서 저장데이터', values);
-      dispatch(resumeRegister({ values, navigate }));
+      const payload = {
+        ...values,
+        devposition: values.devposition === '' ? null : values.devposition,
+      };
+
+      console.log('이력서 저장데이터', payload);
+      dispatch(resumeUpdate({ values: payload, resumeId }));
     },
   });
+
+  useEffect(() => {
+    if (resumeId) {
+      dispatch(getResumeDetail(resumeId));
+    }
+  }, [dispatch, resumeId]);
+
+  useEffect(() => {
+    if (currentResume && resumeId) {
+      formik.setValues({
+        title: currentResume.title || '',
+        intro: currentResume.intro || '',
+        skills: currentResume.skills || [],
+        githubUrl: currentResume.githubUrl || '',
+        visible: currentResume.visible || false,
+        devposition: currentResume.devposition || '',
+      });
+      setIsPublic(currentResume.visible || false);
+    }
+  }, [currentResume, resumeId]);
+
   const handleToggle = () => {
     const newValue = !isPublic;
     setIsPublic(newValue);

@@ -168,7 +168,7 @@ const AppLayout = ({ authenticate, setAuthenticate}) => {
         <NavCenter>
           <Link to="/projects"><FontAwesomeIcon icon={faBriefcase} /> 프로젝트</Link>
           <Link to="/community"><FontAwesomeIcon icon={faUserCircle} /> 커뮤니티</Link>
-          <Link to="/resume"><FontAwesomeIcon icon={faFileAlt} /> 이력서 관리</Link>
+          <Link to="/resumelist"><FontAwesomeIcon icon={faFileAlt} /> 이력서 관리</Link>
         </NavCenter>
         <ButtonGroup>
           <NavButton onClick={() => alert("비즈니스 문의")}>비즈니스 문의</NavButton>

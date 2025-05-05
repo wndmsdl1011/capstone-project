@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileAlt, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import ResumeCardItem from '../../../../common/component/ResumeCardItem';
+import { useDispatch, useSelector } from 'react-redux';
+import { resumeRegister } from '../../../../features/resume/resumeSlice';
 
 const ResumeContainer = styled.div`
   display: flex;
@@ -35,11 +37,15 @@ const AddResumeButton = styled.button`
 
 const MyResume = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { profile } = useSelector((state) => state.user);
+  const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
   const [resumes, setResumes] = useState([
     { title: '이력서 제목 1', detail: '이력서 상세내용', isPublic: false },
     { title: '이력서 제목 2', detail: '이력서 상세내용', isPublic: false },
     { title: '이력서 제목 3', detail: '이력서 상세내용', isPublic: false },
   ]);
+
   const handleToggle = (index) => {
     const updated = [...resumes];
     updated[index].isPublic = !updated[index].isPublic;
@@ -51,6 +57,16 @@ const MyResume = () => {
     setResumes(updated);
   };
   const handleResumeForm = () => {
+    const values = {
+      title: `${profile.name}이력서_${today}`,
+      intro: '',
+      skills: [],
+      githubUrl: '',
+      visible: false,
+      devposition: null,
+    };
+
+    dispatch(resumeRegister({ values, navigate }));
     navigate('/resume');
   };
   return (

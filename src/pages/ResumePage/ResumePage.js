@@ -1,0 +1,236 @@
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import PlusIcon from '../../assets/images/Resume/+.png';
+import ResumeImg from '../../assets/images/Resume/Resume.png';
+import Form from 'react-bootstrap/Form';
+import { useDispatch, useSelector } from 'react-redux';
+import { resumeRegister, getResumeList, resumeDelete } from "../../features/resume/resumeSlice";
+import { useNavigate } from 'react-router-dom';
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  padding-top: 32px;
+  padding-bottom: 32px;
+  background-color: #F7F7FA; 
+  min-height: 100vh;
+`;
+
+const Title = styled.div`
+  width: 896px; 
+  font-size: 20.4px;
+  font-weight: 700;
+  margin-bottom: 32px;
+`;
+
+const ResumeContainer = styled.div`
+  width: 896px;
+  min-height: 482px;
+  border-radius: 16px;
+  background-color: #ffffff;
+  padding: 32px;
+`;
+
+const Resume = styled.div`
+  width: 832px;
+  height: 98px;
+  border-radius: 12px;
+  border: 1px solid #E5E7EB;
+  margin-bottom: 16px;
+  padding: 25px;
+`;
+
+const ResumeInContainer = styled.div`
+  width: 782px;
+  height: 48px;
+  display: flex;
+  justify-content: space-between;
+`;
+
+const ResumeLeft = styled.div`
+  width: 144.56px;
+  height: 48px;
+  display: flex;
+  justify-content: space-between;
+`;
+
+const ResumeLeftAndRight = styled.div`
+  width: 88.56px;
+  height: 48px;
+`;
+
+const ResumeLeftAndLeft = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: #e6eeff;
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+  cursor: pointer;
+`;
+
+const ResumeRight = styled.div`
+  width: 150.23px;
+  height: 48px;
+  display: flex;
+  flex-direction: row; /* 가로로 배치 */
+  align-items: center;
+  justify-content: space-between; /* 스위치랑 버튼 사이 띄우기 */
+  padding: 0 4px; /* 양 옆 살짝 패딩 */
+`;
+
+const DeleteButton = styled.button`
+  width: 40px;
+  height: 24px;
+  background-color: #F87171;
+  color: white;
+  font-size: 10px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #EF4444;
+  }
+`;
+
+const ResumeCreate = styled.div`
+  width: 832px;
+  height: 76px;
+  border-radius: 12px;
+  border: 2px dotted #E5E7EB;
+  display: flex;
+  flex-direction: row; 
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+
+  &:hover {
+    cursor: pointer;
+  }
+`;
+
+const ResumePage = () => {
+  const [isPublic, setIsPublic] = useState(false);
+  const [resumes, setResumes] = useState([]);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { profile } = useSelector((state) => state.user);
+  const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+
+  useEffect(() => {
+    const fetchResumes = async () => {
+      // const result = await dispatch(getResumeList()); 
+      // setResumes(result.payload);
+    };
+
+    fetchResumes();
+  }, []);
+
+  const handleResumeClick = (resumeId) => {
+    navigate(`/resume/${resumeId}`);
+  };
+
+  const handleSwitchChange = (e) => {
+    setIsPublic(e.target.checked);
+  };
+
+  const handleResumeForm = async () => {
+    const values = {
+      title: `${profile.name}이력서_${today}`,
+      intro: '',
+      skills: [],
+      githubUrl: '',
+      visible: false,
+      devposition: null,
+    };
+
+    const res = await dispatch(resumeRegister({ values, navigate }));
+
+    const resumeId = res?.payload?.resumeId || res?.resumeId;
+
+    if (resumeId) {
+      navigate(`/resume/${resumeId}`);
+    } else {
+      console.error("이력서 ID 없음. 응답 확인 필요:", res);
+    }
+  };
+
+  const handleDeleteResume = async (resumeId) => {
+    const confirmDelete = window.confirm("정말 이력서를 삭제하시겠습니까?");
+    if (!confirmDelete) return;
+
+    try {
+      await dispatch(resumeDelete(resumeId));
+      setResumes(prev => prev.filter(resume => resume.resumeId !== resumeId));
+    } catch (error) {
+      console.error("이력서 삭제 중 오류:", error);
+      alert("삭제에 실패했습니다.");
+    }
+  };
+  return (
+    <Container>
+      <Title>이력서 관리</Title>
+      <ResumeContainer>
+        {resumes.map((resume) => (
+          <Resume key={resume.resumeId}>
+            <ResumeInContainer>
+              <ResumeLeft>
+                <ResumeLeftAndLeft onClick={() => handleResumeClick(resume.resumeId)}>
+                  <img src={ResumeImg} alt="Resume" />
+                </ResumeLeftAndLeft>
+                <ResumeLeftAndRight>
+                  <div
+                    style={{
+                      fontWeight: 500,
+                      fontSize: '13.6px',
+                      color: '#1F2937',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => handleResumeClick(resume.resumeId)}
+                    onMouseEnter={(e) => (e.target.style.textDecoration = 'underline')}
+                    onMouseLeave={(e) => (e.target.style.textDecoration = 'none')}
+                  >
+                    {resume.title}
+                  </div>
+                  <div
+                    onClick={() => handleResumeClick(resume.resumeId)}
+                    style={{
+                      fontWeight: 400,
+                      fontSize: '11.9px',
+                      color: '#6B7280',
+                      cursor: 'pointer',
+                    }}>
+                    {resume.intro || '이력서 상세내용'}
+                  </div>
+                </ResumeLeftAndRight>
+              </ResumeLeft>
+              <ResumeRight>
+                <div>{resume.visible ? '공개' : '비공개'}</div>
+                <Form.Check
+                  type="switch"
+                  id={`switch-${resume.resumeId}`}
+                  label=""
+                  checked={resume.visible}
+                  onChange={handleSwitchChange}
+                />
+                <DeleteButton onClick={() => handleDeleteResume(resume.resumeId)}>삭제</DeleteButton>
+              </ResumeRight>
+            </ResumeInContainer>
+          </Resume>
+        ))}
+
+        <ResumeCreate onClick={handleResumeForm}>
+          <img src={PlusIcon} alt="+" />
+          <div style={{ fontWeight: 400, fontSize: '13.6px', color: '#6B7280' }}>새 이력서 작성하기</div>
+        </ResumeCreate>
+      </ResumeContainer>
+    </Container>
+  );
+};
+
+export default ResumePage;

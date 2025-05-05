@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from '../../utils/api';
 import { showToastMessage } from '../common/uiSlice';
 
-
 export const resumeRegister = createAsyncThunk(
   "resume/resumeRegister",
   async ({ values, navigate }, { dispatch, rejectWithValue }) => {
@@ -10,11 +9,10 @@ export const resumeRegister = createAsyncThunk(
       const token = sessionStorage.getItem("access_token");
       console.log("accessToken:", token);
       console.log("이력서values", values);
-      const response = await api.post("/api/resume/create", values,{
+      const response = await api.post("/api/resume/create", values, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        
       });
       dispatch(
         showToastMessage({
@@ -22,7 +20,7 @@ export const resumeRegister = createAsyncThunk(
           status: "success",
         })
       );
-      
+
       console.log("이력서 등록 데이터", response.data);
       return response.data;
     } catch (error) {
@@ -37,9 +35,124 @@ export const resumeRegister = createAsyncThunk(
   }
 );
 
+export const getResumeList = createAsyncThunk(
+  "resume/getResumeList",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await api.get("/api/resume");
+
+      dispatch(
+        showToastMessage({
+          message: "이력서 리스트를 조회하였습니다!",
+          status: "success",
+        })
+      );
+
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "이력서 리스트 조회 실패",
+          status: "error",
+        })
+      );
+      return rejectWithValue(error.response?.data || "이력서 리스트 조회 실패");
+    }
+  }
+)
+
+export const getResumeDetail = createAsyncThunk(
+  "resume/getResumeDetail",
+  async (resumeId, { dispatch, rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await api.get(`/api/resumes/${resumeId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      dispatch(
+        showToastMessage({
+          message: "이력서를 조회하였습니다!",
+          status: "success",
+        })
+      );
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "이력서 조회 실패",
+          status: "error",
+        })
+      );
+      return rejectWithValue(error.response?.data || "이력서 조회 실패");
+    }
+  }
+)
+
+export const resumeUpdate = createAsyncThunk(
+  "resume/resumeUpdate",
+  async ({ values, resumeId }, { dispatch, rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await api.put(`/api/resume/${resumeId}`, values, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      dispatch(
+        showToastMessage({
+          message: "이력서를 수정하였습니다!",
+          status: "success",
+        })
+      );
+
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "이력서 수정 실패",
+          status: "error",
+        })
+      );
+      return rejectWithValue(error.response?.data || "이력서 수정 실패");
+    }
+  }
+);
+
+export const resumeDelete = createAsyncThunk(
+  "resume/resumeDelete",
+  async (resumeId, { dispatch, rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await api.delete(`/api/resume/${resumeId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      dispatch(
+        showToastMessage({
+          message: "이력서를 삭제하였습니다!",
+          status: "success",
+        })
+      );
+      return resumeId;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "이력서 삭제 실패",
+          status: "error",
+        })
+      );
+      return rejectWithValue(error.response?.data || "이력서 삭제 실패");
+    }
+  }
+)
+
 const resumeSlice = createSlice({
   name: "resume",
   initialState: {
+    currentResume: null,
     loading: false,
     success: false,
     error: null,
@@ -69,7 +182,53 @@ const resumeSlice = createSlice({
         state.loading = false;
         state.success = false;
         state.error = action.payload?.message || "오류가 발생했습니다.";
-      });
+      })
+      .addCase(getResumeList.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(getResumeList.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.message = action.payload?.message || null;
+      })
+      .addCase(getResumeList.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload?.message || "오류가 발생했습니다.";
+      })
+      .addCase(getResumeDetail.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(getResumeDetail.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.currentResume = action.payload;
+        state.message = action.payload?.message || null;
+      })
+      .addCase(getResumeDetail.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload?.message || "오류가 발생했습니다.";
+      })
+      .addCase(resumeUpdate.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(resumeUpdate.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.message = action.payload?.message || null;
+      })
+      .addCase(resumeUpdate.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload?.message || "오류가 발생했습니다.";
+      })
   },
 });
 
