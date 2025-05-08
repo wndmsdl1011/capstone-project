@@ -15,15 +15,43 @@ export const postProject = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          
         }
-        
       );
       console.log(token); // 유효한 JWT인지 확인
 
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+// 비동기 액션: 프로젝트 공고 목록 조회
+export const fetchProjectList = createAsyncThunk(
+  "project/fetchProjectList",
+  async ({ page, size }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/project/list?page=${page}&size=${size}`
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+// 비동기 액션: 프로젝트 상세 조회
+export const fetchProjectDetail = createAsyncThunk(
+  "project/fetchProjectDetail",
+  async (projectId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/project/${projectId}`
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "조회 실패");
     }
   }
 );
@@ -35,6 +63,9 @@ const projectSlice = createSlice({
     success: false,
     error: null,
     message: null,
+    projectList: [],
+    totalPages: 0,
+    projectDetail: null,
   },
   reducers: {
     resetProjectState: (state) => {
@@ -59,7 +90,40 @@ const projectSlice = createSlice({
       .addCase(postProject.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
-        state.error = action.payload?.message || "오류가 발생했습니다.";
+        state.error =
+          typeof action.payload === "string"
+            ? action.payload
+            : action.payload?.message || "프로젝트 등록에 실패했습니다.";
+      })
+      .addCase(fetchProjectList.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchProjectList.fulfilled, (state, action) => {
+        state.loading = false;
+        state.projectList = action.payload.postits;
+        state.totalPages = action.payload.total_pages;
+      })
+      .addCase(fetchProjectList.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          typeof action.payload === "string"
+            ? action.payload
+            : action.payload?.message ||
+              "프로젝트 목록을 불러오는 데 실패했습니다.";
+      })
+      .addCase(fetchProjectDetail.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchProjectDetail.fulfilled, (state, action) => {
+        state.loading = false;
+        state.projectDetail = action.payload;
+      })
+      .addCase(fetchProjectDetail.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          typeof action.payload === "string"
+            ? action.payload
+            : action.payload?.message || "프로젝트 상세 조회에 실패했습니다.";
       });
   },
 });
