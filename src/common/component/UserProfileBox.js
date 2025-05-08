@@ -81,11 +81,7 @@ const { profile, userRole } = useSelector((state) => state.user);
   };
   
   const handleLogout = () => {
-    if (token) {
-      dispatch(logout(token));
-    } else {
-      navigate("/login");
-    }
+    dispatch(logout({ token, navigate }));
   };
   const handleGoMypage = () => {
     userRole == "USER" ? navigate('/mypage/user') : navigate('/mypage/company')
