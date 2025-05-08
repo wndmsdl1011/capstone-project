@@ -72,7 +72,7 @@ const DropdownItem = styled.div`
 const User = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-const { profile } = useSelector((state) => state.user);
+const { profile, userRole } = useSelector((state) => state.user);
   const [notificationCount, setNotificationCount] = useState(2);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const token = sessionStorage.getItem("access_token");
@@ -87,7 +87,9 @@ const { profile } = useSelector((state) => state.user);
       navigate("/login");
     }
   };
-
+  const handleGoMypage = () => {
+    userRole == "USER" ? navigate('/mypage/user') : navigate('/mypage/company')
+  }
   return (
     <UserTab>
       <UserProfile>
@@ -104,7 +106,7 @@ const { profile } = useSelector((state) => state.user);
 
         {isDropdownOpen && (
           <CustomDropdownMenu>
-            <DropdownItem onClick={() => navigate("/account/purchase")}>
+            <DropdownItem onClick={handleGoMypage}>
               마이페이지
             </DropdownItem>
             <DropdownItem onClick={handleLogout}>

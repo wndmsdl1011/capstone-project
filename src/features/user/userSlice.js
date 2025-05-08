@@ -37,10 +37,17 @@ export const loginWithEmail = createAsyncThunk(
         })
       );
       navigate("/");
+      console.log("로그인 데이터", response.data);
       return response.data; // response.data.user이렇게 해도 됨
     } catch (error) {
       //실패
       //실패시 생긴 에러값을 reducer에 저장
+      dispatch(
+        showToastMessage({
+          message: "아이디 또는 비밀번호가 일치하지 않습니다.",
+          status: "error",
+        })
+      );
       return rejectWithValue(error.response?.data?.error || error.message);
     }
   }
@@ -238,6 +245,7 @@ const userSlice = createSlice({
     success: false,
     profile: null,
     emailmessage: "",
+    userRole:null,
   },
   reducers: {
     // 직접적으로 호출
@@ -250,7 +258,11 @@ const userSlice = createSlice({
       state.emailmessage = '';
       state.checkEmailError = '';
     },
+    setRole: (state, action)=> {
+      state.userRole = action.payload;
+    },
     logout,
+    
   },
   extraReducers: (builder) => {
     // async처럼 외부의 함수를 통해 호출
@@ -282,7 +294,7 @@ const userSlice = createSlice({
       })
       .addCase(loginWithEmail.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user; // 로그인이 성공적이라면 이 user값을 init initialState: { user: null, 여기에 넣어주겠다
+        state.userRole = action.payload.role; // 로그인이 성공적이라면 이 user값을 init initialState: { user: null, 여기에 넣어주겠다
         state.loginError = null; // 로그인 에러는 null로 바꿔주고
       })
       .addCase(loginWithEmail.rejected, (state, action) => {
@@ -334,5 +346,5 @@ const userSlice = createSlice({
       });
   },
 });
-export const {clearErrors } = userSlice.actions;
+export const {clearErrors, setRole } = userSlice.actions;
 export default userSlice.reducer;
