@@ -342,9 +342,9 @@ const ResumeFormPage = () => {
       githubUrl: '',
       visible: false,
       devposition: '',
-      photo:'',
-      introduce:'',
-      projects:[]
+      photo: '',
+      introduce: '',
+      projects: []
     },
     onSubmit: async (values) => {
       // const payload = {
@@ -359,6 +359,7 @@ const ResumeFormPage = () => {
   });
 
   useEffect(() => {
+    console.log(resumeId);
     if (resumeId) {
       dispatch(getResumeDetail(resumeId));
     }
@@ -407,7 +408,7 @@ const ResumeFormPage = () => {
     };
     reader.readAsDataURL(file);
   };
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
     formik.handleSubmit();
@@ -436,29 +437,29 @@ const ResumeFormPage = () => {
             <strong>기본 스펙</strong>
           </Label>
           <FlexRow>
-        <ProfileImageBox>
-          <UploadLabel htmlFor="photo-upload">
-            {preview ? (
-              <Image src={preview} alt="프로필 미리보기" />
-            ) : (
-              <>
-                <FontAwesomeIcon icon={faPlus} size="lg" />
-                <span>사진추가</span>
-                <small style={{ fontSize: '12px' }}>1:1 비율 권장</small>
-              </>
-            )}
-          </UploadLabel>
-          <FileInput id="photo-upload" type="file" accept="image/*" onChange={handleImageChange} />
-        </ProfileImageBox>
+            <ProfileImageBox>
+              <UploadLabel htmlFor="photo-upload">
+                {preview ? (
+                  <Image src={preview} alt="프로필 미리보기" />
+                ) : (
+                  <>
+                    <FontAwesomeIcon icon={faPlus} size="lg" />
+                    <span>사진추가</span>
+                    <small style={{ fontSize: '12px' }}>1:1 비율 권장</small>
+                  </>
+                )}
+              </UploadLabel>
+              <FileInput id="photo-upload" type="file" accept="image/*" onChange={handleImageChange} />
+            </ProfileImageBox>
 
-        <SpecInfo>
-          {/* <p><strong>기본 스펙</strong></p> */}
-          <p style={{fontSize:'22px'}}><strong>{profile?.name} ({profile?.gender})</strong></p>
-          <p><FontAwesomeIcon icon={faEnvelope} /> {profile?.email}</p>
-          <p><FontAwesomeIcon icon={faBirthdayCake} /> {profile?.birthYear}년생</p>
-          <p><FontAwesomeIcon icon={faPhone} /> {profile?.phone}</p>
-        </SpecInfo>
-      </FlexRow>
+            <SpecInfo>
+              {/* <p><strong>기본 스펙</strong></p> */}
+              <p style={{ fontSize: '22px' }}><strong>{profile?.name} ({profile?.gender})</strong></p>
+              <p><FontAwesomeIcon icon={faEnvelope} /> {profile?.email}</p>
+              <p><FontAwesomeIcon icon={faBirthdayCake} /> {profile?.birthYear}년생</p>
+              <p><FontAwesomeIcon icon={faPhone} /> {profile?.phone}</p>
+            </SpecInfo>
+          </FlexRow>
         </Section>
 
         <Section>
@@ -517,80 +518,80 @@ const ResumeFormPage = () => {
             onChange={formik.handleChange}
           />
         </Section>
-        
+
         <Section>
-        
-        <FlexBetween>
-        <Label><strong>프로젝트</strong></Label>
-        <AddButton type="button" onClick={handleAddProject}>
-          <FontAwesomeIcon icon={faPlus} /> 프로젝트 추가
-        </AddButton>
-      </FlexBetween>
-      <ProjectList>
-  {formik.values.projects.map((project, idx) => (
-    <ProjectItem key={idx}>
-      <Row>
-        <ProjectInput
-          type="text"
-          name={`projects[${idx}].name`}
-          placeholder="*프로젝트명을 입력해주세요"
-          value={project.name}
-          onChange={formik.handleChange}
-        />
-        <DeleteButton type="button" onClick={() => handleRemoveProject(idx)}>
-          <FontAwesomeIcon icon={faTrash} />
-        </DeleteButton>
-      </Row>
 
-      <ProjectDetailInput
-        type="text"
-        name={`projects[${idx}].description`}
-        placeholder="프로젝트 상세내용을 작성해주세요"
-        value={project.description}
-        onChange={formik.handleChange}
-      />
-      
+          <FlexBetween>
+            <Label><strong>프로젝트</strong></Label>
+            <AddButton type="button" onClick={handleAddProject}>
+              <FontAwesomeIcon icon={faPlus} /> 프로젝트 추가
+            </AddButton>
+          </FlexBetween>
+          <ProjectList>
+            {formik.values.projects.map((project, idx) => (
+              <ProjectItem key={idx}>
+                <Row>
+                  <ProjectInput
+                    type="text"
+                    name={`projects[${idx}].name`}
+                    placeholder="*프로젝트명을 입력해주세요"
+                    value={project.name}
+                    onChange={formik.handleChange}
+                  />
+                  <DeleteButton type="button" onClick={() => handleRemoveProject(idx)}>
+                    <FontAwesomeIcon icon={faTrash} />
+                  </DeleteButton>
+                </Row>
 
-      
-      <Select
-        isMulti
-        name={`projects[${idx}].techStack`}
-        options={techOptions}
-        classNamePrefix="select"
-        value={techOptions.filter((option) =>
-          project.techStack.includes(option.value)
-        )}
-        onChange={(selectedOptions) => {
-          const updatedProjects = [...formik.values.projects];
-          updatedProjects[idx].techStack = selectedOptions.map((opt) => opt.value);
-          formik.setFieldValue('projects', updatedProjects);
-        }}
-        placeholder="기술스택을 등록해주세요"
-        
-      />
+                <ProjectDetailInput
+                  type="text"
+                  name={`projects[${idx}].description`}
+                  placeholder="프로젝트 상세내용을 작성해주세요"
+                  value={project.description}
+                  onChange={formik.handleChange}
+                />
 
-      <Label style={{marginTop:"7px"}}>깃허브 링크</Label>
-      <Input
-        type="text"
-        name={`projects[${idx}].githubLink`}
-        placeholder="http://, https:// 를 포함해 작성해주세요"
-        value={project.githubLink}
-        onChange={formik.handleChange}
-      />
-    </ProjectItem>
-  ))}
-</ProjectList>    
-      
+
+
+                <Select
+                  isMulti
+                  name={`projects[${idx}].techStack`}
+                  options={techOptions}
+                  classNamePrefix="select"
+                  value={techOptions.filter((option) =>
+                    project.techStack.includes(option.value)
+                  )}
+                  onChange={(selectedOptions) => {
+                    const updatedProjects = [...formik.values.projects];
+                    updatedProjects[idx].techStack = selectedOptions.map((opt) => opt.value);
+                    formik.setFieldValue('projects', updatedProjects);
+                  }}
+                  placeholder="기술스택을 등록해주세요"
+
+                />
+
+                <Label style={{ marginTop: "7px" }}>깃허브 링크</Label>
+                <Input
+                  type="text"
+                  name={`projects[${idx}].githubLink`}
+                  placeholder="http://, https:// 를 포함해 작성해주세요"
+                  value={project.githubLink}
+                  onChange={formik.handleChange}
+                />
+              </ProjectItem>
+            ))}
+          </ProjectList>
+
         </Section>
 
         <Section>
           <Label><strong>자기소개서</strong></Label>
           <TextArea
-          name="introduce"
-          type="text"
-          placeholder="자기소개서 내용을 작성해주세요"
-          value={formik.values.introduce}
-          onChange={formik.handleChange}
+            name="introduce"
+            type="text"
+            placeholder="자기소개서 내용을 작성해주세요"
+            value={formik.values.introduce}
+            onChange={formik.handleChange}
           />
         </Section>
 

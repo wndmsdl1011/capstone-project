@@ -42,22 +42,28 @@ const Resume = styled.div`
 `;
 
 const ResumeInContainer = styled.div`
-  width: 782px;
-  height: 48px;
+  width: 100%;
   display: flex;
   justify-content: space-between;
+  align-items: flex-start; 
+  flex-wrap: wrap; 
 `;
 
 const ResumeLeft = styled.div`
-  width: 144.56px;
-  height: 48px;
   display: flex;
-  justify-content: space-between;
+  gap: 8px;
+  flex-grow: 1; 
+  min-width: 0; 
 `;
 
 const ResumeLeftAndRight = styled.div`
-  width: 88.56px;
-  height: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
+  max-width: 100%;
 `;
 
 const ResumeLeftAndLeft = styled.div`
@@ -75,10 +81,24 @@ const ResumeRight = styled.div`
   width: 150.23px;
   height: 48px;
   display: flex;
-  flex-direction: row; /* 가로로 배치 */
+  align-items: center; 
+  justify-content: space-between;
+  padding: 0 4px;
+  gap: 4px; 
+
+  .form-check.form-switch {
+  margin-bottom: 0;
+  padding-top: 0;
+  display: flex;
   align-items: center;
-  justify-content: space-between; /* 스위치랑 버튼 사이 띄우기 */
-  padding: 0 4px; /* 양 옆 살짝 패딩 */
+
+  .form-check-input {
+  width: 40px;
+  height: 24px;
+  margin-top: 0;
+  transform: scale(1); 
+}
+}
 `;
 
 const DeleteButton = styled.button`
@@ -124,8 +144,8 @@ const ResumePage = () => {
 
   useEffect(() => {
     const fetchResumes = async () => {
-      // const result = await dispatch(getResumeList()); 
-      // setResumes(result.payload);
+      const result = await dispatch(getResumeList());
+      setResumes(result.payload);
     };
 
     fetchResumes();
@@ -147,6 +167,9 @@ const ResumePage = () => {
       githubUrl: '',
       visible: false,
       devposition: null,
+      photo: '',
+      introduce: '',
+      projects: [],
     };
 
     const res = await dispatch(resumeRegister({ values, navigate }));

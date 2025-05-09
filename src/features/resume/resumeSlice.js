@@ -39,7 +39,7 @@ export const getResumeList = createAsyncThunk(
   "resume/getResumeList",
   async (_, { dispatch, rejectWithValue }) => {
     try {
-      const response = await api.get("/api/resume");
+      const response = await api.get("/api/resume/list");
 
       dispatch(
         showToastMessage({
@@ -125,7 +125,7 @@ export const resumeDelete = createAsyncThunk(
   async (resumeId, { dispatch, rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
-      const response = await api.delete(`/api/resume/${resumeId}`, {
+      const response = await api.delete(`/api/resume/${resumeId}/delete`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -136,7 +136,7 @@ export const resumeDelete = createAsyncThunk(
           status: "success",
         })
       );
-      return resumeId;
+      return response.data
     } catch (error) {
       dispatch(
         showToastMessage({
