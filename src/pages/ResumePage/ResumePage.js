@@ -4,7 +4,7 @@ import PlusIcon from '../../assets/images/Resume/+.png';
 import ResumeImg from '../../assets/images/Resume/Resume.png';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { resumeRegister, getResumeList, resumeDelete } from "../../features/resume/resumeSlice";
+import { resumeRegister, getResumeList, resumeDelete, resumeVisible } from "../../features/resume/resumeSlice";
 import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
@@ -155,8 +155,18 @@ const ResumePage = () => {
     navigate(`/resume/${resumeId}`);
   };
 
-  const handleSwitchChange = (e) => {
-    setIsPublic(e.target.checked);
+  const handleSwitchChange = async (newVisible, resumeId) => {
+    try {
+      await dispatch(resumeVisible({ visible: newVisible, resumeId }));
+      setResumes(prev =>
+        prev.map(resume =>
+          resume.resumeId === resumeId ? { ...resume, visible: newVisible } : resume
+        )
+      );
+    } catch (error) {
+      console.error("공개 범위 수정 중 오류:", error);
+      alert("공개 범위 변경에 실패했습니다.");
+    }
   };
 
   const handleResumeForm = async () => {
@@ -239,7 +249,7 @@ const ResumePage = () => {
                   id={`switch-${resume.resumeId}`}
                   label=""
                   checked={resume.visible}
-                  onChange={handleSwitchChange}
+                  onChange={(e) => handleSwitchChange(e.target.checked, resume.resumeId)}
                 />
                 <DeleteButton onClick={() => handleDeleteResume(resume.resumeId)}>삭제</DeleteButton>
               </ResumeRight>

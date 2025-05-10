@@ -149,6 +149,35 @@ export const resumeDelete = createAsyncThunk(
   }
 )
 
+export const resumeVisible = createAsyncThunk(
+  "resume/resumeVisible",
+  async ({ visible, resumeId }, { dispatch, rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await api.put(`/api/resume/${resumeId}/visible`, visible, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      dispatch(
+        showToastMessage({
+          message: "이력서 공개범위를 수정하였습니다!",
+          status: "success",
+        })
+      );
+      return response.data
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "이력서 공개범위 수정 실패",
+          status: "error",
+        })
+      );
+      return rejectWithValue(error.response?.data || "이력서 공개범위 수정 실패");
+    }
+  }
+)
+
 const resumeSlice = createSlice({
   name: "resume",
   initialState: {
@@ -225,6 +254,21 @@ const resumeSlice = createSlice({
         state.message = action.payload?.message || null;
       })
       .addCase(resumeUpdate.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload?.message || "오류가 발생했습니다.";
+      })
+      .addCase(resumeVisible.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(resumeVisible.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.message = action.payload?.message || null;
+      })
+      .addCase(resumeVisible.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
         state.error = action.payload?.message || "오류가 발생했습니다.";
