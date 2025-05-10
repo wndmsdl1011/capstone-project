@@ -8,11 +8,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserProfile, logout } from '../features/user/userSlice';
 import UserProfileBox from '../common/component/UserProfileBox'
 import { useCookies } from 'react-cookie';
+
 const Container = styled.div`
   margin: 0 auto;
   position: relative;
   background-color: #f9fafb;
-  width:70%
+  width:100%
 `;
 
 const Navbar = styled.nav`

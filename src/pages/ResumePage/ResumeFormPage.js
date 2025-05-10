@@ -264,6 +264,8 @@ const ResumeFormPage = () => {
   const [isPublic, setIsPublic] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [imageFile, setImageFile] = useState(null);
+  const [preview, setPreview] = useState('');
   const techOptions = [
     'HTML',
     'CSS',
@@ -342,7 +344,6 @@ const ResumeFormPage = () => {
       githubUrl: '',
       visible: false,
       devposition: '',
-      photo:'',
       introduce:'',
       projects:[]
     },
@@ -354,7 +355,7 @@ const ResumeFormPage = () => {
 
       console.log('이력서 저장데이터', values);
       // dispatch(resumeUpdate({ values: payload, resumeId }));
-      dispatch(resumeRegister({ values, navigate })); // post 화긴하려고 삽입한거 연동 확인하면 지우고 위에 주석 푸셈
+      dispatch(resumeRegister({ values, imageFile, navigate })); // post 화긴하려고 삽입한거 연동 확인하면 지우고 위에 주석 푸셈
     },
   });
 
@@ -394,19 +395,24 @@ const ResumeFormPage = () => {
     formik.setFieldValue('projects', updated);
   };
 
-  const [preview, setPreview] = useState('');
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleImageChange = async (e) => {
+  const file = e.target.files[0];
     if (!file) return;
-
+ // 파일 크기 확인 (10MB = 10 * 1024 * 1024 = 10485760 bytes)
+  const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+  //파일 사이즈 아직 미정 현재는 2.8mb도 안들어감.
+  if (file.size > MAX_SIZE) {
+    alert("파일 크기가 10MB를 초과할 수 없습니다. 10MB 이하로 업로드해주세요.");
+    return; 
+  }
+    setImageFile(file); 
+    // 미리보기용 base64 생성
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreview(reader.result);
-      formik.setFieldValue('photo', reader.result); // base64로 저장
     };
     reader.readAsDataURL(file);
-  };
+};
   
   const handleSubmit = (e) => {
     e.preventDefault();

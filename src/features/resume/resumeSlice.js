@@ -4,14 +4,24 @@ import { showToastMessage } from '../common/uiSlice';
 
 export const resumeRegister = createAsyncThunk(
   "resume/resumeRegister",
-  async ({ values, navigate }, { dispatch, rejectWithValue }) => {
+  async ({ values, imageFile, navigate }, { dispatch, rejectWithValue }) => {
     try {
+      console.log("imageFile", imageFile);
       const token = sessionStorage.getItem("access_token");
       console.log("accessToken:", token);
       console.log("이력서values", values);
-      const response = await api.post("/api/resume/create", values, {
+      const formData = new FormData();
+      const dtoBlob = new Blob([JSON.stringify(values)], { type: 'application/json' });
+      formData.append('dto', dtoBlob);
+
+      if (imageFile) {
+        formData.append('photo', imageFile);
+      }
+      console.log("formData",formData);
+      const response = await api.post("/api/resume/create", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
         },
       });
       dispatch(
