@@ -177,7 +177,6 @@ const ResumePage = () => {
       githubUrl: '',
       visible: false,
       devposition: null,
-      photo: '',
       introduce: '',
       projects: [],
     };
