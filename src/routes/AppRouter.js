@@ -7,12 +7,13 @@ import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import PersonalRegisterPage from "../pages/RegisterPage/PersonalRegisterPage";
 import CompanyRegisterPage from "../pages/RegisterPage/CompanyRegisterPage";
 import ProjectPage from "../pages/ProjectPage/ProjectPage";
-import ProjectRegisterPage from "../pages/ProjectPage/ProjectRegisterPage"
+import ProjectRegisterPage from "../pages/ProjectPage/ProjectRegisterPage";
 import CommunityPage from "../pages/CommunityPage/CommunityPage";
 import ResumeFormPage from "../pages/ResumePage/ResumeFormPage";
 import ResumePage from "../pages/ResumePage/ResumePage";
-import CompanyMyPage from '../pages/MyPage/companyMypage/CompanyMyPage';
-import MyPage from '../pages/MyPage/personalMypage/MyPage';
+import CompanyMyPage from "../pages/MyPage/companyMypage/CompanyMyPage";
+import MyPage from "../pages/MyPage/personalMypage/MyPage";
+import ProjectDetailPage from "../pages/ProjectPage/ProjectDetailPage";
 
 const AppRouter = () => {
   return (
@@ -26,6 +27,7 @@ const AppRouter = () => {
         <Route path="/register/personal" element={<PersonalRegisterPage />} />
         <Route path="/register/company" element={<CompanyRegisterPage />} />
         <Route path="/projects" element={<ProjectPage />} />
+        <Route path="/projects/:id" element={<ProjectDetailPage />} />
         <Route path="/projects/register" element={<ProjectRegisterPage />} />
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/resume/:resumeId" element={<ResumeFormPage />} />
