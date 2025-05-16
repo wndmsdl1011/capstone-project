@@ -47,7 +47,7 @@ export const fetchProjectDetail = createAsyncThunk(
   async (projectId, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/project/${projectId}`
+        `http://localhost:8080/api/project/${projectId}/detail`
       );
       return response.data;
     } catch (error) {
