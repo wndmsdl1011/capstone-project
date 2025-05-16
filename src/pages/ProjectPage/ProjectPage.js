@@ -5,6 +5,13 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import ReactPaginate from "react-paginate";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import ForumIcon from "@mui/icons-material/Forum";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+
+import Avatar from "@mui/material/Avatar";
+import TechIcon from "../../components/TechIcon";
 
 const ProjectPage = () => {
   const dispatch = useDispatch();
@@ -21,8 +28,21 @@ const ProjectPage = () => {
     );
   };
 
+  const getDeadlineStatus = (deadline) => {
+    const today = new Date();
+    const endDate = new Date(deadline);
+    const diffTime = endDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return "마감";
+    if (diffDays <= 7) return "임박";
+    return "진행중";
+  };
+
   useEffect(() => {
-    dispatch(fetchProjectList({ page, size: 10 }));
+    dispatch(fetchProjectList({ page, size: 10 })).then((res) => {
+      console.log("📦 프로젝트 응답 데이터", res);
+    });
   }, [page, dispatch]);
 
   return (
@@ -51,47 +71,99 @@ const ProjectPage = () => {
                 }}
               >
                 {bookmarkedProjects.includes(project.projectId) ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    fill="#2d3282"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M5 3c-1.1 0-2 .9-2 2v16l9-4 9 4V5c0-1.1-.9-2-2-2H5z" />
-                  </svg>
+                  <BookmarkIcon fontSize="medium" sx={{ color: "#2d3282" }} />
                 ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    fill="none"
-                    stroke="#2d3282"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="feather feather-bookmark"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                  </svg>
+                  <BookmarkBorderIcon
+                    fontSize="medium"
+                    sx={{ color: "#2d3282" }}
+                  />
                 )}
               </BookmarkButton>
               <TagRow>
                 <Tag>프로젝트</Tag>
-                <UrgentTag style={{ background: "#fff4e5", color: "#ff9900" }}>
-                  모집중
-                </UrgentTag>
+                {(() => {
+                  const status = getDeadlineStatus(project.recruitDeadline);
+                  if (status === "임박") {
+                    return (
+                      <UrgentTag
+                        style={{ background: "#fff3cd", color: "#856404" }}
+                      >
+                        마감임박
+                      </UrgentTag>
+                    );
+                  }
+                  if (status === "마감") {
+                    return (
+                      <UrgentTag
+                        style={{ background: "#f8d7da", color: "#721c24" }}
+                      >
+                        모집 마감
+                      </UrgentTag>
+                    );
+                  }
+                  return (
+                    <UrgentTag
+                      style={{ background: "#d1ecf1", color: "#0c5460" }}
+                    >
+                      모집중
+                    </UrgentTag>
+                  );
+                })()}
               </TagRow>
+              <MetaItem
+                style={{
+                  fontSize: "13px",
+                  color: "#9ca3af",
+                  marginBottom: "4px",
+                }}
+              >
+                마감일: {project.recruitDeadline}
+              </MetaItem>
               <ProjectTitle>{project.title}</ProjectTitle>
               <SkillTagRow>
-                {project.requiredSkill.map((skill) => (
-                  <SkillTag key={skill}>{skill}</SkillTag>
+                {(project.requiredSkill || []).map((skill) => (
+                  <TechIcon key={skill} tech={skill} size={24} />
                 ))}
               </SkillTagRow>
               <MetaRow>
-                <MetaItem>{project.managername}</MetaItem>
-                <MetaItem>{project.createdAt}</MetaItem>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  <Avatar
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      fontSize: "0.75rem",
+                      bgcolor: "#cbd5e1",
+                    }}
+                  >
+                    {project.managername?.charAt(0) || "유"}
+                  </Avatar>
+                  <MetaItem>{project.managername}</MetaItem>
+                </div>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "12px" }}
+                >
+                  <MetaItem
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <VisibilityIcon fontSize="small" /> {project.views || 0}
+                  </MetaItem>
+                  <MetaItem
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <ForumIcon fontSize="small" />
+                    {project.comments || 0}
+                  </MetaItem>
+                </div>
               </MetaRow>
             </Card>
           </Link>
@@ -125,7 +197,7 @@ const ProjectPage = () => {
 export default ProjectPage;
 
 const Container = styled.div`
-  width: 1248px;
+  width: 70%;
   margin: 0 auto;
   padding: 32px 0;
 `;
@@ -156,9 +228,12 @@ const Card = styled.div`
   position: relative;
   background: white;
   border-radius: 16px;
-  padding: 20px 20px 60px;
+  padding: 20px;
   margin-bottom: 32px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  min-height: 240px;
 `;
 
 const BookmarkButton = styled.button`
@@ -188,16 +263,22 @@ const Tag = styled.span`
 const UrgentTag = styled(Tag)``;
 
 const ProjectTitle = styled.h3`
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   color: #1f2937;
-  margin-bottom: 8px;
+  margin: 4px 0;
 `;
 
 const MetaRow = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
   font-size: 14px;
   color: #6b7280;
 `;
@@ -208,15 +289,8 @@ const SkillTagRow = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin: 4px 0;
   margin-bottom: 8px;
-`;
-
-const SkillTag = styled.span`
-  background: #e6eeff;
-  border-radius: 9999px;
-  padding: 4px 12px;
-  font-size: 12px;
-  color: #2d3282;
 `;
 
 const PaginationWrapper = styled.div`
