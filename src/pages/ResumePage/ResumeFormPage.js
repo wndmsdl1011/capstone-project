@@ -5,6 +5,8 @@ import {
   faEnvelope,
   faBirthdayCake,
   faPhone,
+  faTrash,
+  faPlus,
 } from '@fortawesome/free-solid-svg-icons';
 import { useFormik } from 'formik';
 import Select from 'react-select';
@@ -91,25 +93,154 @@ const Input = styled.input`
   font-size: 14px;
   margin-bottom: 16px;
 `;
+const FlexRow = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
 
-const SelectBox = styled.select`
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #d1d5db;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+  }
+`;
+
+
+const ProfileImageBox = styled.div`
+  width: 220px;
+  height: 220px;
+  border-radius: 12px;
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+`;
+
+const Image = styled.img`
+  width: 84%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+const UploadLabel = styled.label`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+`;
+
+const FileInput = styled.input`
+  display: none;
+`;
+
+const SpecInfo = styled.div`
+  flex: 1;
+`;
+
+const ProjectList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const FlexBetween = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const AddButton = styled.button`
+  background: none;
+  border: none;
+  color: #10b981;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+const ProjectItem = styled.div`
+  
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  position: relative;
+`;
+
+const Row = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const ProjectInput = styled.input`
+  flex: 1;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 18px;
+  &::placeholder {  
+    font-weight: 1000; 
+  }
+`;
+
+const ProjectDetailInput = styled.input`
+  width:100%;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
   border-radius: 8px;
   font-size: 14px;
-  margin-bottom: 16px;
+  ::placeholder {
+    color: #9ca3af;
+    
+  }
 `;
 
-const FileDropZone = styled.div`
-  border: 2px dashed #d1d5db;
-  padding: 40px 0;
-  text-align: center;
-  border-radius: 12px;
-  color: #6b7280;
-  margin-bottom: 24px;
+const PlaceholderText = styled.div`
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 4px;
+  margin-bottom: 12px;
 `;
 
+const DeleteButton = styled.button`
+  margin-left: 8px;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+
+  &:hover {
+    color: #ef4444;
+  }
+`;
+// const DeleteButton = styled.button`
+//   background: none;
+//   border: none;
+//   color: #9ca3af;
+//   cursor: pointer;
+
+//   &:hover {
+//     color: #ef4444;
+//   }
+// `;
+const TextArea = styled.textarea`
+  width: 100%;
+  height: 200px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  resize: vertical;
+`;
 const SaveButton = styled.button`
   background-color: #5eead4;
   padding: 12px;
@@ -133,6 +264,8 @@ const ResumeFormPage = () => {
   const [isPublic, setIsPublic] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [imageFile, setImageFile] = useState(null);
+  const [preview, setPreview] = useState('');
   const techOptions = [
     'HTML',
     'CSS',
@@ -211,15 +344,18 @@ const ResumeFormPage = () => {
       githubUrl: '',
       visible: false,
       devposition: '',
+      introduce:'',
+      projects:[]
     },
     onSubmit: async (values) => {
-      const payload = {
-        ...values,
-        devposition: values.devposition === '' ? null : values.devposition,
-      };
+      // const payload = {
+      //   ...values,
+      //   devposition: values.devposition === '' ? null : values.devposition,
+      // };
 
-      console.log('이력서 저장데이터', payload);
-      dispatch(resumeUpdate({ values: payload, resumeId }));
+      console.log('이력서 저장데이터', values);
+      // dispatch(resumeUpdate({ values: payload, resumeId }));
+      dispatch(resumeRegister({ values, imageFile, navigate })); // post 화긴하려고 삽입한거 연동 확인하면 지우고 위에 주석 푸셈
     },
   });
 
@@ -248,7 +384,36 @@ const ResumeFormPage = () => {
     setIsPublic(newValue);
     formik.setFieldValue('visible', newValue); // formik에도 반영
   };
+  const handleAddProject = () => {
+    const newProject = { name: '', description: '', techStack: [], githubLink: '' };
+    formik.setFieldValue('projects', [...formik.values.projects, newProject]);
+  };
 
+  const handleRemoveProject = (index) => {
+    const updated = [...formik.values.projects];
+    updated.splice(index, 1);
+    formik.setFieldValue('projects', updated);
+  };
+
+  const handleImageChange = async (e) => {
+  const file = e.target.files[0];
+    if (!file) return;
+ // 파일 크기 확인 (10MB = 10 * 1024 * 1024 = 10485760 bytes)
+  const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+  //파일 사이즈 아직 미정 현재는 2.8mb도 안들어감.
+  if (file.size > MAX_SIZE) {
+    alert("파일 크기가 10MB를 초과할 수 없습니다. 10MB 이하로 업로드해주세요.");
+    return; 
+  }
+    setImageFile(file); 
+    // 미리보기용 base64 생성
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+};
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     formik.handleSubmit();
@@ -276,22 +441,34 @@ const ResumeFormPage = () => {
           <Label>
             <strong>기본 스펙</strong>
           </Label>
-          <p>
-            이름 : {profile?.name}({profile?.gender})
-          </p>
-          <p>
-            <FontAwesomeIcon icon={faEnvelope} /> {profile?.email}
-          </p>
-          <p>
-            <FontAwesomeIcon icon={faBirthdayCake} /> {profile?.birthYear}년생
-          </p>
-          <p>
-            <FontAwesomeIcon icon={faPhone} /> {profile?.phone}
-          </p>
+          <FlexRow>
+        <ProfileImageBox>
+          <UploadLabel htmlFor="photo-upload">
+            {preview ? (
+              <Image src={preview} alt="프로필 미리보기" />
+            ) : (
+              <>
+                <FontAwesomeIcon icon={faPlus} size="lg" />
+                <span>사진추가</span>
+                <small style={{ fontSize: '12px' }}>1:1 비율 권장</small>
+              </>
+            )}
+          </UploadLabel>
+          <FileInput id="photo-upload" type="file" accept="image/*" onChange={handleImageChange} />
+        </ProfileImageBox>
+
+        <SpecInfo>
+          {/* <p><strong>기본 스펙</strong></p> */}
+          <p style={{fontSize:'22px'}}><strong>{profile?.name} ({profile?.gender})</strong></p>
+          <p><FontAwesomeIcon icon={faEnvelope} /> {profile?.email}</p>
+          <p><FontAwesomeIcon icon={faBirthdayCake} /> {profile?.birthYear}년생</p>
+          <p><FontAwesomeIcon icon={faPhone} /> {profile?.phone}</p>
+        </SpecInfo>
+      </FlexRow>
         </Section>
 
         <Section>
-          <Label>간단 소개</Label>
+          <Label><strong>간단 소개</strong></Label>
           <Input
             name="intro"
             type="text"
@@ -302,7 +479,7 @@ const ResumeFormPage = () => {
         </Section>
 
         <Section>
-          <Label>개발 직무</Label>
+          <Label><strong>개발 직무</strong></Label>
           <Select
             name="devposition"
             options={devOptions}
@@ -317,7 +494,7 @@ const ResumeFormPage = () => {
         </Section>
 
         <Section>
-          <Label>기술 스택</Label>
+          <Label><strong>기술 스택</strong></Label>
           <Select
             isMulti
             name="skills"
@@ -337,7 +514,7 @@ const ResumeFormPage = () => {
         </Section>
 
         <Section>
-          <Label>GitHub 링크</Label>
+          <Label><strong>GitHub 링크</strong></Label>
           <Input
             name="githubUrl"
             type="text"
@@ -346,15 +523,81 @@ const ResumeFormPage = () => {
             onChange={formik.handleChange}
           />
         </Section>
+        
+        <Section>
+        
+        <FlexBetween>
+        <Label><strong>프로젝트</strong></Label>
+        <AddButton type="button" onClick={handleAddProject}>
+          <FontAwesomeIcon icon={faPlus} /> 프로젝트 추가
+        </AddButton>
+      </FlexBetween>
+      <ProjectList>
+  {formik.values.projects.map((project, idx) => (
+    <ProjectItem key={idx}>
+      <Row>
+        <ProjectInput
+          type="text"
+          name={`projects[${idx}].name`}
+          placeholder="*프로젝트명을 입력해주세요"
+          value={project.name}
+          onChange={formik.handleChange}
+        />
+        <DeleteButton type="button" onClick={() => handleRemoveProject(idx)}>
+          <FontAwesomeIcon icon={faTrash} />
+        </DeleteButton>
+      </Row>
+
+      <ProjectDetailInput
+        type="text"
+        name={`projects[${idx}].description`}
+        placeholder="프로젝트 상세내용을 작성해주세요"
+        value={project.description}
+        onChange={formik.handleChange}
+      />
+      
+
+      
+      <Select
+        isMulti
+        name={`projects[${idx}].techStack`}
+        options={techOptions}
+        classNamePrefix="select"
+        value={techOptions.filter((option) =>
+          project.techStack.includes(option.value)
+        )}
+        onChange={(selectedOptions) => {
+          const updatedProjects = [...formik.values.projects];
+          updatedProjects[idx].techStack = selectedOptions.map((opt) => opt.value);
+          formik.setFieldValue('projects', updatedProjects);
+        }}
+        placeholder="기술스택을 등록해주세요"
+        
+      />
+
+      <Label style={{marginTop:"7px"}}>깃허브 링크</Label>
+      <Input
+        type="text"
+        name={`projects[${idx}].githubLink`}
+        placeholder="http://, https:// 를 포함해 작성해주세요"
+        value={project.githubLink}
+        onChange={formik.handleChange}
+      />
+    </ProjectItem>
+  ))}
+</ProjectList>    
+      
+        </Section>
 
         <Section>
-          <Label>파일 첨부</Label>
-          <FileDropZone>
-            여기에 파일을 끌어다 놓거나 <br />
-            <strong style={{ color: '#3730a3', cursor: 'pointer' }}>
-              파일 선택하기
-            </strong>
-          </FileDropZone>
+          <Label><strong>자기소개서</strong></Label>
+          <TextArea
+          name="introduce"
+          type="text"
+          placeholder="자기소개서 내용을 작성해주세요"
+          value={formik.values.introduce}
+          onChange={formik.handleChange}
+          />
         </Section>
 
         <SaveButton type="submit">저장하기</SaveButton>

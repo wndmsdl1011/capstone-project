@@ -9,18 +9,18 @@ import {
   faBell,
 } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
-import ToastMessage from "../common/component/ToastMessage";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchUserProfile, logout } from "../features/user/userSlice";
-import UserProfileBox from "../common/component/UserProfileBox";
-import { useCookies } from "react-cookie";
+import ToastMessage from '../common/component/ToastMessage';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUserProfile, logout } from '../features/user/userSlice';
+import UserProfileBox from '../common/component/UserProfileBox'
+import { useCookies } from 'react-cookie';
+
 const Container = styled.div`
   margin: 0 auto;
   position: relative;
   background-color: #f9fafb;
   width: 100%;
-`;
-
+  
 const Navbar = styled.nav`
   display: flex;
   justify-content: space-between;

@@ -60,26 +60,22 @@ export const loginWithGoogle = createAsyncThunk(
 
 export const logout = createAsyncThunk(
   "user/logout",
-  async (token, { dispatch }) => {
+  async ({ token, navigate },  { dispatch }) => {
     try {
-      
-      const response = await api.post(
-        "/api/logout", 
-        {}, // POST 요청 body는 비워둠
-        {
+      if (token) {
+        await api.post("/api/logout", {}, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
-      sessionStorage.removeItem("access_token");
-      window.location.href = "/login";
+        });
+      }
     } catch (error) {
       console.log("로그아웃 실패", error);
+    } finally {
+      // 토큰 그냥 무조건 제거
+      sessionStorage.removeItem("access_token");
+      navigate("/login")
     }
-    // user정보를 지우고
-
-    // session token의 값을 지운다.
   }
 );
 
