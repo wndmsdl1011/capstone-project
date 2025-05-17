@@ -4,7 +4,7 @@ import PlusIcon from '../../assets/images/Resume/+.png';
 import ResumeImg from '../../assets/images/Resume/Resume.png';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { resumeRegister, getResumeList, resumeDelete } from "../../features/resume/resumeSlice";
+import { resumeRegister, getResumeList, resumeDelete, resumeVisible, originResume } from "../../features/resume/resumeSlice";
 import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
@@ -42,22 +42,28 @@ const Resume = styled.div`
 `;
 
 const ResumeInContainer = styled.div`
-  width: 782px;
-  height: 48px;
+  width: 100%;
   display: flex;
   justify-content: space-between;
+  align-items: flex-start; 
+  flex-wrap: wrap; 
 `;
 
 const ResumeLeft = styled.div`
-  width: 144.56px;
-  height: 48px;
   display: flex;
-  justify-content: space-between;
+  gap: 8px;
+  flex-grow: 1; 
+  min-width: 0; 
 `;
 
 const ResumeLeftAndRight = styled.div`
-  width: 88.56px;
-  height: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
+  max-width: 100%;
 `;
 
 const ResumeLeftAndLeft = styled.div`
@@ -75,10 +81,24 @@ const ResumeRight = styled.div`
   width: 150.23px;
   height: 48px;
   display: flex;
-  flex-direction: row; /* 가로로 배치 */
+  align-items: center; 
+  justify-content: space-between;
+  padding: 0 4px;
+  gap: 4px; 
+
+  .form-check.form-switch {
+  margin-bottom: 0;
+  padding-top: 0;
+  display: flex;
   align-items: center;
-  justify-content: space-between; /* 스위치랑 버튼 사이 띄우기 */
-  padding: 0 4px; /* 양 옆 살짝 패딩 */
+
+  .form-check-input {
+  width: 40px;
+  height: 24px;
+  margin-top: 0;
+  transform: scale(1); 
+}
+}
 `;
 
 const DeleteButton = styled.button`
@@ -115,31 +135,46 @@ const ResumeCreate = styled.div`
 `;
 
 const ResumePage = () => {
-  const [isPublic, setIsPublic] = useState(false);
   const [resumes, setResumes] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { profile } = useSelector((state) => state.user);
+  const { resumeNumber } = useSelector((state) => state.resume);
   const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
 
   useEffect(() => {
     const fetchResumes = async () => {
-      // const result = await dispatch(getResumeList()); 
-      // setResumes(result.payload);
+      const result = await dispatch(getResumeList());
+      setResumes(result.payload);
     };
 
     fetchResumes();
   }, []);
 
   const handleResumeClick = (resumeId) => {
+    originResume();
     navigate(`/resume/${resumeId}`);
   };
 
-  const handleSwitchChange = (e) => {
-    setIsPublic(e.target.checked);
+  const handleSwitchChange = async (newVisible, resumeId) => {
+    try {
+      await dispatch(resumeVisible({ visible: newVisible, resumeId }));
+      setResumes(prev =>
+        prev.map(resume =>
+          resume.resumeId === resumeId ? { ...resume, visible: newVisible } : resume
+        )
+      );
+    } catch (error) {
+      console.error("공개 범위 수정 중 오류:", error);
+      alert("공개 범위 변경에 실패했습니다.");
+    }
   };
 
   const handleResumeForm = async () => {
+    if (resumeNumber >= 3) {
+      alert("이력서는 최대 3개까지 보유하실 수 있습니다.");
+      return;
+    }
     const values = {
       title: `${profile.name}이력서_${today}`,
       intro: '',
@@ -147,6 +182,8 @@ const ResumePage = () => {
       githubUrl: '',
       visible: false,
       devposition: null,
+      introduce: '',
+      projects: [],
     };
 
     const res = await dispatch(resumeRegister({ values, navigate }));
@@ -216,7 +253,7 @@ const ResumePage = () => {
                   id={`switch-${resume.resumeId}`}
                   label=""
                   checked={resume.visible}
-                  onChange={handleSwitchChange}
+                  onChange={(e) => handleSwitchChange(e.target.checked, resume.resumeId)}
                 />
                 <DeleteButton onClick={() => handleDeleteResume(resume.resumeId)}>삭제</DeleteButton>
               </ResumeRight>

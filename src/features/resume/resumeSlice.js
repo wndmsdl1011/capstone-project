@@ -17,7 +17,7 @@ export const resumeRegister = createAsyncThunk(
       if (imageFile) {
         formData.append('photo', imageFile);
       }
-      console.log("formData",formData);
+      console.log("formData", formData);
       const response = await api.post("/api/resume/create", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -49,7 +49,7 @@ export const getResumeList = createAsyncThunk(
   "resume/getResumeList",
   async (_, { dispatch, rejectWithValue }) => {
     try {
-      const response = await api.get("/api/resume");
+      const response = await api.get("/api/resume/list");
 
       dispatch(
         showToastMessage({
@@ -102,12 +102,21 @@ export const getResumeDetail = createAsyncThunk(
 
 export const resumeUpdate = createAsyncThunk(
   "resume/resumeUpdate",
-  async ({ values, resumeId }, { dispatch, rejectWithValue }) => {
+  async ({ values, imageFile, resumeId }, { dispatch, rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
-      const response = await api.put(`/api/resume/${resumeId}`, values, {
+      const formData = new FormData();
+      const dtoBlob = new Blob([JSON.stringify(values)], { type: 'application/json' });
+      formData.append('dto', dtoBlob);
+
+      if (imageFile) {
+        formData.append('photo', imageFile);
+      }
+      console.log("formData", formData);
+      const response = await api.put(`/api/resume/${resumeId}/update`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
         },
       });
       dispatch(
@@ -135,7 +144,7 @@ export const resumeDelete = createAsyncThunk(
   async (resumeId, { dispatch, rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
-      const response = await api.delete(`/api/resume/${resumeId}`, {
+      const response = await api.delete(`/api/resume/${resumeId}/delete`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -146,7 +155,7 @@ export const resumeDelete = createAsyncThunk(
           status: "success",
         })
       );
-      return resumeId;
+      return response.data
     } catch (error) {
       dispatch(
         showToastMessage({
@@ -159,6 +168,35 @@ export const resumeDelete = createAsyncThunk(
   }
 )
 
+export const resumeVisible = createAsyncThunk(
+  "resume/resumeVisible",
+  async ({ visible, resumeId }, { dispatch, rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await api.patch(`/api/resume/${resumeId}/visible?visible=${visible}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      dispatch(
+        showToastMessage({
+          message: "이력서 공개범위를 수정하였습니다!",
+          status: "success",
+        })
+      );
+      return response.data
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "이력서 공개범위 수정 실패",
+          status: "error",
+        })
+      );
+      return rejectWithValue(error.response?.data || "이력서 공개범위 수정 실패");
+    }
+  }
+)
+
 const resumeSlice = createSlice({
   name: "resume",
   initialState: {
@@ -167,6 +205,8 @@ const resumeSlice = createSlice({
     success: false,
     error: null,
     message: null,
+    newResume: false,
+    resumeNumber: null,
   },
   reducers: {
     resetResumeState: (state) => {
@@ -174,6 +214,9 @@ const resumeSlice = createSlice({
       state.success = false;
       state.error = null;
       state.message = null;
+    },
+    originResume: (state) => {
+      state.newResume = false;
     },
   },
   extraReducers: (builder) => {
@@ -187,6 +230,7 @@ const resumeSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.message = action.payload?.message || null;
+        state.newResume = true;
       })
       .addCase(resumeRegister.rejected, (state, action) => {
         state.loading = false;
@@ -202,6 +246,7 @@ const resumeSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.message = action.payload?.message || null;
+        state.resumeNumber = action.payload?.length;
       })
       .addCase(getResumeList.rejected, (state, action) => {
         state.loading = false;
@@ -239,8 +284,26 @@ const resumeSlice = createSlice({
         state.success = false;
         state.error = action.payload?.message || "오류가 발생했습니다.";
       })
+      .addCase(resumeVisible.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(resumeVisible.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.message = action.payload?.message || null;
+      })
+      .addCase(resumeVisible.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload?.message || "오류가 발생했습니다.";
+      })
+      .addCase(resumeDelete.fulfilled, (state) => {
+        state.resumeNumber = state.resumeNumber - 1;
+      })
   },
 });
 
-export const { resetResumeState } = resumeSlice.actions;
+export const { resetResumeState, originResume } = resumeSlice.actions;
 export default resumeSlice.reducer;
