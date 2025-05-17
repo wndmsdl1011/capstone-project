@@ -19,21 +19,17 @@ const TECH_STACK_OPTIONS = [
   { value: "NODEJS", label: "Node.js" },
   { value: "EXPRESS", label: "Express" },
   { value: "SPRING", label: "Spring" },
-  { value: "SPRING BOOT", label: "Spring Boot" },
+  { value: "SPRING_BOOT", label: "Spring Boot" },
   { value: "DJANGO", label: "Django" },
   { value: "FLASK", label: "Flask" },
-  { value: "LARAVEL", label: "Laravel" },
   { value: "MYSQL", label: "MySQL" },
   { value: "POSTGRESQL", label: "PostgreSQL" },
   { value: "MONGODB", label: "MongoDB" },
-  { value: "FIREBASE", label: "Firebase" },
   { value: "AWS", label: "AWS" },
-  { value: "GCP", label: "GCP" },
   { value: "KUBERNETES", label: "Kubernetes" },
   { value: "DOCKER", label: "Docker" },
   { value: "GIT", label: "Git" },
   { value: "FIGMA", label: "Figma" },
-  { value: "ZEPLIN", label: "Zeplin" },
 ];
 
 const Container = styled.div`
