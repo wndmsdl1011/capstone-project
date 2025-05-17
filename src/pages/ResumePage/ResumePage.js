@@ -4,7 +4,7 @@ import PlusIcon from '../../assets/images/Resume/+.png';
 import ResumeImg from '../../assets/images/Resume/Resume.png';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { resumeRegister, getResumeList, resumeDelete, resumeVisible } from "../../features/resume/resumeSlice";
+import { resumeRegister, getResumeList, resumeDelete, resumeVisible, originResume } from "../../features/resume/resumeSlice";
 import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
@@ -135,11 +135,11 @@ const ResumeCreate = styled.div`
 `;
 
 const ResumePage = () => {
-  const [isPublic, setIsPublic] = useState(false);
   const [resumes, setResumes] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { profile } = useSelector((state) => state.user);
+  const { resumeNumber } = useSelector((state) => state.resume);
   const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
 
   useEffect(() => {
@@ -152,6 +152,7 @@ const ResumePage = () => {
   }, []);
 
   const handleResumeClick = (resumeId) => {
+    originResume();
     navigate(`/resume/${resumeId}`);
   };
 
@@ -170,6 +171,10 @@ const ResumePage = () => {
   };
 
   const handleResumeForm = async () => {
+    if (resumeNumber >= 3) {
+      alert("이력서는 최대 3개까지 보유하실 수 있습니다.");
+      return;
+    }
     const values = {
       title: `${profile.name}이력서_${today}`,
       intro: '',

@@ -205,6 +205,8 @@ const resumeSlice = createSlice({
     success: false,
     error: null,
     message: null,
+    newResume: false,
+    resumeNumber: null,
   },
   reducers: {
     resetResumeState: (state) => {
@@ -212,6 +214,9 @@ const resumeSlice = createSlice({
       state.success = false;
       state.error = null;
       state.message = null;
+    },
+    originResume: (state) => {
+      state.newResume = false;
     },
   },
   extraReducers: (builder) => {
@@ -225,6 +230,7 @@ const resumeSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.message = action.payload?.message || null;
+        state.newResume = true;
       })
       .addCase(resumeRegister.rejected, (state, action) => {
         state.loading = false;
@@ -240,6 +246,7 @@ const resumeSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.message = action.payload?.message || null;
+        state.resumeNumber = action.payload?.length;
       })
       .addCase(getResumeList.rejected, (state, action) => {
         state.loading = false;
@@ -292,8 +299,11 @@ const resumeSlice = createSlice({
         state.success = false;
         state.error = action.payload?.message || "오류가 발생했습니다.";
       })
+      .addCase(resumeDelete.fulfilled, (state) => {
+        state.resumeNumber = state.resumeNumber - 1;
+      })
   },
 });
 
-export const { resetResumeState } = resumeSlice.actions;
+export const { resetResumeState, originResume } = resumeSlice.actions;
 export default resumeSlice.reducer;

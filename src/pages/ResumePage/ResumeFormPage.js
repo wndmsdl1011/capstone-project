@@ -12,7 +12,7 @@ import { useFormik } from 'formik';
 import Select from 'react-select';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { resumeRegister, getResumeDetail, resumeUpdate } from '../../features/resume/resumeSlice';
+import { getResumeDetail, resumeUpdate } from '../../features/resume/resumeSlice';
 
 const Container = styled.div`
   max-width: 640px;
@@ -261,6 +261,7 @@ const ResumeFormPage = () => {
   const { resumeId } = useParams();
   const { profile } = useSelector((state) => state.user);
   const { currentResume } = useSelector((state) => state.resume);
+  const { newResume } = useSelector((state) => state.resume);
   const [isPublic, setIsPublic] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -344,20 +345,18 @@ const ResumeFormPage = () => {
       githubUrl: '',
       visible: false,
       devposition: '',
-      introduce:'',
-      projects:[]
+      introduce: '',
+      projects: []
     },
     onSubmit: async (values) => {
 
       console.log('이력서 저장데이터', values);
       dispatch(resumeUpdate({ values, imageFile, resumeId }));
-      // dispatch(resumeRegister({ values, imageFile, navigate })); // post 화긴하려고 삽입한거 연동 확인하면 지우고 위에 주석 푸셈
     },
   });
 
   useEffect(() => {
-    console.log(resumeId);
-    if (resumeId) {
+    if (resumeId && newResume == false) {
       dispatch(getResumeDetail(resumeId));
     }
   }, [dispatch, resumeId]);
@@ -371,8 +370,11 @@ const ResumeFormPage = () => {
         githubUrl: currentResume.githubUrl || '',
         visible: currentResume.visible || false,
         devposition: currentResume.devposition || '',
+        introduce: currentResume.introduce || '',
+        projects: currentResume.projects || [],
       });
       setIsPublic(currentResume.visible || false);
+      setImageFile(currentResume.img || null);
     }
   }, [currentResume, resumeId]);
 
@@ -393,24 +395,24 @@ const ResumeFormPage = () => {
   };
 
   const handleImageChange = async (e) => {
-  const file = e.target.files[0];
+    const file = e.target.files[0];
     if (!file) return;
- // 파일 크기 확인 (10MB = 10 * 1024 * 1024 = 10485760 bytes)
-  const MAX_SIZE = 10 * 1024 * 1024; // 10MB
-  //파일 사이즈 아직 미정 현재는 2.8mb도 안들어감.
-  if (file.size > MAX_SIZE) {
-    alert("파일 크기가 10MB를 초과할 수 없습니다. 10MB 이하로 업로드해주세요.");
-    return; 
-  }
-    setImageFile(file); 
+    // 파일 크기 확인 (10MB = 10 * 1024 * 1024 = 10485760 bytes)
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    //파일 사이즈 아직 미정 현재는 2.8mb도 안들어감.
+    if (file.size > MAX_SIZE) {
+      alert("파일 크기가 10MB를 초과할 수 없습니다. 10MB 이하로 업로드해주세요.");
+      return;
+    }
+    setImageFile(file);
     // 미리보기용 base64 생성
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreview(reader.result);
     };
     reader.readAsDataURL(file);
-};
-  
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     formik.handleSubmit();

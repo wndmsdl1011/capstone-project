@@ -95,8 +95,8 @@ const DeleteButton = styled.button`
   }
 `;
 
-const ResumeCardItem = ({ title, detail, isPublic, onToggle, onDelete }) => (
-  <ResumeCard>
+const ResumeCardItem = ({ title, detail, isPublic, onToggle, onDelete, onClick }) => (
+  <ResumeCard onClick={onClick}>
     <ResumeInfo>
       <ResumeIcon>
         <FontAwesomeIcon icon={faFileAlt} />
@@ -108,10 +108,16 @@ const ResumeCardItem = ({ title, detail, isPublic, onToggle, onDelete }) => (
     </ResumeInfo>
     <RightControls>
       <ToggleLabel>공개 범위</ToggleLabel>
-      <ToggleSwitch isPublic={isPublic} onClick={onToggle}>
+      <ToggleSwitch isPublic={isPublic} onClick={(e) => {
+        e.stopPropagation();
+        onToggle(!isPublic);
+      }}>
         <ToggleHandle isPublic={isPublic} />
       </ToggleSwitch>
-      <DeleteButton onClick={onDelete}>
+      <DeleteButton onClick={(e) => {
+        e.stopPropagation(); 
+        onDelete();
+      }}>
         <FontAwesomeIcon icon={faTrash} />
       </DeleteButton>
     </RightControls>
