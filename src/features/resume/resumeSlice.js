@@ -47,25 +47,16 @@ export const resumeRegister = createAsyncThunk(
 
 export const getResumeList = createAsyncThunk(
   "resume/getResumeList",
-  async (_, { dispatch, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get("/api/resume/list");
-
-      dispatch(
-        showToastMessage({
-          message: "이력서 리스트를 조회하였습니다!",
-          status: "success",
-        })
-      );
-
+      const token = sessionStorage.getItem("access_token");
+      const response = await api.get("/api/resume/list", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
-      dispatch(
-        showToastMessage({
-          message: "이력서 리스트 조회 실패",
-          status: "error",
-        })
-      );
       return rejectWithValue(error.response?.data || "이력서 리스트 조회 실패");
     }
   }
@@ -73,7 +64,7 @@ export const getResumeList = createAsyncThunk(
 
 export const getResumeDetail = createAsyncThunk(
   "resume/getResumeDetail",
-  async (resumeId, { dispatch, rejectWithValue }) => {
+  async (resumeId, { rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
       const response = await api.get(`/api/resumes/${resumeId}`, {
@@ -81,20 +72,8 @@ export const getResumeDetail = createAsyncThunk(
           Authorization: `Bearer ${token}`,
         },
       });
-      dispatch(
-        showToastMessage({
-          message: "이력서를 조회하였습니다!",
-          status: "success",
-        })
-      );
       return response.data;
     } catch (error) {
-      dispatch(
-        showToastMessage({
-          message: "이력서 조회 실패",
-          status: "error",
-        })
-      );
       return rejectWithValue(error.response?.data || "이력서 조회 실패");
     }
   }

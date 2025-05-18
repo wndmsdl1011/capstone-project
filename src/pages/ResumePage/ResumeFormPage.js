@@ -260,8 +260,7 @@ const SaveButton = styled.button`
 const ResumeFormPage = () => {
   const { resumeId } = useParams();
   const { profile } = useSelector((state) => state.user);
-  const { currentResume } = useSelector((state) => state.resume);
-  const { newResume } = useSelector((state) => state.resume);
+  const { currentResume, newResume } = useSelector((state) => state.resume);
   const [isPublic, setIsPublic] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
