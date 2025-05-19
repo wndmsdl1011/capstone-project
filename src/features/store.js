@@ -9,6 +9,7 @@ const store = configureStore({
     project: projectSlice,
     ui: uiSlice,
     resume:resumeSlice,
+    // admin:adminSlice,
   },
 });
 export default store;

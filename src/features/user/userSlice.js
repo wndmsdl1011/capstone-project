@@ -74,6 +74,7 @@ export const logout = createAsyncThunk(
     } finally {
       // 토큰 그냥 무조건 제거
       sessionStorage.removeItem("access_token");
+      sessionStorage.removeItem("userRole"); 
       navigate("/login")
     }
   }
@@ -241,7 +242,7 @@ const userSlice = createSlice({
     success: false,
     profile: null,
     emailmessage: "",
-    userRole:null,
+    userRole: "",
   },
   reducers: {
     // 직접적으로 호출
@@ -290,7 +291,7 @@ const userSlice = createSlice({
       })
       .addCase(loginWithEmail.fulfilled, (state, action) => {
         state.loading = false;
-        state.userRole = action.payload.role; // 로그인이 성공적이라면 이 user값을 init initialState: { user: null, 여기에 넣어주겠다
+        sessionStorage.setItem("userRole", action.payload.role); // ✅ 여기에서 저장 // 로그인이 성공적이라면 이 user값을 init initialState: { user: null, 여기에 넣어주겠다
         state.loginError = null; // 로그인 에러는 null로 바꿔주고
       })
       .addCase(loginWithEmail.rejected, (state, action) => {
