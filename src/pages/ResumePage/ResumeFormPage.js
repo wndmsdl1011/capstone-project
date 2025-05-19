@@ -350,7 +350,7 @@ const ResumeFormPage = () => {
     onSubmit: async (values) => {
 
       console.log('이력서 저장데이터', values);
-      dispatch(resumeUpdate({ values, imageFile, resumeId }));
+      dispatch(resumeUpdate({ values, imageFile, resumeId, navigate }));
     },
   });
 

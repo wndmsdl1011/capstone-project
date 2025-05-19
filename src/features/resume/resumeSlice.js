@@ -81,7 +81,7 @@ export const getResumeDetail = createAsyncThunk(
 
 export const resumeUpdate = createAsyncThunk(
   "resume/resumeUpdate",
-  async ({ values, imageFile, resumeId }, { dispatch, rejectWithValue }) => {
+  async ({ values, imageFile, resumeId, navigate }, { dispatch, rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
       const formData = new FormData();
@@ -104,6 +104,7 @@ export const resumeUpdate = createAsyncThunk(
           status: "success",
         })
       );
+      navigate("/resumelist");
 
       return response.data;
     } catch (error) {
