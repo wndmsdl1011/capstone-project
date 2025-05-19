@@ -56,6 +56,28 @@ export const fetchProjectDetail = createAsyncThunk(
   }
 );
 
+// 비동기 액션: 프로젝트 지원하기
+export const applyToProject = createAsyncThunk(
+  "project/applyToProject",
+  async ({ projectId, resumeId }, { rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await axios.post(
+        `http://localhost:8080/api/project/${projectId}/apply/${resumeId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "지원 실패");
+    }
+  }
+);
+
 const projectSlice = createSlice({
   name: "project",
   initialState: {

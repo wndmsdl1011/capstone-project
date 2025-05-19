@@ -14,6 +14,7 @@ import ResumePage from "../pages/ResumePage/ResumePage";
 import CompanyMyPage from "../pages/MyPage/companyMypage/CompanyMyPage";
 import MyPage from "../pages/MyPage/personalMypage/MyPage";
 import ProjectDetailPage from "../pages/ProjectPage/ProjectDetailPage";
+import ApplyFormPage from "../pages/ProjectPage/ApplyFormPage";
 
 const AppRouter = () => {
   return (
@@ -29,6 +30,7 @@ const AppRouter = () => {
         <Route path="/projects" element={<ProjectPage />} />
         <Route path="/projects/:id" element={<ProjectDetailPage />} />
         <Route path="/projects/register" element={<ProjectRegisterPage />} />
+        <Route path="/projects/:id/apply" element={<ApplyFormPage />} />
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/resume/:resumeId" element={<ResumeFormPage />} />
         <Route path="/resumelist" element={<ResumePage />} />

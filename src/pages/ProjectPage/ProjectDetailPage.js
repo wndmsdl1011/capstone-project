@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProjectDetail } from "../../features/post/projectSlice";
@@ -10,6 +11,7 @@ const ProjectDetailPage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { projectDetail } = useSelector((state) => state.project);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (id) {
@@ -109,7 +111,9 @@ const ProjectDetailPage = () => {
         <SectionTitle>프로젝트 소개</SectionTitle>
         <Paragraph>{projectDetail.description}</Paragraph>
 
-        <Button>지원하기</Button>
+        <Button onClick={() => navigate(`/projects/${id}/apply`)}>
+          지원하기
+        </Button>
       </BottomCard>
     </Container>
   );
