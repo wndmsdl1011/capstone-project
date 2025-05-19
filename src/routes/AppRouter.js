@@ -14,6 +14,7 @@ import ResumePage from "../pages/ResumePage/ResumePage";
 import CompanyMyPage from "../pages/MyPage/companyMypage/CompanyMyPage";
 import MyPage from "../pages/MyPage/personalMypage/MyPage";
 import ProjectDetailPage from "../pages/ProjectPage/ProjectDetailPage";
+import AdminPage from '../pages/AdminPage/AdminPage';
 
 const AppRouter = () => {
   return (
@@ -32,6 +33,7 @@ const AppRouter = () => {
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/resume/:resumeId" element={<ResumeFormPage />} />
         <Route path="/resumelist" element={<ResumePage />} />
+        <Route path="/adminpage" element={<AdminPage />} />
       </Route>
 
       {/* NotFoundPage를 처리하는 라우트 */}

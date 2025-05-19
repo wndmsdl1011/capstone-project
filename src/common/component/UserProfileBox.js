@@ -72,19 +72,32 @@ const DropdownItem = styled.div`
 const User = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-const { profile, userRole } = useSelector((state) => state.user);
+const { profile} = useSelector((state) => state.user);
   const [notificationCount, setNotificationCount] = useState(2);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const token = sessionStorage.getItem("access_token");
+  const userRole = sessionStorage.getItem("userRole");
   const toggleDropdown = () => {
+    console.log("userRole",userRole);
     setIsDropdownOpen((prev) => !prev);
   };
   
   const handleLogout = () => {
     dispatch(logout({ token, navigate }));
   };
+  
   const handleGoMypage = () => {
-    userRole == "USER" ? navigate('/mypage/user') : navigate('/mypage/company')
+    
+    if(userRole == "USER"){
+      navigate('/mypage/user')
+    } else if(userRole == "COMPANY"){
+      navigate('/mypage/company')
+    } else{
+      navigate('/adminpage')
+    }
+    setIsDropdownOpen(false);
+    // userRole == "USER" ? navigate('/mypage/user') : navigate('/mypage/company')
+
   }
   return (
     <UserTab>
@@ -103,7 +116,7 @@ const { profile, userRole } = useSelector((state) => state.user);
         {isDropdownOpen && (
           <CustomDropdownMenu>
             <DropdownItem onClick={handleGoMypage}>
-              마이페이지
+              {userRole == "ADMIN" ? "관리자페이지" : "마이페이지"}
             </DropdownItem>
             <DropdownItem onClick={handleLogout}>
               로그아웃
