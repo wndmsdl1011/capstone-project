@@ -260,7 +260,7 @@ const SaveButton = styled.button`
 const ResumeFormPage = () => {
   const { resumeId } = useParams();
   const { profile } = useSelector((state) => state.user);
-  const { currentResume, newResume } = useSelector((state) => state.resume);
+  const { currentResume, newResume, wherePage } = useSelector((state) => state.resume);
   const [isPublic, setIsPublic] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -319,22 +319,22 @@ const ResumeFormPage = () => {
     { value: 'FULLSTACK', label: '웹 풀스택 개발자' },
     { value: 'ANDROID', label: '안드로이드 개발자' },
     { value: 'IOS', label: 'iOS 개발자' },
-    { value: 'CROSSPLATFORM', label: '크로스플랫폼 앱개발자' },
+    { value: 'CROSS_PLATFORM', label: '크로스플랫폼 앱개발자' },
     { value: 'GAME_CLIENT', label: '게임 클라이언트 개발자' },
     { value: 'GAME_SERVER', label: '게임 서버 개발자' },
     { value: 'DBA', label: 'DBA' },
     { value: 'BIGDATA', label: '빅데이터 엔지니어' },
     { value: 'AI_ML', label: '인공지능/머신러닝' },
-    { value: 'DEVOPS', label: 'devops/시스템 엔지니어' },
+    { value: 'DEVOPS', label: 'DevOps/시스템 엔지니어' },
     { value: 'SECURITY', label: '정보보안 담당자' },
     { value: 'QA', label: 'QA 엔지니어' },
     { value: 'PM', label: '개발 PM' },
-    { value: 'HW', label: 'HW/임베디드' },
-    { value: 'SW', label: 'SW/솔루션' },
+    { value: 'EMBEDDED', label: 'HW/임베디드' },
+    { value: 'SOLUTION', label: 'SW/솔루션' },
     { value: 'WEB_PUBLISHER', label: '웹퍼블리셔' },
     { value: 'VR_AR', label: 'VR/AR/3D' },
     { value: 'BLOCKCHAIN', label: '블록체인' },
-    { value: 'SUPPORT', label: '기술지원' },
+    { value: 'TECH_SUPPORT', label: '기술지원' },
   ];
 
   const formik = useFormik({
@@ -351,7 +351,7 @@ const ResumeFormPage = () => {
     onSubmit: async (values) => {
 
       console.log('이력서 저장데이터', values);
-      dispatch(resumeUpdate({ values, imageFile, resumeId, navigate }));
+      dispatch(resumeUpdate({ values, imageFile, resumeId, navigate, wherePage }));
     },
   });
 

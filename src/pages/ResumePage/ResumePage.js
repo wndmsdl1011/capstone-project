@@ -4,7 +4,7 @@ import PlusIcon from '../../assets/images/Resume/+.png';
 import ResumeImg from '../../assets/images/Resume/Resume.png';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { resumeRegister, getResumeList, resumeDelete, resumeVisible, originResume } from "../../features/resume/resumeSlice";
+import { resumeRegister, getResumeList, resumeDelete, resumeVisible, originResume, resumelistPage } from "../../features/resume/resumeSlice";
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Container = styled.div`
@@ -147,12 +147,13 @@ const ResumePage = () => {
     const token = sessionStorage.getItem("access_token");
 
     if (!token) {
-      console.log('토큰없음');
       navigate('/login', {
         state: { from: location.pathname },
       });
       return
     }
+
+    dispatch(resumelistPage());
 
     const fetchResumes = async () => {
       const result = await dispatch(getResumeList());

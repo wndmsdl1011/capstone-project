@@ -6,7 +6,7 @@ import { faFileAlt, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import ResumeCardItem from '../../../../common/component/ResumeCardItem';
 import { useDispatch, useSelector } from 'react-redux';
-import { resumeRegister, getResumeList, resumeDelete, resumeVisible, originResume } from '../../../../features/resume/resumeSlice';
+import { resumeRegister, getResumeList, resumeDelete, resumeVisible, originResume, myPageResume } from '../../../../features/resume/resumeSlice';
 
 const ResumeContainer = styled.div`
   display: flex;
@@ -44,6 +44,8 @@ const MyResume = () => {
   const [resumes, setResumes] = useState([]);
 
   useEffect(() => {
+    dispatch(myPageResume());
+
     const fetchResumes = async () => {
       const result = await dispatch(getResumeList());
       setResumes(result.payload);

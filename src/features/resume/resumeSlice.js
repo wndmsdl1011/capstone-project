@@ -81,10 +81,8 @@ export const getResumeDetail = createAsyncThunk(
 
 export const resumeUpdate = createAsyncThunk(
   "resume/resumeUpdate",
-  async ({ values, imageFile, resumeId, navigate }, { dispatch, rejectWithValue }) => {
+  async ({ values, imageFile, resumeId, navigate, wherePage }, { dispatch, rejectWithValue }) => {
     try {
-      console.log("이력서values", values);
-      console.log("imageFile", imageFile);
       const token = sessionStorage.getItem("access_token");
       const formData = new FormData();
       const dtoBlob = new Blob([JSON.stringify(values)], { type: 'application/json' });
@@ -93,7 +91,6 @@ export const resumeUpdate = createAsyncThunk(
       if (imageFile) {
         formData.append('photo', imageFile);
       }
-      console.log("formData", formData);
       const response = await api.put(`/api/resume/${resumeId}/update`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -106,7 +103,12 @@ export const resumeUpdate = createAsyncThunk(
           status: "success",
         })
       );
-      navigate("/resumelist");
+
+      if (wherePage == '/mypage/user') {
+        navigate(wherePage, { state: { selectedMenu: '이력서 관리' } });
+      } else if (wherePage == '/resumelist') {
+        navigate(wherePage);
+      }
 
       return response.data;
     } catch (error) {
@@ -189,6 +191,7 @@ const resumeSlice = createSlice({
     message: null,
     newResume: false,
     resumeNumber: null,
+    wherePage: '',
   },
   reducers: {
     resetResumeState: (state) => {
@@ -199,6 +202,12 @@ const resumeSlice = createSlice({
     },
     originResume: (state) => {
       state.newResume = false;
+    },
+    myPageResume: (state) => {
+      state.wherePage = '/mypage/user';
+    },
+    resumelistPage: (state) => {
+      state.wherePage = '/resumelist';
     },
   },
   extraReducers: (builder) => {
@@ -287,5 +296,5 @@ const resumeSlice = createSlice({
   },
 });
 
-export const { resetResumeState, originResume } = resumeSlice.actions;
+export const { resetResumeState, originResume, myPageResume, resumelistPage } = resumeSlice.actions;
 export default resumeSlice.reducer;
