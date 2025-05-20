@@ -53,7 +53,7 @@ const MyResume = () => {
   }, []);
 
   const handleResumeClick = (resumeId) => {
-    originResume();
+    dispatch(originResume());
     navigate(`/resume/${resumeId}`);
   };
 

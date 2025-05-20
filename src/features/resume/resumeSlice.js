@@ -67,7 +67,7 @@ export const getResumeDetail = createAsyncThunk(
   async (resumeId, { rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
-      const response = await api.get(`/api/resumes/${resumeId}`, {
+      const response = await api.get(`/api/resume/${resumeId}/detail`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -83,6 +83,8 @@ export const resumeUpdate = createAsyncThunk(
   "resume/resumeUpdate",
   async ({ values, imageFile, resumeId, navigate }, { dispatch, rejectWithValue }) => {
     try {
+      console.log("이력서values", values);
+      console.log("imageFile", imageFile);
       const token = sessionStorage.getItem("access_token");
       const formData = new FormData();
       const dtoBlob = new Blob([JSON.stringify(values)], { type: 'application/json' });

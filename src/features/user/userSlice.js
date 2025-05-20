@@ -36,7 +36,7 @@ export const loginWithEmail = createAsyncThunk(
           status: "success",
         })
       );
-      navigate("/");
+
       console.log("로그인 데이터", response.data);
       return response.data; // response.data.user이렇게 해도 됨
     } catch (error) {
@@ -55,12 +55,12 @@ export const loginWithEmail = createAsyncThunk(
 
 export const loginWithGoogle = createAsyncThunk(
   "user/loginWithGoogle",
-  async (token, { rejectWithValue }) => {}
+  async (token, { rejectWithValue }) => { }
 );
 
 export const logout = createAsyncThunk(
   "user/logout",
-  async ({ token, navigate },  { dispatch }) => {
+  async ({ token, navigate }, { dispatch }) => {
     try {
       if (token) {
         await api.post("/api/logout", {}, {
@@ -74,7 +74,7 @@ export const logout = createAsyncThunk(
     } finally {
       // 토큰 그냥 무조건 제거
       sessionStorage.removeItem("access_token");
-      sessionStorage.removeItem("userRole"); 
+      sessionStorage.removeItem("userRole");
       navigate("/login")
     }
   }
@@ -135,7 +135,7 @@ export const checkEmailAvailability = createAsyncThunk(
       return response.data;
     } catch (error) {
       alert("이미 사용 중인 이메일입니다.")
-      const errorMessage = error.response?.data|| "이미 사용 중인 이메일입니다.";
+      const errorMessage = error.response?.data || "이미 사용 중인 이메일입니다.";
       return rejectWithValue(errorMessage);
     }
   }
@@ -147,11 +147,11 @@ export const fetchUserProfile = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
-      const response = await api.get("/api/mypage",  {
+      const response = await api.get("/api/mypage", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        
+
       });
       console.log("Redux: 응답 데이터:", response.data);
       return response.data;
@@ -221,7 +221,7 @@ export const loginWithToken = createAsyncThunk(
 export const RefreshWithToken = createAsyncThunk(
   "user/loginWithToken",
   async (_, { rejectWithValue }) => {
-    
+
     try {
       const response = await api.post("/api/reissue");
       console.log("refresh토큰", response.data);
@@ -237,7 +237,7 @@ const userSlice = createSlice({
     user: null,
     loading: false,
     loginError: null,
-    checkEmailError:null,
+    checkEmailError: null,
     registrationError: null,
     success: false,
     profile: null,
@@ -255,11 +255,11 @@ const userSlice = createSlice({
       state.emailmessage = '';
       state.checkEmailError = '';
     },
-    setRole: (state, action)=> {
+    setRole: (state, action) => {
       state.userRole = action.payload;
     },
     logout,
-    
+
   },
   extraReducers: (builder) => {
     // async처럼 외부의 함수를 통해 호출
@@ -343,5 +343,5 @@ const userSlice = createSlice({
       });
   },
 });
-export const {clearErrors, setRole } = userSlice.actions;
+export const { clearErrors, setRole } = userSlice.actions;
 export default userSlice.reducer;

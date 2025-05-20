@@ -11,7 +11,7 @@ import {
 import { useFormik } from 'formik';
 import Select from 'react-select';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { getResumeDetail, resumeUpdate } from '../../features/resume/resumeSlice';
 
 const Container = styled.div`
@@ -264,6 +264,7 @@ const ResumeFormPage = () => {
   const [isPublic, setIsPublic] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const [imageFile, setImageFile] = useState(null);
   const [preview, setPreview] = useState('');
   const techOptions = [
@@ -330,7 +331,7 @@ const ResumeFormPage = () => {
     { value: 'PM', label: '개발 PM' },
     { value: 'HW', label: 'HW/임베디드' },
     { value: 'SW', label: 'SW/솔루션' },
-    { value: 'WEBPUBLISHER', label: '웹퍼블리셔' },
+    { value: 'WEB_PUBLISHER', label: '웹퍼블리셔' },
     { value: 'VR_AR', label: 'VR/AR/3D' },
     { value: 'BLOCKCHAIN', label: '블록체인' },
     { value: 'SUPPORT', label: '기술지원' },
@@ -355,13 +356,22 @@ const ResumeFormPage = () => {
   });
 
   useEffect(() => {
+    const token = sessionStorage.getItem("access_token");
+
+    if (!token) {
+      navigate('/login', {
+        state: { from: location.pathname },
+      });
+      return;
+    }
+
     if (resumeId && newResume == false) {
       dispatch(getResumeDetail(resumeId));
     }
-  }, [dispatch, resumeId]);
+  }, [dispatch, navigate, resumeId, location]);
 
   useEffect(() => {
-    if (currentResume && resumeId) {
+    if (currentResume && resumeId && newResume == false) {
       formik.setValues({
         title: currentResume.title || '',
         intro: currentResume.intro || '',
@@ -373,9 +383,14 @@ const ResumeFormPage = () => {
         projects: currentResume.projects || [],
       });
       setIsPublic(currentResume.visible || false);
-      setImageFile(currentResume.img || null);
+      if (currentResume.photo) {
+        const imageUrl = `http://localhost:8080/uploads/${currentResume.photo}`;
+        setPreview(imageUrl);
+      } else {
+        setPreview(null); // 이미지 없으면 미리보기도 없음
+      }
     }
-  }, [currentResume, resumeId]);
+  }, [currentResume, resumeId, newResume]);
 
   const handleToggle = () => {
     const newValue = !isPublic;
@@ -512,7 +527,7 @@ const ResumeFormPage = () => {
         </Section>
 
         <Section>
-          <Label><strong>GitHub 링크</strong></Label>
+          <Label><strong>프로필 GitHub 링크</strong></Label>
           <Input
             name="githubUrl"
             type="text"
