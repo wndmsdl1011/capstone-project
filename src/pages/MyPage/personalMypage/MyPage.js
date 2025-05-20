@@ -10,7 +10,7 @@ import {
   faBookmark,
   faBell,
 } from '@fortawesome/free-solid-svg-icons';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import AppliedProject from '../personalMypage/component/AppliedProjects';
 import MyResume from '../personalMypage/component/MyResume';
@@ -163,10 +163,12 @@ const ProjectGrid = styled.div`
 
 const MyPage = () => {
   const { profile } = useSelector((state) => state.user);
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const token = sessionStorage.getItem("access_token");
-  const [selectedMenu, setSelectedMenu] = useState('지원한 프로젝트');
+  const initialMenu = location.state?.selectedMenu || '지원한 프로젝트';
+  const [selectedMenu, setSelectedMenu] = useState(initialMenu);
   const iconColor = '#2D3282';
   const menuItems = [
     {
@@ -212,13 +214,13 @@ const MyPage = () => {
   ];
 
   const handleLogout = () => {
-        if (token) {
-          dispatch(logout(token));
-        } else {
-          navigate("/login");
-        }
-      };
-      
+    if (token) {
+      dispatch(logout(token));
+    } else {
+      navigate("/login");
+    }
+  };
+
   return (
     <Container>
       <GridWrapper>
@@ -254,12 +256,12 @@ const MyPage = () => {
 
         <MainContent center={selectedMenu === '알림함'}>
           <ProjectGrid>
-            
+
             {selectedMenu === '지원한 프로젝트' && <AppliedProject />}
             {selectedMenu === '이력서 관리' && <MyResume />}
             {selectedMenu === '스크랩한 프로젝트' && <ScrappedProjects />}
             {selectedMenu === '알림함' && <Notification />}
-            
+
           </ProjectGrid>
         </MainContent>
       </GridWrapper>

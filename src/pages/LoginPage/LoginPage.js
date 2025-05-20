@@ -6,7 +6,7 @@ import {
   loginWithEmail,
   setRole,
 } from '../../features/user/userSlice';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -182,6 +182,7 @@ const LoginPage = () => {
   const { user, loginError } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   let role = null;
   useEffect(() => {
     if (loginError) {
@@ -189,7 +190,7 @@ const LoginPage = () => {
     }
   }, [loginError, dispatch]);
 
-  const handleLoginWithEmail = (event) => {
+  const handleLoginWithEmail = async (event) => {
     event.preventDefault();
     console.log(email);
     if (email === 'admin@bu.ac.kr') {
@@ -202,8 +203,15 @@ const LoginPage = () => {
 
     // const role = userType === 'business' ? 'COMPANY' : 'USER';
     console.log('role', role);
-    dispatch(loginWithEmail({ email, password, role, navigate }));
-    dispatch(setRole(role));
+    const success = await dispatch(loginWithEmail({ email, password, role, navigate }));
+    await dispatch(setRole(role));
+
+    if (success) {
+      const redirectTo = location.state?.from || '/';
+      navigate(redirectTo); 
+    } else {
+      alert('로그인 실패');
+    }
   };
 
   // if (user) {
