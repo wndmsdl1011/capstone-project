@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import { useSelector } from "react-redux"; // added
 import AppLayOut from "../Layout/AppLayOut";
 import HomePage from "../pages/HomePage/HomePage";
 import LoginPage from "../pages/LoginPage/LoginPage";
@@ -14,9 +15,14 @@ import ResumePage from "../pages/ResumePage/ResumePage";
 import CompanyMyPage from "../pages/MyPage/companyMypage/CompanyMyPage";
 import MyPage from "../pages/MyPage/personalMypage/MyPage";
 import ProjectDetailPage from "../pages/ProjectPage/ProjectDetailPage";
+import CompanyProjectDetailPage from "../pages/ProjectPage/CompanyProjectDetailPage.js"; // added
+import ApplyFormPage from "../pages/ProjectPage/ApplyFormPage";
+import ApplicantsManagePage from "../pages/ProjectPage/ApplicantsManagePage";
 import AdminPage from '../pages/AdminPage/AdminPage';
 
 const AppRouter = () => {
+  const userRole = useSelector((state) => state.user.userRole); // added
+
   return (
     <Routes>
       {/* AppLayout을 기본 레이아웃으로 적용 */}
@@ -28,8 +34,20 @@ const AppRouter = () => {
         <Route path="/register/personal" element={<PersonalRegisterPage />} />
         <Route path="/register/company" element={<CompanyRegisterPage />} />
         <Route path="/projects" element={<ProjectPage />} />
-        <Route path="/projects/:id" element={<ProjectDetailPage />} />
+        <Route
+          path="/projects/:id"
+          element={
+            userRole === "COMPANY" ? (
+              <CompanyProjectDetailPage />
+            ) : (
+              <ProjectDetailPage />
+            )
+          }
+        />{" "}
+        {/* modified */}
         <Route path="/projects/register" element={<ProjectRegisterPage />} />
+        <Route path="/projects/:id/apply" element={<ApplyFormPage />} />
+        <Route path="/projects/:id/applicants" element={<ApplicantsManagePage />} />
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/resume/:resumeId" element={<ResumeFormPage />} />
         <Route path="/resumelist" element={<ResumePage />} />
