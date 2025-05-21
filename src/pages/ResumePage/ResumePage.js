@@ -4,8 +4,8 @@ import PlusIcon from '../../assets/images/Resume/+.png';
 import ResumeImg from '../../assets/images/Resume/Resume.png';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { resumeRegister, getResumeList, resumeDelete, resumeVisible, originResume } from "../../features/resume/resumeSlice";
-import { useNavigate } from 'react-router-dom';
+import { resumeRegister, getResumeList, resumeDelete, resumeVisible, originResume, resumelistPage } from "../../features/resume/resumeSlice";
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Container = styled.div`
   display: flex;
@@ -138,21 +138,33 @@ const ResumePage = () => {
   const [resumes, setResumes] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { profile } = useSelector((state) => state.user);
   const { resumeNumber } = useSelector((state) => state.resume);
   const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
 
   useEffect(() => {
+    const token = sessionStorage.getItem("access_token");
+
+    if (!token) {
+      navigate('/login', {
+        state: { from: location.pathname },
+      });
+      return
+    }
+
+    dispatch(resumelistPage());
+
     const fetchResumes = async () => {
       const result = await dispatch(getResumeList());
       setResumes(result.payload);
     };
 
     fetchResumes();
-  }, []);
+  }, [dispatch, navigate, location]);
 
   const handleResumeClick = (resumeId) => {
-    originResume();
+    dispatch(originResume());
     navigate(`/resume/${resumeId}`);
   };
 

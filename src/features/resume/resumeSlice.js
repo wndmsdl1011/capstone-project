@@ -49,25 +49,16 @@ export const resumeRegister = createAsyncThunk(
 
 export const getResumeList = createAsyncThunk(
   "resume/getResumeList",
-  async (_, { dispatch, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get("/api/resume/list");
-
-      dispatch(
-        showToastMessage({
-          message: "이력서 리스트를 조회하였습니다!",
-          status: "success",
-        })
-      );
-
+      const token = sessionStorage.getItem("access_token");
+      const response = await api.get("/api/resume/list", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
-      dispatch(
-        showToastMessage({
-          message: "이력서 리스트 조회 실패",
-          status: "error",
-        })
-      );
       return rejectWithValue(error.response?.data || "이력서 리스트 조회 실패");
     }
   }
@@ -75,28 +66,16 @@ export const getResumeList = createAsyncThunk(
 
 export const getResumeDetail = createAsyncThunk(
   "resume/getResumeDetail",
-  async (resumeId, { dispatch, rejectWithValue }) => {
+  async (resumeId, { rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
-      const response = await api.get(`/api/resumes/${resumeId}`, {
+      const response = await api.get(`/api/resume/${resumeId}/detail`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      dispatch(
-        showToastMessage({
-          message: "이력서를 조회하였습니다!",
-          status: "success",
-        })
-      );
       return response.data;
     } catch (error) {
-      dispatch(
-        showToastMessage({
-          message: "이력서 조회 실패",
-          status: "error",
-        })
-      );
       return rejectWithValue(error.response?.data || "이력서 조회 실패");
     }
   }
@@ -104,7 +83,7 @@ export const getResumeDetail = createAsyncThunk(
 
 export const resumeUpdate = createAsyncThunk(
   "resume/resumeUpdate",
-  async ({ values, imageFile, resumeId }, { dispatch, rejectWithValue }) => {
+  async ({ values, imageFile, resumeId, navigate, wherePage }, { dispatch, rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
       const formData = new FormData();
@@ -116,23 +95,24 @@ export const resumeUpdate = createAsyncThunk(
       if (imageFile) {
         formData.append("photo", imageFile);
       }
-      console.log("formData", formData);
-      const response = await api.put(
-        `/api/resume/${resumeId}/update`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await api.put(`/api/resume/${resumeId}/update`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       dispatch(
         showToastMessage({
           message: "이력서를 수정하였습니다!",
           status: "success",
         })
       );
+
+      if (wherePage == '/mypage/user') {
+        navigate(wherePage, { state: { selectedMenu: '이력서 관리' } });
+      } else if (wherePage == '/resumelist') {
+        navigate(wherePage);
+      }
 
       return response.data;
     } catch (error) {
@@ -220,6 +200,7 @@ const resumeSlice = createSlice({
     message: null,
     newResume: false,
     resumeNumber: null,
+    wherePage: '',
   },
   reducers: {
     resetResumeState: (state) => {
@@ -230,6 +211,12 @@ const resumeSlice = createSlice({
     },
     originResume: (state) => {
       state.newResume = false;
+    },
+    myPageResume: (state) => {
+      state.wherePage = '/mypage/user';
+    },
+    resumelistPage: (state) => {
+      state.wherePage = '/resumelist';
     },
   },
   extraReducers: (builder) => {
@@ -318,5 +305,5 @@ const resumeSlice = createSlice({
   },
 });
 
-export const { resetResumeState, originResume } = resumeSlice.actions;
+export const { resetResumeState, originResume, myPageResume, resumelistPage } = resumeSlice.actions;
 export default resumeSlice.reducer;

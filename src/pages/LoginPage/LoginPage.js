@@ -6,10 +6,15 @@ import {
   loginWithEmail,
   setRole,
 } from '../../features/user/userSlice';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faLock, faBuilding, faUser  } from '@fortawesome/free-solid-svg-icons';
+import {
+  faEnvelope,
+  faLock,
+  faBuilding,
+  faUser,
+} from '@fortawesome/free-solid-svg-icons';
 
 const Logo = styled.div`
   text-align: center;
@@ -26,14 +31,13 @@ const Logo = styled.div`
   }
 `;
 
-
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   min-height: 100vh;
-  background:#F8F9FF;
+  background: #f8f9ff;
   padding: 30px 5px;
   perspective: 1200px;
 `;
@@ -44,7 +48,7 @@ const MemberTypeToggle = styled.div`
   margin-bottom: 20px;
   background: #fff;
   border-radius: 10px;
-  width:450px;
+  width: 450px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   padding: 10px 0px;
 `;
@@ -53,7 +57,7 @@ const ToggleButton = styled.button.withConfig({
   shouldForwardProp: (prop) => prop !== 'active',
 })`
   background: none;
-  width:200px;
+  width: 200px;
   border-radius: 10px;
   border: none;
   font-size: 18px;
@@ -69,7 +73,7 @@ const ToggleButton = styled.button.withConfig({
     active &&
     css`
       color: #2d3282;
-      background-color: #E6EEFF;
+      background-color: #e6eeff;
     `}
 
   ${({ active }) =>
@@ -77,7 +81,7 @@ const ToggleButton = styled.button.withConfig({
     css`
       &:hover {
         color: #2d3282;
-        background-color: #E6EEFF;
+        background-color: #e6eeff;
       }
     `}
 `;
@@ -118,7 +122,6 @@ const CardFront = styled(CardFace)`
 
 const CardBack = styled(CardFace)`
   transform: rotateY(180deg);
-
 `;
 const StyledLabel = styled.label`
   display: block;
@@ -154,7 +157,7 @@ const StyledIcon = styled(FontAwesomeIcon)`
 
 const Button = styled.button`
   width: 100%;
-  background: #2D3282;
+  background: #2d3282;
   color: white;
   border: none;
   padding: 12px;
@@ -179,20 +182,36 @@ const LoginPage = () => {
   const { user, loginError } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const location = useLocation();
+  let role = null;
   useEffect(() => {
     if (loginError) {
       dispatch(clearErrors());
     }
   }, [loginError, dispatch]);
 
-  const handleLoginWithEmail = (event) => {
+  const handleLoginWithEmail = async (event) => {
     event.preventDefault();
-    console.log(password);
-    const role = userType === 'business' ? 'COMPANY' : 'USER';
+    console.log(email);
+    if (email === 'admin@bu.ac.kr') {
+      role = 'ADMIN';
+    } else if (userType === 'personal') {
+      role = 'USER';
+    } else {
+      role = 'COMPANY';
+    }
+
+    // const role = userType === 'business' ? 'COMPANY' : 'USER';
     console.log('role', role);
-    dispatch(loginWithEmail({ email, password, role, navigate }));
-    dispatch(setRole(role));
+    const success = await dispatch(loginWithEmail({ email, password, role, navigate }));
+    await dispatch(setRole(role));
+
+    if (success) {
+      const redirectTo = location.state?.from || '/';
+      navigate(redirectTo); 
+    } else {
+      alert('로그인 실패');
+    }
   };
 
   // if (user) {
@@ -201,28 +220,30 @@ const LoginPage = () => {
 
   const selectBusiness = userType === 'business';
   const registerText = selectBusiness ? '기업 회원가입' : '개인 회원가입';
-  const registerLink = selectBusiness ? '/register/company' : '/register/personal';
+  const registerLink = selectBusiness
+    ? '/register/company'
+    : '/register/personal';
 
   return (
     <Container>
       <Logo>
-    J<span>ob</span> M<span>iddle</span> P<span>latform</span>
-  </Logo>
+        J<span>ob</span> M<span>iddle</span> P<span>latform</span>
+      </Logo>
       <MemberTypeToggle>
         <ToggleButton
           active={userType === 'personal'}
           onClick={() => setUserType('personal')}
         >
           <InputWrapper>
-          <FontAwesomeIcon icon={faUser} style={{marginRight:10}}/>
-          일반 사용자
+            <FontAwesomeIcon icon={faUser} style={{ marginRight: 10 }} />
+            일반 사용자
           </InputWrapper>
         </ToggleButton>
         <ToggleButton
           active={userType === 'business'}
           onClick={() => setUserType('business')}
         >
-          <FontAwesomeIcon icon={faBuilding} style={{marginRight:10}}/>
+          <FontAwesomeIcon icon={faBuilding} style={{ marginRight: 10 }} />
           기업 담당자
         </ToggleButton>
       </MemberTypeToggle>
@@ -234,64 +255,57 @@ const LoginPage = () => {
           {/* 앞면 - 개인회원 */}
           <CardFront>
             <form onSubmit={handleLoginWithEmail}>
-            <StyledLabel htmlFor="email">이메일</StyledLabel>
-            <InputWrapper>
-            
-            <StyledIcon icon={faEnvelope} />
-              <Input
-                type="email"
-                placeholder={'이메일을 입력해주세요'}
-                required
-                onChange={(e) => setEmail(e.target.value)}
-              />
+              <StyledLabel htmlFor="email">이메일</StyledLabel>
+              <InputWrapper>
+                <StyledIcon icon={faEnvelope} />
+                <Input
+                  type="email"
+                  placeholder={'이메일을 입력해주세요'}
+                  required
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </InputWrapper>
               <StyledLabel htmlFor="email">비밀번호</StyledLabel>
               <InputWrapper>
-              <StyledIcon icon={faLock} />
-              <Input
-                type="password"
-                placeholder="비밀번호를 입력해주세요"
-                required
-                onChange={(e) => setPassword(e.target.value)}
-              />
+                <StyledIcon icon={faLock} />
+                <Input
+                  type="password"
+                  placeholder="비밀번호를 입력해주세요"
+                  required
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </InputWrapper>
-              <Button type="submit">
-                로그인
-              </Button>
+              <Button type="submit">로그인</Button>
             </form>
             <p>
               계정이 없다면? <Link to={registerLink}>{registerText}</Link>
             </p>
-
-            
           </CardFront>
 
           {/* 뒷면 - 기업회원 */}
           <CardBack>
             <form onSubmit={handleLoginWithEmail}>
-            <StyledLabel htmlFor="email">이메일</StyledLabel>
-            <InputWrapper>
-            <StyledIcon icon={faEnvelope} />
-              <Input
-                type="email"
-                placeholder="이메일을 입력해주세요"
-                required
-                onChange={(e) => setEmail(e.target.value)}
-              />
+              <StyledLabel htmlFor="email">이메일</StyledLabel>
+              <InputWrapper>
+                <StyledIcon icon={faEnvelope} />
+                <Input
+                  type="email"
+                  placeholder="이메일을 입력해주세요"
+                  required
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </InputWrapper>
               <StyledLabel htmlFor="email">비밀번호</StyledLabel>
               <InputWrapper>
-              <StyledIcon icon={faLock} />
-              <Input
-                type="password"
-                placeholder="비밀번호를 입력해주세요"
-                required
-                onChange={(e) => setPassword(e.target.value)}
-              />
+                <StyledIcon icon={faLock} />
+                <Input
+                  type="password"
+                  placeholder="비밀번호를 입력해주세요"
+                  required
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </InputWrapper>
-              <Button type="submit">
-                로그인
-              </Button>
+              <Button type="submit">로그인</Button>
             </form>
             <p>
               계정이 없다면? <Link to={registerLink}>{registerText}</Link>

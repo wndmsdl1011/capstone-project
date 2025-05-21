@@ -39,7 +39,7 @@ export const loginWithEmail = createAsyncThunk(
           status: "success",
         })
       );
-      navigate("/");
+
       console.log("로그인 데이터", response.data);
       return response.data; // response.data.user이렇게 해도 됨
     } catch (error) {
@@ -58,7 +58,7 @@ export const loginWithEmail = createAsyncThunk(
 
 export const loginWithGoogle = createAsyncThunk(
   "user/loginWithGoogle",
-  async (token, { rejectWithValue }) => {}
+  async (token, { rejectWithValue }) => { }
 );
 
 export const logout = createAsyncThunk(
@@ -81,7 +81,8 @@ export const logout = createAsyncThunk(
     } finally {
       // 토큰 그냥 무조건 제거
       sessionStorage.removeItem("access_token");
-      navigate("/login");
+      sessionStorage.removeItem("userRole");
+      navigate("/login")
     }
   }
 );
@@ -142,9 +143,8 @@ export const checkEmailAvailability = createAsyncThunk(
       console.log("중복 데이터 확인", response.data);
       return response.data;
     } catch (error) {
-      alert("이미 사용 중인 이메일입니다.");
-      const errorMessage =
-        error.response?.data || "이미 사용 중인 이메일입니다.";
+      alert("이미 사용 중인 이메일입니다.")
+      const errorMessage = error.response?.data || "이미 사용 중인 이메일입니다.";
       return rejectWithValue(errorMessage);
     }
   }
@@ -248,7 +248,7 @@ const userSlice = createSlice({
     success: false,
     profile: null,
     emailmessage: "",
-    userRole: null,
+    userRole: "",
   },
   reducers: {
     // 직접적으로 호출
@@ -296,7 +296,7 @@ const userSlice = createSlice({
       })
       .addCase(loginWithEmail.fulfilled, (state, action) => {
         state.loading = false;
-        state.userRole = action.payload.role; // 로그인이 성공적이라면 이 user값을 init initialState: { user: null, 여기에 넣어주겠다
+        sessionStorage.setItem("userRole", action.payload.role); // ✅ 여기에서 저장 // 로그인이 성공적이라면 이 user값을 init initialState: { user: null, 여기에 넣어주겠다
         state.loginError = null; // 로그인 에러는 null로 바꿔주고
       })
       .addCase(loginWithEmail.rejected, (state, action) => {

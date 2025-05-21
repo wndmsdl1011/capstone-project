@@ -18,6 +18,7 @@ import ProjectDetailPage from "../pages/ProjectPage/ProjectDetailPage";
 import CompanyProjectDetailPage from "../pages/ProjectPage/CompanyProjectDetailPage.js"; // added
 import ApplyFormPage from "../pages/ProjectPage/ApplyFormPage";
 import ApplicantsManagePage from "../pages/ProjectPage/ApplicantsManagePage";
+import AdminPage from '../pages/AdminPage/AdminPage';
 
 const AppRouter = () => {
   const userRole = useSelector((state) => state.user.userRole); // added
@@ -50,6 +51,7 @@ const AppRouter = () => {
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/resume/:resumeId" element={<ResumeFormPage />} />
         <Route path="/resumelist" element={<ResumePage />} />
+        <Route path="/adminpage" element={<AdminPage />} />
       </Route>
 
       {/* NotFoundPage를 처리하는 라우트 */}
