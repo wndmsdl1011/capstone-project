@@ -1,13 +1,12 @@
 import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProjectDetail } from "../../features/post/projectSlice";
 import TechIcon from "../../components/TechIcon";
 import { format, differenceInMonths } from "date-fns";
 
-const ProjectDetailPage = () => {
+const CompanyProjectDetailPage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { projectDetail } = useSelector((state) => state.project);
@@ -21,7 +20,6 @@ const ProjectDetailPage = () => {
 
   if (!projectDetail) return <Container>불러오는 중...</Container>;
 
-  // 모집 상태 유틸 함수
   const getDeadlineStatus = (deadline) => {
     const today = new Date();
     const endDate = new Date(deadline);
@@ -111,24 +109,15 @@ const ProjectDetailPage = () => {
         <SectionTitle>프로젝트 소개</SectionTitle>
         <Paragraph>{projectDetail.description}</Paragraph>
 
-        <Button
-          onClick={() => {
-            const token = sessionStorage.getItem("access_token");
-            if (!token) {
-              navigate("/login");
-            } else {
-              navigate(`/projects/${id}/apply`);
-            }
-          }}
-        >
-          지원하기
+        <Button onClick={() => navigate(`/projects/${id}/applicants`)}>
+          지원자 관리
         </Button>
       </BottomCard>
     </Container>
   );
 };
 
-export default ProjectDetailPage;
+export default CompanyProjectDetailPage;
 
 const Container = styled.div`
   max-width: 768px;
@@ -204,11 +193,6 @@ const Tag = styled.span`
   font-size: 12px;
   color: #4b5563;
 `;
-
-// const SkillTag = styled(Tag)`
-//   background: #e6eeff;
-//   color: #2d3282;
-// `;
 
 const SectionTitle = styled.h3`
   font-size: 18px;

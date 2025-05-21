@@ -1,27 +1,29 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProjectDetail } from "../../features/post/projectSlice";
+import {
+  fetchProjectDetail,
+  fetchProjectApplicants,
+} from "../../features/post/projectSlice";
 import TechIcon from "../../components/TechIcon";
 import { format, differenceInMonths } from "date-fns";
 
-const ProjectDetailPage = () => {
+const ApplicantsManagePage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { projectDetail } = useSelector((state) => state.project);
-  const navigate = useNavigate();
+  const { projectDetail, applicants } = useSelector((state) => state.project);
 
   useEffect(() => {
     if (id) {
       dispatch(fetchProjectDetail(id));
+      dispatch(fetchProjectApplicants(id));
     }
   }, [id, dispatch]);
 
   if (!projectDetail) return <Container>불러오는 중...</Container>;
 
-  // 모집 상태 유틸 함수
+  // 모집 상태 계산 함수
   const getDeadlineStatus = (deadline) => {
     const today = new Date();
     const endDate = new Date(deadline);
@@ -37,26 +39,27 @@ const ProjectDetailPage = () => {
       <TopCard>
         <TagRow>
           <Tag>프로젝트</Tag>
+          {/* 모집 상태 태그 */}
           {(() => {
             const status = getDeadlineStatus(projectDetail.recruitDeadline);
-            if (status === "임박") {
-              return (
-                <Tag style={{ background: "#fff3cd", color: "#856404" }}>
-                  마감임박
-                </Tag>
-              );
-            }
-            if (status === "마감") {
-              return (
-                <Tag style={{ background: "#f8d7da", color: "#721c24" }}>
-                  모집 마감
-                </Tag>
-              );
-            }
             return (
-              <Tag style={{ background: "#d1ecf1", color: "#0c5460" }}>
-                모집중
-              </Tag>
+              <>
+                {status === "임박" && (
+                  <Tag style={{ background: "#fff3cd", color: "#856404" }}>
+                    마감임박
+                  </Tag>
+                )}
+                {status === "마감" && (
+                  <Tag style={{ background: "#f8d7da", color: "#721c24" }}>
+                    모집 마감
+                  </Tag>
+                )}
+                {status === "진행중" && (
+                  <Tag style={{ background: "#d1ecf1", color: "#0c5460" }}>
+                    모집중
+                  </Tag>
+                )}
+              </>
             );
           })()}
         </TagRow>
@@ -89,46 +92,32 @@ const ProjectDetailPage = () => {
       </TopCard>
 
       <BottomCard>
-        <SectionTitle style={{ marginTop: 0 }}>프로젝트 정보</SectionTitle>
-        <InfoRow>
-          <InfoItem>
-            <InfoLabel>📅 프로젝트 기간</InfoLabel>
-            <InfoText>
-              {format(new Date(projectDetail.startDate), "yyyy.MM.dd")} ~{" "}
-              {format(new Date(projectDetail.endDate), "yyyy.MM.dd")} (
-              {differenceInMonths(
-                new Date(projectDetail.endDate),
-                new Date(projectDetail.startDate)
-              ) + 1}
-              개월)
-            </InfoText>
-          </InfoItem>
-          <InfoItem>
-            <InfoLabel>👥 모집 인원</InfoLabel>
-            <InfoText>{projectDetail.recruitCount}명</InfoText>
-          </InfoItem>
-        </InfoRow>
-        <SectionTitle>프로젝트 소개</SectionTitle>
-        <Paragraph>{projectDetail.description}</Paragraph>
-
-        <Button
-          onClick={() => {
-            const token = sessionStorage.getItem("access_token");
-            if (!token) {
-              navigate("/login");
-            } else {
-              navigate(`/projects/${id}/apply`);
-            }
-          }}
-        >
-          지원하기
-        </Button>
+        <SectionTitle style={{ marginTop: 0 }}>지원자 목록</SectionTitle>
+        {applicants && applicants.length > 0 ? (
+          applicants.map((applicant, index) => (
+            <ApplicantCard key={index}>
+              <ApplicantHeader>
+                <ApplicantInfo>
+                  <ApplicantAvatar src={applicant.photo} alt={applicant.name} />
+                  <div>
+                    <ApplicantName>{applicant.name}</ApplicantName>
+                    <ApplicantMeta>{applicant.devposition}</ApplicantMeta>
+                  </div>
+                </ApplicantInfo>
+                <ApplicantStatus>{applicant.status}</ApplicantStatus>
+              </ApplicantHeader>
+              <AppliedAt>지원일: {applicant.appliedAt}</AppliedAt>
+            </ApplicantCard>
+          ))
+        ) : (
+          <PlaceholderText>아직 지원자가 없습니다.</PlaceholderText>
+        )}
       </BottomCard>
     </Container>
   );
 };
 
-export default ProjectDetailPage;
+export default ApplicantsManagePage;
 
 const Container = styled.div`
   max-width: 768px;
@@ -205,11 +194,6 @@ const Tag = styled.span`
   color: #4b5563;
 `;
 
-// const SkillTag = styled(Tag)`
-//   background: #e6eeff;
-//   color: #2d3282;
-// `;
-
 const SectionTitle = styled.h3`
   font-size: 18px;
   font-weight: bold;
@@ -218,56 +202,60 @@ const SectionTitle = styled.h3`
   margin-bottom: 20px;
 `;
 
-const Paragraph = styled.p`
+const PlaceholderText = styled.p`
   font-size: 14px;
-  color: #4b5563;
-  line-height: 1.7;
-`;
-
-const Button = styled.button`
-  background-color: #2d3282;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 32px;
-  display: block;
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
+  color: #6b7280;
 `;
 
 const TagRow = styled.div`
   display: flex;
   gap: 8px;
-  align-items: center;
-  margin-bottom: 0;
 `;
 
-const InfoRow = styled.div`
+const ApplicantCard = styled.div`
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+`;
+
+const ApplicantHeader = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-top: 12px;
-  flex-wrap: wrap;
+  align-items: center;
 `;
 
-const InfoItem = styled.div`
-  flex: 1;
-  min-width: 200px;
-  margin-bottom: 12px;
+const ApplicantInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
 `;
 
-const InfoLabel = styled.div`
-  font-size: 14px;
+const ApplicantAvatar = styled.img`
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  object-fit: cover;
+`;
+
+const ApplicantName = styled.div`
   font-weight: bold;
-  color: #1f2937;
-  margin-bottom: 6px;
+  font-size: 16px;
 `;
 
-const InfoText = styled.div`
-  font-size: 14px;
-  color: #4b5563;
+const ApplicantMeta = styled.div`
+  font-size: 13px;
+  color: #6b7280;
+`;
+
+const ApplicantStatus = styled.div`
+  font-size: 13px;
+  font-weight: bold;
+  color: #2d3282;
+`;
+
+const AppliedAt = styled.div`
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 8px;
 `;

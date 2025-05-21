@@ -14,7 +14,10 @@ import { showToastMessage } from "../common/uiSlice";
 // page나 라우터도 어떤 대략적인 페이지들만 설정해논거라 알아서 유동적으로 페이지 추가시 라우터도 수정 바람.
 export const loginWithEmail = createAsyncThunk(
   "user/loginWithEmail",
-  async ({ email, password, role, navigate }, { dispatch, rejectWithValue }) => {
+  async (
+    { email, password, role, navigate },
+    { dispatch, rejectWithValue }
+  ) => {
     console.log("email,role", email, role);
     try {
       const response = await api.post("/api/login", { email, password, role }); // post로 보내줌
@@ -60,21 +63,25 @@ export const loginWithGoogle = createAsyncThunk(
 
 export const logout = createAsyncThunk(
   "user/logout",
-  async ({ token, navigate },  { dispatch }) => {
+  async ({ token, navigate }, { dispatch }) => {
     try {
       if (token) {
-        await api.post("/api/logout", {}, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        await api.post(
+          "/api/logout",
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
       }
     } catch (error) {
       console.log("로그아웃 실패", error);
     } finally {
       // 토큰 그냥 무조건 제거
       sessionStorage.removeItem("access_token");
-      navigate("/login")
+      navigate("/login");
     }
   }
 );
@@ -95,7 +102,7 @@ export const registerUser = createAsyncThunk(
       navigate("/login");
       return response.data;
     } catch (error) {
-      alert("전화번호 중복입니다.")
+      alert("전화번호 중복입니다.");
       return rejectWithValue(error.response?.data || "전화번호 중복입니다.");
     }
   }
@@ -116,8 +123,10 @@ export const registerCompany = createAsyncThunk(
       navigate("/login");
       return response.data;
     } catch (error) {
-      alert("전화번호 및 사업자등록번호 중복입니다.")
-      return rejectWithValue(error.response?.data || "전화번호 및 사업자등록번호 중복입니다.");
+      alert("전화번호 및 사업자등록번호 중복입니다.");
+      return rejectWithValue(
+        error.response?.data || "전화번호 및 사업자등록번호 중복입니다."
+      );
     }
   }
 );
@@ -133,8 +142,9 @@ export const checkEmailAvailability = createAsyncThunk(
       console.log("중복 데이터 확인", response.data);
       return response.data;
     } catch (error) {
-      alert("이미 사용 중인 이메일입니다.")
-      const errorMessage = error.response?.data|| "이미 사용 중인 이메일입니다.";
+      alert("이미 사용 중인 이메일입니다.");
+      const errorMessage =
+        error.response?.data || "이미 사용 중인 이메일입니다.";
       return rejectWithValue(errorMessage);
     }
   }
@@ -146,11 +156,10 @@ export const fetchUserProfile = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
-      const response = await api.get("/api/mypage",  {
+      const response = await api.get("/api/mypage", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        
       });
       console.log("Redux: 응답 데이터:", response.data);
       return response.data;
@@ -216,11 +225,9 @@ export const loginWithToken = createAsyncThunk(
   }
 );
 
-
 export const RefreshWithToken = createAsyncThunk(
   "user/loginWithToken",
   async (_, { rejectWithValue }) => {
-    
     try {
       const response = await api.post("/api/reissue");
       console.log("refresh토큰", response.data);
@@ -236,12 +243,12 @@ const userSlice = createSlice({
     user: null,
     loading: false,
     loginError: null,
-    checkEmailError:null,
+    checkEmailError: null,
     registrationError: null,
     success: false,
     profile: null,
     emailmessage: "",
-    userRole:null,
+    userRole: null,
   },
   reducers: {
     // 직접적으로 호출
@@ -251,14 +258,13 @@ const userSlice = createSlice({
     clearErrors: (state) => {
       state.loginError = null;
       state.registrationError = null;
-      state.emailmessage = '';
-      state.checkEmailError = '';
+      state.emailmessage = "";
+      state.checkEmailError = "";
     },
-    setRole: (state, action)=> {
+    setRole: (state, action) => {
       state.userRole = action.payload;
     },
     logout,
-    
   },
   extraReducers: (builder) => {
     // async처럼 외부의 함수를 통해 호출
@@ -342,5 +348,5 @@ const userSlice = createSlice({
       });
   },
 });
-export const {clearErrors, setRole } = userSlice.actions;
+export const { clearErrors, setRole } = userSlice.actions;
 export default userSlice.reducer;

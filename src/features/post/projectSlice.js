@@ -78,6 +78,27 @@ export const applyToProject = createAsyncThunk(
   }
 );
 
+// 비동기 액션: 프로젝트 지원자 목록 조회
+export const fetchProjectApplicants = createAsyncThunk(
+  "project/fetchProjectApplicants",
+  async (projectId, { rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await axios.get(
+        `http://localhost:8080/api/project/${projectId}/applicants`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "지원자 목록 조회 실패");
+    }
+  }
+);
+
 const projectSlice = createSlice({
   name: "project",
   initialState: {
@@ -88,6 +109,7 @@ const projectSlice = createSlice({
     projectList: [],
     totalPages: 0,
     projectDetail: null,
+    applicants: [],
   },
   reducers: {
     resetProjectState: (state) => {
@@ -146,6 +168,20 @@ const projectSlice = createSlice({
           typeof action.payload === "string"
             ? action.payload
             : action.payload?.message || "프로젝트 상세 조회에 실패했습니다.";
+      })
+      .addCase(fetchProjectApplicants.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchProjectApplicants.fulfilled, (state, action) => {
+        state.loading = false;
+        state.applicants = action.payload;
+      })
+      .addCase(fetchProjectApplicants.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          typeof action.payload === "string"
+            ? action.payload
+            : action.payload?.message || "지원자 목록 조회에 실패했습니다.";
       });
   },
 });

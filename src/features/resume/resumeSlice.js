@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from '../../utils/api';
-import { showToastMessage } from '../common/uiSlice';
+import api from "../../utils/api";
+import { showToastMessage } from "../common/uiSlice";
 
 export const resumeRegister = createAsyncThunk(
   "resume/resumeRegister",
@@ -11,17 +11,19 @@ export const resumeRegister = createAsyncThunk(
       console.log("accessToken:", token);
       console.log("이력서values", values);
       const formData = new FormData();
-      const dtoBlob = new Blob([JSON.stringify(values)], { type: 'application/json' });
-      formData.append('dto', dtoBlob);
+      const dtoBlob = new Blob([JSON.stringify(values)], {
+        type: "application/json",
+      });
+      formData.append("dto", dtoBlob);
 
       if (imageFile) {
-        formData.append('photo', imageFile);
+        formData.append("photo", imageFile);
       }
       console.log("formData", formData);
       const response = await api.post("/api/resume/create", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
       dispatch(
@@ -69,7 +71,7 @@ export const getResumeList = createAsyncThunk(
       return rejectWithValue(error.response?.data || "이력서 리스트 조회 실패");
     }
   }
-)
+);
 
 export const getResumeDetail = createAsyncThunk(
   "resume/getResumeDetail",
@@ -98,7 +100,7 @@ export const getResumeDetail = createAsyncThunk(
       return rejectWithValue(error.response?.data || "이력서 조회 실패");
     }
   }
-)
+);
 
 export const resumeUpdate = createAsyncThunk(
   "resume/resumeUpdate",
@@ -106,19 +108,25 @@ export const resumeUpdate = createAsyncThunk(
     try {
       const token = sessionStorage.getItem("access_token");
       const formData = new FormData();
-      const dtoBlob = new Blob([JSON.stringify(values)], { type: 'application/json' });
-      formData.append('dto', dtoBlob);
+      const dtoBlob = new Blob([JSON.stringify(values)], {
+        type: "application/json",
+      });
+      formData.append("dto", dtoBlob);
 
       if (imageFile) {
-        formData.append('photo', imageFile);
+        formData.append("photo", imageFile);
       }
       console.log("formData", formData);
-      const response = await api.put(`/api/resume/${resumeId}/update`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.put(
+        `/api/resume/${resumeId}/update`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       dispatch(
         showToastMessage({
           message: "이력서를 수정하였습니다!",
@@ -155,7 +163,7 @@ export const resumeDelete = createAsyncThunk(
           status: "success",
         })
       );
-      return response.data
+      return response.data;
     } catch (error) {
       dispatch(
         showToastMessage({
@@ -166,25 +174,28 @@ export const resumeDelete = createAsyncThunk(
       return rejectWithValue(error.response?.data || "이력서 삭제 실패");
     }
   }
-)
+);
 
 export const resumeVisible = createAsyncThunk(
   "resume/resumeVisible",
   async ({ visible, resumeId }, { dispatch, rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
-      const response = await api.patch(`/api/resume/${resumeId}/visible?visible=${visible}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.patch(
+        `/api/resume/${resumeId}/visible?visible=${visible}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       dispatch(
         showToastMessage({
           message: "이력서 공개범위를 수정하였습니다!",
           status: "success",
         })
       );
-      return response.data
+      return response.data;
     } catch (error) {
       dispatch(
         showToastMessage({
@@ -192,10 +203,12 @@ export const resumeVisible = createAsyncThunk(
           status: "error",
         })
       );
-      return rejectWithValue(error.response?.data || "이력서 공개범위 수정 실패");
+      return rejectWithValue(
+        error.response?.data || "이력서 공개범위 수정 실패"
+      );
     }
   }
-)
+);
 
 const resumeSlice = createSlice({
   name: "resume",
@@ -301,7 +314,7 @@ const resumeSlice = createSlice({
       })
       .addCase(resumeDelete.fulfilled, (state) => {
         state.resumeNumber = state.resumeNumber - 1;
-      })
+      });
   },
 });
 
