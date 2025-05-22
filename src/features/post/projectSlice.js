@@ -174,7 +174,26 @@ const projectSlice = createSlice({
       })
       .addCase(fetchProjectApplicants.fulfilled, (state, action) => {
         state.loading = false;
-        state.applicants = action.payload;
+        state.applicants = action.payload.map((applicant) => ({
+          accountId: applicant.accountId,
+          name: applicant.name,
+          photo: applicant.photo,
+          devposition: applicant.devposition,
+          status: applicant.status,
+          appliedAt: applicant.appliedAt,
+          resume: {
+            resumeId: applicant.resume.resumeId,
+            title: applicant.resume.title,
+            intro: applicant.resume.intro,
+            devposition: applicant.resume.devposition,
+            skills: applicant.resume.skills,
+            photo: applicant.resume.photo,
+            visible: applicant.resume.visible,
+            projects: applicant.resume.projects,
+            githubUrl: applicant.resume.githubUrl,
+            introduce: applicant.resume.introduce,
+          },
+        }));
       })
       .addCase(fetchProjectApplicants.rejected, (state, action) => {
         state.loading = false;
