@@ -1,24 +1,31 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import PlusIcon from '../../assets/images/Resume/+.png';
-import ResumeImg from '../../assets/images/Resume/Resume.png';
-import Form from 'react-bootstrap/Form';
-import { useDispatch, useSelector } from 'react-redux';
-import { resumeRegister, getResumeList, resumeDelete, resumeVisible, originResume, resumelistPage } from "../../features/resume/resumeSlice";
-import { useNavigate, useLocation } from 'react-router-dom';
+import PlusIcon from "../../assets/images/Resume/+.png";
+import ResumeImg from "../../assets/images/Resume/Resume.png";
+import Form from "react-bootstrap/Form";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  resumeRegister,
+  getResumeList,
+  resumeDelete,
+  resumeVisible,
+  originResume,
+  resumelistPage,
+} from "../../features/resume/resumeSlice";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center; 
+  align-items: center;
   padding-top: 32px;
   padding-bottom: 32px;
-  background-color: #F7F7FA; 
+  background-color: #f7f7fa;
   min-height: 100vh;
 `;
 
 const Title = styled.div`
-  width: 896px; 
+  width: 896px;
   font-size: 20.4px;
   font-weight: 700;
   margin-bottom: 32px;
@@ -36,7 +43,7 @@ const Resume = styled.div`
   width: 832px;
   height: 98px;
   border-radius: 12px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid #e5e7eb;
   margin-bottom: 16px;
   padding: 25px;
 `;
@@ -45,15 +52,15 @@ const ResumeInContainer = styled.div`
   width: 100%;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start; 
-  flex-wrap: wrap; 
+  align-items: flex-start;
+  flex-wrap: wrap;
 `;
 
 const ResumeLeft = styled.div`
   display: flex;
   gap: 8px;
-  flex-grow: 1; 
-  min-width: 0; 
+  flex-grow: 1;
+  min-width: 0;
 `;
 
 const ResumeLeftAndRight = styled.div`
@@ -73,7 +80,7 @@ const ResumeLeftAndLeft = styled.div`
   background-color: #e6eeff;
   display: flex;
   justify-content: center;
-  align-items: center; 
+  align-items: center;
   cursor: pointer;
 `;
 
@@ -81,30 +88,30 @@ const ResumeRight = styled.div`
   width: 150.23px;
   height: 48px;
   display: flex;
-  align-items: center; 
+  align-items: center;
   justify-content: space-between;
   padding: 0 4px;
-  gap: 4px; 
+  gap: 4px;
 
   .form-check.form-switch {
-  margin-bottom: 0;
-  padding-top: 0;
-  display: flex;
-  align-items: center;
+    margin-bottom: 0;
+    padding-top: 0;
+    display: flex;
+    align-items: center;
 
-  .form-check-input {
-  width: 40px;
-  height: 24px;
-  margin-top: 0;
-  transform: scale(1); 
-}
-}
+    .form-check-input {
+      width: 40px;
+      height: 24px;
+      margin-top: 0;
+      transform: scale(1);
+    }
+  }
 `;
 
 const DeleteButton = styled.button`
   width: 40px;
   height: 24px;
-  background-color: #F87171;
+  background-color: #f87171;
   color: white;
   font-size: 10px;
   font-weight: 500;
@@ -114,7 +121,7 @@ const DeleteButton = styled.button`
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: #EF4444;
+    background-color: #ef4444;
   }
 `;
 
@@ -122,9 +129,9 @@ const ResumeCreate = styled.div`
   width: 832px;
   height: 76px;
   border-radius: 12px;
-  border: 2px dotted #E5E7EB;
+  border: 2px dotted #e5e7eb;
   display: flex;
-  flex-direction: row; 
+  flex-direction: row;
   justify-content: center;
   align-items: center;
   gap: 8px;
@@ -141,16 +148,16 @@ const ResumePage = () => {
   const location = useLocation();
   const { profile } = useSelector((state) => state.user);
   const { resumeNumber } = useSelector((state) => state.resume);
-  const today = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+  const today = new Date().toISOString().slice(2, 10).replace(/-/g, "");
 
   useEffect(() => {
     const token = sessionStorage.getItem("access_token");
 
     if (!token) {
-      navigate('/login', {
+      navigate("/login", {
         state: { from: location.pathname },
       });
-      return
+      return;
     }
 
     dispatch(resumelistPage());
@@ -171,9 +178,11 @@ const ResumePage = () => {
   const handleSwitchChange = async (newVisible, resumeId) => {
     try {
       await dispatch(resumeVisible({ visible: newVisible, resumeId }));
-      setResumes(prev =>
-        prev.map(resume =>
-          resume.resumeId === resumeId ? { ...resume, visible: newVisible } : resume
+      setResumes((prev) =>
+        prev.map((resume) =>
+          resume.resumeId === resumeId
+            ? { ...resume, visible: newVisible }
+            : resume
         )
       );
     } catch (error) {
@@ -189,13 +198,22 @@ const ResumePage = () => {
     }
     const values = {
       title: `${profile.name}이력서_${today}`,
-      intro: '',
+      intro: "",
       skills: [],
-      githubUrl: '',
+      githubUrl: "",
       visible: false,
       devposition: null,
-      introduce: '',
-      projects: [],
+      introduce: "",
+      projects: [
+        {
+          name: "",
+          description: "",
+          techStack: [],
+          githubLink: "",
+          startDate: null,
+          endDate: null,
+        },
+      ],
     };
 
     const res = await dispatch(resumeRegister({ values, navigate }));
@@ -215,7 +233,9 @@ const ResumePage = () => {
 
     try {
       await dispatch(resumeDelete(resumeId));
-      setResumes(prev => prev.filter(resume => resume.resumeId !== resumeId));
+      setResumes((prev) =>
+        prev.filter((resume) => resume.resumeId !== resumeId)
+      );
     } catch (error) {
       console.error("이력서 삭제 중 오류:", error);
       alert("삭제에 실패했습니다.");
@@ -229,20 +249,26 @@ const ResumePage = () => {
           <Resume key={resume.resumeId}>
             <ResumeInContainer>
               <ResumeLeft>
-                <ResumeLeftAndLeft onClick={() => handleResumeClick(resume.resumeId)}>
+                <ResumeLeftAndLeft
+                  onClick={() => handleResumeClick(resume.resumeId)}
+                >
                   <img src={ResumeImg} alt="Resume" />
                 </ResumeLeftAndLeft>
                 <ResumeLeftAndRight>
                   <div
                     style={{
                       fontWeight: 500,
-                      fontSize: '13.6px',
-                      color: '#1F2937',
-                      cursor: 'pointer',
+                      fontSize: "13.6px",
+                      color: "#1F2937",
+                      cursor: "pointer",
                     }}
                     onClick={() => handleResumeClick(resume.resumeId)}
-                    onMouseEnter={(e) => (e.target.style.textDecoration = 'underline')}
-                    onMouseLeave={(e) => (e.target.style.textDecoration = 'none')}
+                    onMouseEnter={(e) =>
+                      (e.target.style.textDecoration = "underline")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.target.style.textDecoration = "none")
+                    }
                   >
                     {resume.title}
                   </div>
@@ -250,24 +276,31 @@ const ResumePage = () => {
                     onClick={() => handleResumeClick(resume.resumeId)}
                     style={{
                       fontWeight: 400,
-                      fontSize: '11.9px',
-                      color: '#6B7280',
-                      cursor: 'pointer',
-                    }}>
-                    {resume.intro || '이력서 상세내용'}
+                      fontSize: "11.9px",
+                      color: "#6B7280",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {resume.intro || "이력서 상세내용"}
                   </div>
                 </ResumeLeftAndRight>
               </ResumeLeft>
               <ResumeRight>
-                <div>{resume.visible ? '공개' : '비공개'}</div>
+                <div>{resume.visible ? "공개" : "비공개"}</div>
                 <Form.Check
                   type="switch"
                   id={`switch-${resume.resumeId}`}
                   label=""
                   checked={resume.visible}
-                  onChange={(e) => handleSwitchChange(e.target.checked, resume.resumeId)}
+                  onChange={(e) =>
+                    handleSwitchChange(e.target.checked, resume.resumeId)
+                  }
                 />
-                <DeleteButton onClick={() => handleDeleteResume(resume.resumeId)}>삭제</DeleteButton>
+                <DeleteButton
+                  onClick={() => handleDeleteResume(resume.resumeId)}
+                >
+                  삭제
+                </DeleteButton>
               </ResumeRight>
             </ResumeInContainer>
           </Resume>
@@ -275,7 +308,11 @@ const ResumePage = () => {
 
         <ResumeCreate onClick={handleResumeForm}>
           <img src={PlusIcon} alt="+" />
-          <div style={{ fontWeight: 400, fontSize: '13.6px', color: '#6B7280' }}>새 이력서 작성하기</div>
+          <div
+            style={{ fontWeight: 400, fontSize: "13.6px", color: "#6B7280" }}
+          >
+            새 이력서 작성하기
+          </div>
         </ResumeCreate>
       </ResumeContainer>
     </Container>

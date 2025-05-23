@@ -27,21 +27,6 @@ const techToClassName = {
   PYTHON: 'devicon-python-plain colored',
   CSS: 'devicon-css3-plain colored',
   HTML: 'devicon-html5-plain colored',
-  REDIS: 'devicon-redis-plain colored',
-  ORACLE: 'devicon-oracle-original colored',
-  SWIFT: 'devicon-swift-plain colored',
-  KOTLIN: 'devicon-kotlin-plain colored',
-  AZURE: 'devicon-azure-plain colored',
-  JENKINS: 'devicon-jenkins-plain colored',
-  JIRA: 'devicon-jira-plain colored',
-  SLACK: 'devicon-slack-plain colored',
-  TAILWIND: 'devicon-tailwindcss-plain colored',
-  POSTMAN: 'devicon-postman-plain colored',
-  SQLITE: 'devicon-sqlite-plain colored',
-  INTELLIJ: 'devicon-intellij-plain colored',
-  VS_CODE: 'devicon-vscode-plain colored',
-  REACT_NATIVE: 'devicon-react-original colored',
-  GITHUB_ACTIONS: 'devicon-githubactions-plain colored',
 };
 
 const TechIcon = ({ tech, size = 24 }) => {

@@ -10,6 +10,10 @@ import { ToastContainer } from "react-toastify";
 import Select from "react-select";
 
 const TECH_STACK_OPTIONS = [
+  { value: "HTML", label: "HTML" },
+  { value: "CSS", label: "CSS" },
+  { value: "JAVA", label: "Java" },
+  { value: "PYTHON", label: "Python" },
   { value: "REACT", label: "React" },
   { value: "VUE", label: "Vue" },
   { value: "ANGULAR", label: "Angular" },

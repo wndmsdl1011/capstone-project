@@ -11,6 +11,13 @@ export const resumeRegister = createAsyncThunk(
       console.log("accessToken:", token);
       console.log("이력서values", values);
       const formData = new FormData();
+      if (values.projects) {
+        values.projects = values.projects.map((project) => ({
+          ...project,
+          startDate: project.startDate || null,
+          endDate: project.endDate || null,
+        }));
+      }
       const dtoBlob = new Blob([JSON.stringify(values)], {
         type: "application/json",
       });
@@ -83,10 +90,20 @@ export const getResumeDetail = createAsyncThunk(
 
 export const resumeUpdate = createAsyncThunk(
   "resume/resumeUpdate",
-  async ({ values, imageFile, resumeId, navigate, wherePage }, { dispatch, rejectWithValue }) => {
+  async (
+    { values, imageFile, resumeId, navigate, wherePage },
+    { dispatch, rejectWithValue }
+  ) => {
     try {
       const token = sessionStorage.getItem("access_token");
       const formData = new FormData();
+      if (values.projects) {
+        values.projects = values.projects.map((project) => ({
+          ...project,
+          startDate: project.startDate || null,
+          endDate: project.endDate || null,
+        }));
+      }
       const dtoBlob = new Blob([JSON.stringify(values)], {
         type: "application/json",
       });
@@ -95,12 +112,16 @@ export const resumeUpdate = createAsyncThunk(
       if (imageFile) {
         formData.append("photo", imageFile);
       }
-      const response = await api.put(`/api/resume/${resumeId}/update`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.put(
+        `/api/resume/${resumeId}/update`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       dispatch(
         showToastMessage({
           message: "이력서를 수정하였습니다!",
@@ -108,9 +129,9 @@ export const resumeUpdate = createAsyncThunk(
         })
       );
 
-      if (wherePage == '/mypage/user') {
-        navigate(wherePage, { state: { selectedMenu: '이력서 관리' } });
-      } else if (wherePage == '/resumelist') {
+      if (wherePage == "/mypage/user") {
+        navigate(wherePage, { state: { selectedMenu: "이력서 관리" } });
+      } else if (wherePage == "/resumelist") {
         navigate(wherePage);
       }
 
@@ -200,7 +221,7 @@ const resumeSlice = createSlice({
     message: null,
     newResume: false,
     resumeNumber: null,
-    wherePage: '',
+    wherePage: "",
   },
   reducers: {
     resetResumeState: (state) => {
@@ -213,10 +234,10 @@ const resumeSlice = createSlice({
       state.newResume = false;
     },
     myPageResume: (state) => {
-      state.wherePage = '/mypage/user';
+      state.wherePage = "/mypage/user";
     },
     resumelistPage: (state) => {
-      state.wherePage = '/resumelist';
+      state.wherePage = "/resumelist";
     },
   },
   extraReducers: (builder) => {
@@ -305,5 +326,6 @@ const resumeSlice = createSlice({
   },
 });
 
-export const { resetResumeState, originResume, myPageResume, resumelistPage } = resumeSlice.actions;
+export const { resetResumeState, originResume, myPageResume, resumelistPage } =
+  resumeSlice.actions;
 export default resumeSlice.reducer;

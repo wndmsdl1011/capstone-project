@@ -205,12 +205,38 @@ const ApplicantsManagePage = () => {
                     {resume.projects?.length ? (
                       resume.projects.map((project, i) => (
                         <ProjectSummary key={i}>
-                          <ProjectTitle>
-                            {project.name || "프로젝트명 없음"}
-                          </ProjectTitle>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              marginBottom: "8px",
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontWeight: "600",
+                                fontSize: "15px",
+                                color: "#1f2937",
+                              }}
+                            >
+                              {project.name || "프로젝트명 없음"}
+                            </div>
+                            <div style={{ fontSize: "12px", color: "#9ca3af" }}>
+                              {project.startDate
+                                ? format(new Date(project.startDate), "yyyy.MM")
+                                : "시작일 없음"}{" "}
+                              ~{" "}
+                              {project.endDate
+                                ? format(new Date(project.endDate), "yyyy.MM")
+                                : "종료일 없음"}
+                            </div>
+                          </div>
+
                           <ProjectDescription>
                             {project.description || "설명 없음"}
                           </ProjectDescription>
+
                           <ProjectTech>
                             사용 기술:
                             {project.techStack?.length ? (
@@ -218,9 +244,14 @@ const ApplicantsManagePage = () => {
                                 <TechIcon key={idx} tech={tech} size={24} />
                               ))
                             ) : (
-                              <span>정보 없음</span>
+                              <span
+                                style={{ color: "#9ca3af", marginLeft: "4px" }}
+                              >
+                                정보 없음
+                              </span>
                             )}
                           </ProjectTech>
+
                           {project.githubLink && (
                             <ProjectGitHubLink
                               href={project.githubLink}
@@ -586,4 +617,10 @@ const ResumeTitleText = styled.p`
 const ResumeIntroText = styled.p`
   font-size: 14px;
   color: #6b7280;
+`;
+
+const ProjectDates = styled.div`
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 6px;
 `;

@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEnvelope,
   faBirthdayCake,
   faPhone,
   faTrash,
   faPlus,
-} from '@fortawesome/free-solid-svg-icons';
-import { useFormik } from 'formik';
-import Select from 'react-select';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { getResumeDetail, resumeUpdate } from '../../features/resume/resumeSlice';
+} from "@fortawesome/free-solid-svg-icons";
+import { useFormik } from "formik";
+import Select from "react-select";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import {
+  getResumeDetail,
+  resumeUpdate,
+} from "../../features/resume/resumeSlice";
 
 const Container = styled.div`
   max-width: 640px;
@@ -52,7 +55,7 @@ const ToggleLabel = styled.span`
 const ToggleSwitch = styled.div`
   width: 50px;
   height: 26px;
-  background-color: ${({ isPublic }) => (isPublic ? '#A7F3D0' : '#F87171')};
+  background-color: ${({ isPublic }) => (isPublic ? "#A7F3D0" : "#F87171")};
   border-radius: 50px;
   position: relative;
   cursor: pointer;
@@ -66,7 +69,7 @@ const ToggleHandle = styled.div`
   border-radius: 50%;
   position: absolute;
   top: 2px;
-  left: ${({ isPublic }) => (isPublic ? '26px' : '2px')};
+  left: ${({ isPublic }) => (isPublic ? "26px" : "2px")};
   transition: left 0.3s;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 `;
@@ -103,7 +106,6 @@ const FlexRow = styled.div`
     align-items: center;
   }
 `;
-
 
 const ProfileImageBox = styled.div`
   width: 220px;
@@ -168,7 +170,6 @@ const AddButton = styled.button`
   gap: 6px;
 `;
 const ProjectItem = styled.div`
-  
   border-radius: 12px;
   padding: 20px;
   border: 1px solid #e5e7eb;
@@ -187,13 +188,13 @@ const ProjectInput = styled.input`
   background: transparent;
   border-radius: 8px;
   font-size: 18px;
-  &::placeholder {  
-    font-weight: 1000; 
+  &::placeholder {
+    font-weight: 1000;
   }
 `;
 
 const ProjectDetailInput = styled.input`
-  width:100%;
+  width: 100%;
   padding: 10px 12px;
   border: none;
   background: transparent;
@@ -201,7 +202,6 @@ const ProjectDetailInput = styled.input`
   font-size: 14px;
   ::placeholder {
     color: #9ca3af;
-    
   }
 `;
 
@@ -260,98 +260,91 @@ const SaveButton = styled.button`
 const ResumeFormPage = () => {
   const { resumeId } = useParams();
   const { profile } = useSelector((state) => state.user);
-  const { currentResume, newResume, wherePage } = useSelector((state) => state.resume);
+  const { currentResume, newResume, wherePage } = useSelector(
+    (state) => state.resume
+  );
   const [isPublic, setIsPublic] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const [imageFile, setImageFile] = useState(null);
-  const [preview, setPreview] = useState('');
+  const [preview, setPreview] = useState("");
   const techOptions = [
-    'HTML',
-    'CSS',
-    'JAVASCRIPT',
-    'TYPESCRIPT',
-    'REACT',
-    'VUE',
-    'ANGULAR',
-    'NEXTJS',
-    'TAILWIND',
-    'BOOTSTRAP',
-    'JAVA',
-    'SPRING',
-    'SPRING_BOOT',
-    'PYTHON',
-    'DJANGO',
-    'FLASK',
-    'NODEJS',
-    'EXPRESS',
-    'MYSQL',
-    'POSTGRESQL',
-    'MONGODB',
-    'ORACLE',
-    'REDIS',
-    'SQLITE',
-    'DOCKER',
-    'KUBERNETES',
-    'AWS',
-    'AZURE',
-    'NGINX',
-    'JENKINS',
-    'GIT',
-    'GITHUB_ACTIONS',
-    'FLUTTER',
-    'REACT_NATIVE',
-    'SWIFT',
-    'KOTLIN',
-    'FIGMA',
-    'POSTMAN',
-    'JIRA',
-    'SLACK',
-    'NOTION',
-    'INTELLIJ',
-    'VS_CODE',
+    "JAVA",
+    "PYTHON",
+    "CSS",
+    "HTML",
+    "REACT",
+    "VUE",
+    "ANGULAR",
+    "NEXTJS",
+    "TYPESCRIPT",
+    "JAVASCRIPT",
+    "NODEJS",
+    "EXPRESS",
+    "SPRING",
+    "SPRING_BOOT",
+    "DJANGO",
+    "FLASK",
+    "MYSQL",
+    "POSTGRESQL",
+    "MONGODB",
+    "AWS",
+    "KUBERNETES",
+    "DOCKER",
+    "GIT",
+    "FIGMA",
   ].map((tech) => ({ value: tech, label: tech }));
 
   const devOptions = [
-    { value: 'BACKEND', label: '서버/백엔드 개발자' },
-    { value: 'FRONTEND', label: '프론트엔드 개발자' },
-    { value: 'FULLSTACK', label: '웹 풀스택 개발자' },
-    { value: 'ANDROID', label: '안드로이드 개발자' },
-    { value: 'IOS', label: 'iOS 개발자' },
-    { value: 'CROSS_PLATFORM', label: '크로스플랫폼 앱개발자' },
-    { value: 'GAME_CLIENT', label: '게임 클라이언트 개발자' },
-    { value: 'GAME_SERVER', label: '게임 서버 개발자' },
-    { value: 'DBA', label: 'DBA' },
-    { value: 'BIGDATA', label: '빅데이터 엔지니어' },
-    { value: 'AI_ML', label: '인공지능/머신러닝' },
-    { value: 'DEVOPS', label: 'DevOps/시스템 엔지니어' },
-    { value: 'SECURITY', label: '정보보안 담당자' },
-    { value: 'QA', label: 'QA 엔지니어' },
-    { value: 'PM', label: '개발 PM' },
-    { value: 'EMBEDDED', label: 'HW/임베디드' },
-    { value: 'SOLUTION', label: 'SW/솔루션' },
-    { value: 'WEB_PUBLISHER', label: '웹퍼블리셔' },
-    { value: 'VR_AR', label: 'VR/AR/3D' },
-    { value: 'BLOCKCHAIN', label: '블록체인' },
-    { value: 'TECH_SUPPORT', label: '기술지원' },
+    { value: "BACKEND", label: "서버/백엔드 개발자" },
+    { value: "FRONTEND", label: "프론트엔드 개발자" },
+    { value: "FULLSTACK", label: "웹 풀스택 개발자" },
+    { value: "ANDROID", label: "안드로이드 개발자" },
+    { value: "IOS", label: "iOS 개발자" },
+    { value: "CROSS_PLATFORM", label: "크로스플랫폼 앱개발자" },
+    { value: "GAME_CLIENT", label: "게임 클라이언트 개발자" },
+    { value: "GAME_SERVER", label: "게임 서버 개발자" },
+    { value: "DBA", label: "DBA" },
+    { value: "BIGDATA", label: "빅데이터 엔지니어" },
+    { value: "AI_ML", label: "인공지능/머신러닝" },
+    { value: "DEVOPS", label: "DevOps/시스템 엔지니어" },
+    { value: "SECURITY", label: "정보보안 담당자" },
+    { value: "QA", label: "QA 엔지니어" },
+    { value: "PM", label: "개발 PM" },
+    { value: "EMBEDDED", label: "HW/임베디드" },
+    { value: "SOLUTION", label: "SW/솔루션" },
+    { value: "WEB_PUBLISHER", label: "웹퍼블리셔" },
+    { value: "VR_AR", label: "VR/AR/3D" },
+    { value: "BLOCKCHAIN", label: "블록체인" },
+    { value: "TECH_SUPPORT", label: "기술지원" },
   ];
 
   const formik = useFormik({
     initialValues: {
-      title: '',
-      intro: '',
+      title: "",
+      intro: "",
       skills: [],
-      githubUrl: '',
+      githubUrl: "",
       visible: false,
-      devposition: '',
-      introduce: '',
-      projects: []
+      devposition: "",
+      introduce: "",
+      projects: [
+        {
+          name: "",
+          description: "",
+          techStack: [],
+          githubLink: "",
+          startDate: null,
+          endDate: null,
+        },
+      ],
     },
     onSubmit: async (values) => {
-
-      console.log('이력서 저장데이터', values);
-      dispatch(resumeUpdate({ values, imageFile, resumeId, navigate, wherePage }));
+      console.log("이력서 저장데이터", values);
+      dispatch(
+        resumeUpdate({ values, imageFile, resumeId, navigate, wherePage })
+      );
     },
   });
 
@@ -359,7 +352,7 @@ const ResumeFormPage = () => {
     const token = sessionStorage.getItem("access_token");
 
     if (!token) {
-      navigate('/login', {
+      navigate("/login", {
         state: { from: location.pathname },
       });
       return;
@@ -373,13 +366,13 @@ const ResumeFormPage = () => {
   useEffect(() => {
     if (currentResume && resumeId && newResume == false) {
       formik.setValues({
-        title: currentResume.title || '',
-        intro: currentResume.intro || '',
+        title: currentResume.title || "",
+        intro: currentResume.intro || "",
         skills: currentResume.skills || [],
-        githubUrl: currentResume.githubUrl || '',
+        githubUrl: currentResume.githubUrl || "",
         visible: currentResume.visible || false,
-        devposition: currentResume.devposition || '',
-        introduce: currentResume.introduce || '',
+        devposition: currentResume.devposition || "",
+        introduce: currentResume.introduce || "",
         projects: currentResume.projects || [],
       });
       setIsPublic(currentResume.visible || false);
@@ -395,17 +388,24 @@ const ResumeFormPage = () => {
   const handleToggle = () => {
     const newValue = !isPublic;
     setIsPublic(newValue);
-    formik.setFieldValue('visible', newValue); // formik에도 반영
+    formik.setFieldValue("visible", newValue); // formik에도 반영
   };
   const handleAddProject = () => {
-    const newProject = { name: '', description: '', techStack: [], githubLink: '' };
-    formik.setFieldValue('projects', [...formik.values.projects, newProject]);
+    const newProject = {
+      name: "",
+      description: "",
+      techStack: [],
+      githubLink: "",
+      startDate: null,
+      endDate: null,
+    };
+    formik.setFieldValue("projects", [...formik.values.projects, newProject]);
   };
 
   const handleRemoveProject = (index) => {
     const updated = [...formik.values.projects];
     updated.splice(index, 1);
-    formik.setFieldValue('projects', updated);
+    formik.setFieldValue("projects", updated);
   };
 
   const handleImageChange = async (e) => {
@@ -415,7 +415,9 @@ const ResumeFormPage = () => {
     const MAX_SIZE = 10 * 1024 * 1024; // 10MB
     //파일 사이즈 아직 미정 현재는 2.8mb도 안들어감.
     if (file.size > MAX_SIZE) {
-      alert("파일 크기가 10MB를 초과할 수 없습니다. 10MB 이하로 업로드해주세요.");
+      alert(
+        "파일 크기가 10MB를 초과할 수 없습니다. 10MB 이하로 업로드해주세요."
+      );
       return;
     }
     setImageFile(file);
@@ -463,25 +465,43 @@ const ResumeFormPage = () => {
                   <>
                     <FontAwesomeIcon icon={faPlus} size="lg" />
                     <span>사진추가</span>
-                    <small style={{ fontSize: '12px' }}>1:1 비율 권장</small>
+                    <small style={{ fontSize: "12px" }}>1:1 비율 권장</small>
                   </>
                 )}
               </UploadLabel>
-              <FileInput id="photo-upload" type="file" accept="image/*" onChange={handleImageChange} />
+              <FileInput
+                id="photo-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
             </ProfileImageBox>
 
             <SpecInfo>
               {/* <p><strong>기본 스펙</strong></p> */}
-              <p style={{ fontSize: '22px' }}><strong>{profile?.name} ({profile?.gender})</strong></p>
-              <p><FontAwesomeIcon icon={faEnvelope} /> {profile?.email}</p>
-              <p><FontAwesomeIcon icon={faBirthdayCake} /> {profile?.birthYear}년생</p>
-              <p><FontAwesomeIcon icon={faPhone} /> {profile?.phone}</p>
+              <p style={{ fontSize: "22px" }}>
+                <strong>
+                  {profile?.name} ({profile?.gender})
+                </strong>
+              </p>
+              <p>
+                <FontAwesomeIcon icon={faEnvelope} /> {profile?.email}
+              </p>
+              <p>
+                <FontAwesomeIcon icon={faBirthdayCake} /> {profile?.birthYear}
+                년생
+              </p>
+              <p>
+                <FontAwesomeIcon icon={faPhone} /> {profile?.phone}
+              </p>
             </SpecInfo>
           </FlexRow>
         </Section>
 
         <Section>
-          <Label><strong>간단 소개</strong></Label>
+          <Label>
+            <strong>간단 소개</strong>
+          </Label>
           <Input
             name="intro"
             type="text"
@@ -492,7 +512,9 @@ const ResumeFormPage = () => {
         </Section>
 
         <Section>
-          <Label><strong>개발 직무</strong></Label>
+          <Label>
+            <strong>개발 직무</strong>
+          </Label>
           <Select
             name="devposition"
             options={devOptions}
@@ -500,14 +522,16 @@ const ResumeFormPage = () => {
               (opt) => opt.value === formik.values.devposition
             )}
             onChange={(option) =>
-              formik.setFieldValue('devposition', option?.value)
+              formik.setFieldValue("devposition", option?.value)
             }
             placeholder="개발 직무 검색 및 선택"
           />
         </Section>
 
         <Section>
-          <Label><strong>기술 스택</strong></Label>
+          <Label>
+            <strong>기술 스택</strong>
+          </Label>
           <Select
             isMulti
             name="skills"
@@ -518,7 +542,7 @@ const ResumeFormPage = () => {
             )}
             onChange={(selectedOptions) =>
               formik.setFieldValue(
-                'skills',
+                "skills",
                 selectedOptions.map((option) => option.value)
               )
             }
@@ -527,7 +551,9 @@ const ResumeFormPage = () => {
         </Section>
 
         <Section>
-          <Label><strong>프로필 GitHub 링크</strong></Label>
+          <Label>
+            <strong>프로필 GitHub 링크</strong>
+          </Label>
           <Input
             name="githubUrl"
             type="text"
@@ -538,9 +564,10 @@ const ResumeFormPage = () => {
         </Section>
 
         <Section>
-
           <FlexBetween>
-            <Label><strong>프로젝트</strong></Label>
+            <Label>
+              <strong>프로젝트</strong>
+            </Label>
             <AddButton type="button" onClick={handleAddProject}>
               <FontAwesomeIcon icon={faPlus} /> 프로젝트 추가
             </AddButton>
@@ -556,7 +583,10 @@ const ResumeFormPage = () => {
                     value={project.name}
                     onChange={formik.handleChange}
                   />
-                  <DeleteButton type="button" onClick={() => handleRemoveProject(idx)}>
+                  <DeleteButton
+                    type="button"
+                    onClick={() => handleRemoveProject(idx)}
+                  >
                     <FontAwesomeIcon icon={faTrash} />
                   </DeleteButton>
                 </Row>
@@ -569,7 +599,20 @@ const ResumeFormPage = () => {
                   onChange={formik.handleChange}
                 />
 
-
+                <Label>프로젝트 시작일</Label>
+                <Input
+                  type="date"
+                  name={`projects[${idx}].startDate`}
+                  value={project.startDate || ""}
+                  onChange={formik.handleChange}
+                />
+                <Label>프로젝트 종료일</Label>
+                <Input
+                  type="date"
+                  name={`projects[${idx}].endDate`}
+                  value={project.endDate || ""}
+                  onChange={formik.handleChange}
+                />
 
                 <Select
                   isMulti
@@ -581,11 +624,12 @@ const ResumeFormPage = () => {
                   )}
                   onChange={(selectedOptions) => {
                     const updatedProjects = [...formik.values.projects];
-                    updatedProjects[idx].techStack = selectedOptions.map((opt) => opt.value);
-                    formik.setFieldValue('projects', updatedProjects);
+                    updatedProjects[idx].techStack = selectedOptions.map(
+                      (opt) => opt.value
+                    );
+                    formik.setFieldValue("projects", updatedProjects);
                   }}
                   placeholder="기술스택을 등록해주세요"
-
                 />
 
                 <Label style={{ marginTop: "7px" }}>깃허브 링크</Label>
@@ -599,11 +643,12 @@ const ResumeFormPage = () => {
               </ProjectItem>
             ))}
           </ProjectList>
-
         </Section>
 
         <Section>
-          <Label><strong>자기소개서</strong></Label>
+          <Label>
+            <strong>자기소개서</strong>
+          </Label>
           <TextArea
             name="introduce"
             type="text"
