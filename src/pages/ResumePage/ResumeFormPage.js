@@ -11,7 +11,7 @@ import {
 import { useFormik } from "formik";
 import Select from "react-select";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   getResumeDetail,
   resumeUpdate,
@@ -266,7 +266,6 @@ const ResumeFormPage = () => {
   const [isPublic, setIsPublic] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const [imageFile, setImageFile] = useState(null);
   const [preview, setPreview] = useState("");
   const techOptions = [
@@ -352,16 +351,14 @@ const ResumeFormPage = () => {
     const token = sessionStorage.getItem("access_token");
 
     if (!token) {
-      navigate("/login", {
-        state: { from: location.pathname },
-      });
+      navigate("/login");
       return;
     }
 
     if (resumeId && newResume == false) {
       dispatch(getResumeDetail(resumeId));
     }
-  }, [dispatch, navigate, resumeId, location]);
+  }, [dispatch, navigate, resumeId]);
 
   useEffect(() => {
     if (currentResume && resumeId && newResume == false) {
