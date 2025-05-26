@@ -190,6 +190,55 @@ export const resumeVisible = createAsyncThunk(
   }
 );
 
+// const response = await api.get("/api/email/exist", {
+//         params: { email: email },
+//       });
+// startDate: startDate.toISOString().split('T')[0],
+//       endDate
+// `/api/gemini/completion/top3/${selectedId}?duration=${duration}`
+export const resumeAImatching = createAsyncThunk(
+  "resume/resumeAImatching",
+  async ({ startDate, endDate , resumeId }, { dispatch, rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      console.log("duration, resumeId", startDate, endDate, resumeId);
+      const response = await api.post(
+        `/api/gemini/completion/top3/${resumeId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params : {
+            startDate : startDate,
+            endDate : endDate
+          }
+        }
+      );
+      dispatch(
+        showToastMessage({
+          message: "AI 매칭 성공!",
+          status: "success",
+        })
+      );
+      console.log("Redux: AI매칭 응답 데이터:", response.data);
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "AI 매칭 실패",
+          status: "error",
+        })
+      );
+      dispatch(aiListClear());
+      return rejectWithValue(
+        error.response?.data || "AI 매칭 실패"
+      );
+    }
+  }
+);
+
+
 const resumeSlice = createSlice({
   name: "resume",
   initialState: {
@@ -201,8 +250,12 @@ const resumeSlice = createSlice({
     newResume: false,
     resumeNumber: null,
     wherePage: '',
+    aiMatchingTop3:[],
   },
   reducers: {
+    aiListClear: (state) => {
+      state.aiMatchingTop3 = [];
+    },
     resetResumeState: (state) => {
       state.loading = false;
       state.success = false;
@@ -301,9 +354,25 @@ const resumeSlice = createSlice({
       })
       .addCase(resumeDelete.fulfilled, (state) => {
         state.resumeNumber = state.resumeNumber - 1;
+      })
+      .addCase(resumeAImatching.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(resumeAImatching.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.aiMatchingTop3 = action.payload;
+        state.message = action.payload?.message || null;
+      })
+      .addCase(resumeAImatching.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload?.message || "오류가 발생했습니다.";
       });
   },
 });
 
-export const { resetResumeState, originResume, myPageResume, resumelistPage } = resumeSlice.actions;
+export const { resetResumeState, originResume, myPageResume, resumelistPage,aiListClear } = resumeSlice.actions;
 export default resumeSlice.reducer;

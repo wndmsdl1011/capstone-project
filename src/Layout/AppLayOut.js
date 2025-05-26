@@ -153,7 +153,7 @@ const AppLayout = ({ authenticate, setAuthenticate }) => {
   const dispatch = useDispatch();
   const { user, profile } = useSelector((state) => state.user);
   const [cookies] = useCookies(["refresh"]);
-
+  const token = sessionStorage.getItem("access_token");
   useEffect(() => {
     const token = sessionStorage.getItem("access_token");
 
@@ -187,7 +187,7 @@ const AppLayout = ({ authenticate, setAuthenticate }) => {
           <NavButton onClick={() => alert("비즈니스 문의")}>
             비즈니스 문의
           </NavButton>
-          {profile ? (
+          {token ? ( // 관리자 UI이슈로 profile => token으로 변경 오류시 수정 필요.
             <NavRight>
               <div style={{ position: "relative" }}>
                 <NotificationButton

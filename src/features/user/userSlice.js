@@ -39,7 +39,7 @@ export const loginWithEmail = createAsyncThunk(
           status: "success",
         })
       );
-
+      navigate("/");
       console.log("로그인 데이터", response.data);
       return response.data; // response.data.user이렇게 해도 됨
     } catch (error) {
