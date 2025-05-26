@@ -9,7 +9,8 @@ import {
   faTachometerAlt,
   faSearch,
 } from '@fortawesome/free-solid-svg-icons';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { approveCompany, fetchPendingCompanies } from '../../features/admin/adminSlice';
 
 const Container = styled.div`
   display: flex;
@@ -161,13 +162,17 @@ const data = [
 const AdminPage = () => {
   const [activeMenu, setActiveMenu] = useState('기업 승인');
   const [search, setSearch] = useState('');
-  // const {PendingCompanyList} = useSelector((state) => state.admin);
-  const filteredData = data.filter(
-    (item) => item.company.includes(search) || item.name.includes(search)
-  );
-  // useEffect();
-  const handleApprove = () => {
+  const {pendingCompanyList} = useSelector((state) => state.admin);
+  const dispatch = useDispatch();
+  useEffect(()=>{
+    dispatch(fetchPendingCompanies());
+    
+  },[dispatch])
 
+  const handleApprove = async(status, companyId) => {
+    await dispatch(approveCompany({ status, companyId })).unwrap(); 
+    dispatch(fetchPendingCompanies()); 
+    
   }
 
   return (
@@ -238,7 +243,7 @@ const AdminPage = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredData.map((item, idx) => (
+            {pendingCompanyList.map((item, idx) => (
               <tr key={idx}>
                 <Td>
                   <CompanyCell>
@@ -249,18 +254,18 @@ const AdminPage = () => {
                         size="lg"
                       />
                     </CompanyIconBox>
-                    <CompanyName>CS Korea</CompanyName>
+                    <CompanyName>{item.companyName}</CompanyName>
                   </CompanyCell>
                 </Td>
                 <Td>{item.name}</Td>
                 <Td>{item.position}</Td>
-                <Td>{item.date}</Td>
+                <Td>{item.createdAt}</Td>
                 <Td>
-                  <Tag type={item.status}>{item.status}</Tag>
+                  <Tag type={item.status}> {item.postRole === 'PENDING' ? '대기' : item.postRole === 'APPROVE' ? '승인' : item.postRole}</Tag>
                 </Td>
                 <Td>
-                  <ActionButton type="승인" onClick={handleApprove}>승인</ActionButton>
-                  <ActionButton type="거절" onClick={handleApprove}>거절</ActionButton>
+                  <ActionButton type="승인" onClick={() => handleApprove("APPROVED", item.companyId)}>승인</ActionButton>
+                  <ActionButton type="거절" onClick={() => handleApprove("REJECTED", item.companyId)}>거절</ActionButton>
                 </Td>
               </tr>
             ))}

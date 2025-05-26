@@ -108,12 +108,15 @@ const ResumeCardItem = ({ title, detail, isPublic, onToggle, onDelete, onClick }
     </ResumeInfo>
     <RightControls>
       <ToggleLabel>공개 범위</ToggleLabel>
+      
       <ToggleSwitch isPublic={isPublic} onClick={(e) => {
         e.stopPropagation();
         onToggle(!isPublic);
       }}>
         <ToggleHandle isPublic={isPublic} />
       </ToggleSwitch>
+
+
       <DeleteButton onClick={(e) => {
         e.stopPropagation(); 
         onDelete();

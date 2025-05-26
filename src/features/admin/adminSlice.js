@@ -1,18 +1,34 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import api from '../../utils/api';
+import { showToastMessage } from '../common/uiSlice';
 
 export const approveCompany = createAsyncThunk(
   "admin/approveCompany",
-  async ({ values, navigate }, { dispatch, rejectWithValue }) => {
+  async ({ status, companyId}, { dispatch, rejectWithValue }) => {
     try {
-      const response = await api.post("/api/register/account", values);
+      console.log("status, companyId", status, companyId);
+      const response = await api.patch(`/api/admin/companies/${companyId}/approve`,{},{
+        params:{
+          status: status
+        }
 
-      dispatch(
+      });
+      if(status == "APPROVED"){
+        dispatch(
         showToastMessage({
-          message: "회원가입을 성공했습니다!",
+          message: "승인하였습니다!",
           status: "success",
         })
       );
+      }else{
+        dispatch(
+        showToastMessage({
+          message: "거절하였습니다",
+          status: "error",
+        })
+      );
+      }
       
       return response.data;
     } catch (error) {
@@ -26,7 +42,7 @@ export const fetchPendingCompanies = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
-      const response = await api.get("/api/mypage",  {
+      const response = await api.get("/api/admin/companies/pending",  {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -51,7 +67,7 @@ const adminSlice = createSlice({
     success: false,
     error: null,
     message: null,
-    PendingCompanyList: [],
+    pendingCompanyList: [],
     totalPages: 0,
     projectDetail: null,
   },
@@ -70,7 +86,7 @@ const adminSlice = createSlice({
       })
       .addCase(fetchPendingCompanies.fulfilled, (state, action) => {
         state.loading = false;
-        state.PendingCompanyList = action.payload.postits; // 수정해야함
+        state.pendingCompanyList = action.payload// 수정해야함
         state.totalPages = action.payload.total_pages;
       })
       .addCase(fetchPendingCompanies.rejected, (state, action) => {
