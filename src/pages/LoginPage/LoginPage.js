@@ -188,7 +188,10 @@ const LoginPage = () => {
     if (loginError) {
       dispatch(clearErrors());
     }
-  }, [loginError, dispatch]);
+    if (location.state?.userType) {
+      setUserType(location.state.userType);
+    }
+  }, [loginError, dispatch, location.state]);
 
   const handleLoginWithEmail = async (event) => {
     event.preventDefault();
@@ -201,17 +204,19 @@ const LoginPage = () => {
       role = 'COMPANY';
     }
 
-    // const role = userType === 'business' ? 'COMPANY' : 'USER';
     console.log('role', role);
-    const success = await dispatch(loginWithEmail({ email, password, role, navigate }));
-    await dispatch(setRole(role));
+    dispatch(loginWithEmail({ email, password, role, navigate }));
+    dispatch(setRole(role));
+    // console.log('role', role);
+    // const success = await dispatch(loginWithEmail({ email, password, role, navigate }));
+    // await dispatch(setRole(role));
 
-    if (success) {
-      const redirectTo = location.state?.from || '/';
-      navigate(redirectTo); 
-    } else {
-      alert('로그인 실패');
-    }
+    // if (success) {
+    //   const redirectTo = location.state?.from || '/';
+    //   navigate(redirectTo); 
+    // } else {
+    //   alert('로그인 실패');
+    // }
   };
 
   // if (user) {

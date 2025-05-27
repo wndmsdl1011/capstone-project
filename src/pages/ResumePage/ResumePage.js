@@ -153,7 +153,7 @@ const ResumePage = () => {
     const token = sessionStorage.getItem("access_token");
 
     if (!token) {
-      navigate("/login");
+      navigate("/login", { replace: true });
       return;
     }
 

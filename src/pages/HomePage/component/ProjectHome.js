@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from "styled-components";
 import ShowProject from './ShowProject';
 import { getHomeProjectList } from '../../../features/home/homeSlice';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
   font-family: 'Pretendard', sans-serif;
@@ -59,7 +59,6 @@ const ButtonText = styled.div`
 const ProjectHome = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   // const { error, project } = useSelector((state) => state.home);
 
   // useEffect(() => {
@@ -69,7 +68,7 @@ const ProjectHome = () => {
   const MoveLogin = (userType) => {
     navigate("login", { state: { userType } });
   };
-  
+
   return (
     <div>
       <Container>
