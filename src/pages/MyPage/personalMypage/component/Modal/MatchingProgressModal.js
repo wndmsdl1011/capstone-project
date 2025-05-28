@@ -165,7 +165,7 @@ const MatchingProgressModal = ({ show, onClose, onComplete }) => {
 
     const interval = setInterval(() => {
       setStepIndex((prev) => (prev < steps.length - 1 ? prev + 1 : prev));
-    }, 60000); // 1분 간격
+    }, 10000); // 1분 간격
 
     return () => clearInterval(interval);
   }, [show]);
@@ -177,7 +177,7 @@ const MatchingProgressModal = ({ show, onClose, onComplete }) => {
   }, [aiMatchingTop3, onComplete]);
 
   useEffect(() => {
-    if (aiMatchingTop3 && aiMatchingTop3.length > 0) {
+    if (aiMatchingTop3 && aiMatchingTop3?.recommendations?.length > 0) {
       setTimeout(() => {
         setShowResultModal(true);
       }, 1000); // 부드럽게 전환되도록 약간 delay

@@ -54,7 +54,7 @@ const DateRangeModal = ({ show, onClose, resumeId, startDate, endDate, setDateRa
       return;
     }
     try {
-    dispatch(resumeAImatching({
+      dispatch(resumeAImatching({
       resumeId,
       startDate: startDate.toISOString().split('T')[0],
       endDate: endDate.toISOString().split('T')[0],
@@ -67,7 +67,6 @@ const DateRangeModal = ({ show, onClose, resumeId, startDate, endDate, setDateRa
       onClose();
     }, 100); // 100ms면 충분
   } catch (error) {
-    // setShowLoadingModal(false); // 로딩창이 열리는 오류는 추후 수정.
     console.error("매칭 중 오류 발생:", error);
   }
   };

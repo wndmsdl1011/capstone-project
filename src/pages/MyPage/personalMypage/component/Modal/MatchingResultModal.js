@@ -219,53 +219,57 @@ const MatchingResultModal = ({ show, onHide }) => {
             회원님의 이력서를를 분석하여 가장 적합한 프로젝트를 추천해드립니다.
           </Subtitle>
 
-          {aiMatchingTop3?.map((project, index) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.5 }} // 순차적으로 등장
-            >
-              <ProjectCard key={project.id}>
-                <HeaderRow>
-                  <IconBox>{medals[index]}</IconBox>
+          {aiMatchingTop3.recommendations
+            ?.slice() // 원본 배열을 복사
+            .sort((a, b) => b.score - a.score)
+            .map((project, index) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.5 }} // 순차적으로 등장
+              >
+                <ProjectCard key={project.id}>
+                  <HeaderRow>
+                    <IconBox>{medals[index]}</IconBox>
 
-                  <TitleAndSkills>
-                    <ProjectTitle>{project.title}</ProjectTitle>
+                    <TitleAndSkills>
+                      <ProjectTitle>{project.title}</ProjectTitle>
 
-                    <SkillWrapper>
-                      {project.requiredSkill.map((skill) => (
-                        <SkillBadge key={skill}>{skill}</SkillBadge>
-                      ))}
-                    </SkillWrapper>
-                  </TitleAndSkills>
-                </HeaderRow>
-                <MySkillTitle>나의 기술스택</MySkillTitle>
-                <MySkillBadgeWrapper>
-                  <MySkillBadge>React</MySkillBadge>
-                  <MySkillBadge>Spring</MySkillBadge>
-                </MySkillBadgeWrapper>
-                <RecommendationBox>
-                  <Highlight>추천 이유:</Highlight>{' '}
-                  {project.recommendation ||
-                    'React와 TypeScript 기술 스택에 일치하며, 프론트엔드 개발 경험이 요구되는 프로젝트입니다.'}
-                </RecommendationBox>
+                      <SkillWrapper>
+                        {project.requiredSkill?.map((skill) => (
+                          <SkillBadge key={skill}>{skill}</SkillBadge>
+                        ))}
+                      </SkillWrapper>
+                    </TitleAndSkills>
+                  </HeaderRow>
+                  <MySkillTitle>나의 기술스택</MySkillTitle>
+                  <MySkillBadgeWrapper>
+                    {aiMatchingTop3.userSkills?.map((skill) => (
+                      <MySkillBadge key={skill}>{skill}</MySkillBadge>
+                    ))}
+                  </MySkillBadgeWrapper>
+                  <RecommendationBox>
+                    <Highlight>추천 이유:</Highlight>{' '}
+                    {project.details ||
+                      'React와 TypeScript 기술 스택에 일치하며, 프론트엔드 개발 경험이 요구되는 프로젝트입니다.'}
+                  </RecommendationBox>
 
-                <BottomRow>
-                  <MetaInfo>
-                    마감일: {project.deadline || '2025.05.25'} &nbsp;&nbsp;
-                    조회수: {project.views || '128'}
-                  </MetaInfo>
-                  <div>
-                    <Percentage>{project.matchingPercentage}% 매칭</Percentage>
-                    <ApplyButton onClick={() => handleApply(project.id)}>
-                      지원하기 <FontAwesomeIcon icon={faArrowRight} />
-                    </ApplyButton>
-                  </div>
-                </BottomRow>
-              </ProjectCard>
-            </motion.div>
-          ))}
+                  <BottomRow>
+                    <MetaInfo>
+                      마감일: {project.deadline || '2025.05.25'} &nbsp;&nbsp;
+                      조회수: {project.views || '128'}
+                    </MetaInfo>
+                    <div>
+                      <Percentage>{project.score}% 매칭</Percentage>
+                      <ApplyButton onClick={() => handleApply(project.id)}>
+                        지원하기 <FontAwesomeIcon icon={faArrowRight} />
+                      </ApplyButton>
+                    </div>
+                  </BottomRow>
+                </ProjectCard>
+              </motion.div>
+            ))}
           <MoreButton onClick={handleNavigate}>
             더 많은 프로젝트 보기
           </MoreButton>
