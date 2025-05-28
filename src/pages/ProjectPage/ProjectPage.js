@@ -19,6 +19,9 @@ const ProjectPage = () => {
   const { projectList, totalPages, loading } = useSelector(
     (state) => state.project
   );
+  const user = useSelector((state) => state.auth?.user);
+  const role = user?.role ?? sessionStorage.getItem("userRole") ?? "";
+  console.log("👤 현재 사용자 Role:", role);
   const [page, setPage] = useState(1);
   const [bookmarkedProjects, setBookmarkedProjects] = useState([]);
 
@@ -49,9 +52,11 @@ const ProjectPage = () => {
     <Container>
       <Header>
         <Title>프로젝트 공고 목록</Title>
-        <PostButton onClick={() => navigate("/projects/register")}>
-          프로젝트 등록
-        </PostButton>
+        {role === "COMPANY" && (
+          <PostButton onClick={() => navigate("/projects/register")}>
+            프로젝트 등록
+          </PostButton>
+        )}
       </Header>
 
       {loading ? (

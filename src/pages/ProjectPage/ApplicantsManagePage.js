@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchProjectDetail,
   fetchProjectApplicants,
+  updateApplicantStatus,
 } from "../../features/post/projectSlice";
 import TechIcon from "../../components/TechIcon";
 import { FaGithub } from "react-icons/fa";
@@ -15,6 +16,17 @@ const ApplicantsManagePage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { projectDetail, applicants } = useSelector((state) => state.project);
+  const handleStatusUpdate = async (applyId, status) => {
+    try {
+      const res = await dispatch(
+        updateApplicantStatus({ projectId: id, applyId, status })
+      );
+      console.log("지원자 상태 변경 응답:", res);
+      dispatch(fetchProjectApplicants(id));
+    } catch (error) {
+      console.error("지원자 상태 변경 실패:", error);
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -111,7 +123,7 @@ const ApplicantsManagePage = () => {
           applicants.map((applicant, index) => {
             const resume = applicant.resume || {};
             return (
-              <ApplicantCard key={index}>
+              <ApplicantCard key={index} $status={applicant.status}>
                 <ApplicantProfileCardHeader>
                   <div
                     style={{
@@ -281,8 +293,22 @@ const ApplicantsManagePage = () => {
 
                 <ApplicantStatusSection>
                   <StatusButtons>
-                    <StatusButton $status="합격">합격</StatusButton>
-                    <StatusButton $status="불합격">불합격</StatusButton>
+                    <StatusButton
+                      $status="합격"
+                      onClick={() =>
+                        handleStatusUpdate(applicant.applyId, "ACCEPTED")
+                      }
+                    >
+                      합격
+                    </StatusButton>
+                    <StatusButton
+                      $status="불합격"
+                      onClick={() =>
+                        handleStatusUpdate(applicant.applyId, "REJECTED")
+                      }
+                    >
+                      불합격
+                    </StatusButton>
                   </StatusButtons>
                 </ApplicantStatusSection>
               </ApplicantCard>
@@ -406,7 +432,12 @@ const ApplicantCard = styled.div`
   border-radius: 14px;
   padding: 16px;
   margin-bottom: 28px;
-  background-color: #fff;
+  background-color: ${({ $status }) =>
+    $status === "ACCEPTED"
+      ? "#ecfdf5" // 연한 초록 (합격)
+      : $status === "REJECTED"
+      ? "#fef2f2" // 연한 빨강 (불합격)
+      : "#ffffff"}; // 기본 (미정)
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;

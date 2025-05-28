@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
 import {
   applyToProject,
   fetchProjectDetail,
@@ -12,7 +11,7 @@ import {
   getResumeDetail,
 } from "../../features/resume/resumeSlice";
 import TechIcon from "../../components/TechIcon";
-
+import { showToastMessage } from "../../features/common/uiSlice";
 const ApplyFormPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -146,7 +145,12 @@ const ApplyFormPage = () => {
         <SubmitButton
           onClick={() => {
             if (!selectedResume) {
-              toast.error("이력서를 선택해주세요.");
+              dispatch(
+                showToastMessage({
+                  message: "이력서를 선택해주세요.",
+                  status: "error",
+                })
+              );
               return;
             }
 
@@ -158,11 +162,11 @@ const ApplyFormPage = () => {
             )
               .unwrap()
               .then(() => {
-                toast.success("지원이 완료되었습니다!");
+                // toast.success("지원이 완료되었습니다!");
                 navigate("/projects");
               })
               .catch((err) => {
-                toast.error(err || "지원에 실패했습니다.");
+                // toast.error(err || "지원에 실패했습니다.");
               });
           }}
         >
