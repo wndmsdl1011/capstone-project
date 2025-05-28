@@ -8,27 +8,7 @@ function App() {
   return (
     <div>
       <AppRouter />
-      <ToastContainer
-        closeButton={({ closeToast }) => (
-          <button
-            onClick={closeToast}
-            style={{
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-            }}
-          >
-            ❌
-          </button>
-        )}
-        onClose={() => {
-          try {
-            // optional: console.log("Toast closed")
-          } catch (e) {
-            console.error("Error during toast close:", e);
-          }
-        }}
-      />
+      <ToastContainer />
     </div>
   );
 }

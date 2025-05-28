@@ -4,9 +4,10 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { postProject } from "../../features/post/projectSlice";
 import styled from "styled-components";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer } from "react-toastify";
+// import { toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+// import { ToastContainer } from "react-toastify";
+import { showToastMessage } from "../../features/common/uiSlice";
 import Select from "react-select";
 
 const TECH_STACK_OPTIONS = [
@@ -146,15 +147,42 @@ const ProjectRegisterPage = () => {
     } = form;
 
     if (!title || title.trim() === "")
-      return toast.error("제목을 입력해주세요!");
+      return dispatch(
+        showToastMessage({ message: "제목을 입력해주세요!", status: "error" })
+      );
     if (!description || description.trim() === "")
-      return toast.error("내용을 입력해주세요!");
+      return dispatch(
+        showToastMessage({ message: "내용을 입력해주세요!", status: "error" })
+      );
     if (!stack || stack.length === 0)
-      return toast.error("기술 스택을 선택해주세요!");
-    if (!startDate) return toast.error("시작일을 선택해주세요!");
-    if (!endDate) return toast.error("종료일을 선택해주세요!");
-    if (!recruitCount) return toast.error("모집 인원을 선택해주세요!");
-    if (!recruitDeadline) return toast.error("모집 마감일을 선택해주세요!");
+      return dispatch(
+        showToastMessage({
+          message: "기술 스택을 선택해주세요!",
+          status: "error",
+        })
+      );
+    if (!startDate)
+      return dispatch(
+        showToastMessage({ message: "시작일을 선택해주세요!", status: "error" })
+      );
+    if (!endDate)
+      return dispatch(
+        showToastMessage({ message: "종료일을 선택해주세요!", status: "error" })
+      );
+    if (!recruitCount)
+      return dispatch(
+        showToastMessage({
+          message: "모집 인원을 선택해주세요!",
+          status: "error",
+        })
+      );
+    if (!recruitDeadline)
+      return dispatch(
+        showToastMessage({
+          message: "모집 마감일을 선택해주세요!",
+          status: "error",
+        })
+      );
 
     const postData = {
       title,
@@ -168,15 +196,22 @@ const ProjectRegisterPage = () => {
 
     dispatch(postProject(postData)).then((resultAction) => {
       if (postProject.rejected.match(resultAction)) {
-        toast.error(
-          resultAction.payload?.message ||
-            "프로젝트 등록 중 문제가 발생했습니다. (권한 또는 서버 오류)"
+        dispatch(
+          showToastMessage({
+            message:
+              resultAction.payload?.message ||
+              "프로젝트 등록 중 문제가 발생했습니다. (권한 또는 서버 오류)",
+            status: "error",
+          })
         );
       } else {
-        toast.success("성공적으로 등록되었습니다!", {
-          onClose: () => navigate("/projects"),
-          autoClose: 1500,
-        });
+        dispatch(
+          showToastMessage({
+            message: "성공적으로 등록되었습니다.",
+            status: "success",
+          })
+        );
+        navigate("/projects");
       }
     });
   };
@@ -265,14 +300,6 @@ const ProjectRegisterPage = () => {
         </Button>
       </ButtonGroup>
       {/* Toast 알림 표시용 컴포넌트 */}
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        closeOnClick
-        pauseOnHover
-        limit={3} //너무 많은 toast가 생성되면 충돌함.
-      />
     </Container>
   );
 };

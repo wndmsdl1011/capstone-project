@@ -1,10 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { showToastMessage } from "../common/uiSlice";
 
 // 비동기 액션: 프로젝트 공고 등록
 export const postProject = createAsyncThunk(
   "project/postProject",
-  async (formData, { rejectWithValue }) => {
+  async (formData, { dispatch, rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
       console.log("accessToken:", token);
@@ -17,10 +18,22 @@ export const postProject = createAsyncThunk(
           },
         }
       );
+      dispatch(
+        showToastMessage({
+          message: "프로젝트 등록이 완료되었습니다.",
+          status: "success",
+        })
+      );
       console.log(token); // 유효한 JWT인지 확인
 
       return response.data;
     } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "프로젝트 등록에 실패했습니다.",
+          status: "error",
+        })
+      );
       return rejectWithValue(error.response.data);
     }
   }
@@ -29,13 +42,25 @@ export const postProject = createAsyncThunk(
 // 비동기 액션: 프로젝트 공고 목록 조회
 export const fetchProjectList = createAsyncThunk(
   "project/fetchProjectList",
-  async ({ page, size }, { rejectWithValue }) => {
+  async ({ page, size }, { dispatch, rejectWithValue }) => {
     try {
       const response = await axios.get(
         `http://localhost:8080/api/project/list?page=${page}&size=${size}`
       );
+      // dispatch(
+      //   showToastMessage({
+      //     message: "프로젝트 목록 불러오기에 성공했습니다.",
+      //     status: "success",
+      //   })
+      // );
       return response.data;
     } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "프로젝트 목록 불러오기에 실패했습니다.",
+          status: "error",
+        })
+      );
       return rejectWithValue(error.response.data);
     }
   }
@@ -44,13 +69,25 @@ export const fetchProjectList = createAsyncThunk(
 // 비동기 액션: 프로젝트 상세 조회
 export const fetchProjectDetail = createAsyncThunk(
   "project/fetchProjectDetail",
-  async (projectId, { rejectWithValue }) => {
+  async (projectId, { dispatch, rejectWithValue }) => {
     try {
       const response = await axios.get(
         `http://localhost:8080/api/project/${projectId}/detail`
       );
+      // dispatch(
+      //   showToastMessage({
+      //     message: "프로젝트 상세 조회에 성공했습니다.",
+      //     status: "success",
+      //   })
+      // );
       return response.data;
     } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "프로젝트 상세 조회에 실패했습니다.",
+          status: "error",
+        })
+      );
       return rejectWithValue(error.response?.data || "조회 실패");
     }
   }
@@ -59,7 +96,7 @@ export const fetchProjectDetail = createAsyncThunk(
 // 비동기 액션: 프로젝트 지원하기
 export const applyToProject = createAsyncThunk(
   "project/applyToProject",
-  async ({ projectId, resumeId }, { rejectWithValue }) => {
+  async ({ projectId, resumeId }, { dispatch, rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
       const response = await axios.post(
@@ -71,9 +108,58 @@ export const applyToProject = createAsyncThunk(
           },
         }
       );
+      dispatch(
+        showToastMessage({
+          message: "프로젝트 지원에 성공했습니다.",
+          status: "success",
+        })
+      );
       return response.data;
     } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "프로젝트 지원 실패",
+          status: "error",
+        })
+      );
       return rejectWithValue(error.response?.data || "지원 실패");
+    }
+  }
+);
+
+// 비동기 액션: 프로젝트 지원자 선택 (합격/불합격 처리)
+export const updateApplicantStatus = createAsyncThunk(
+  "project/updateApplicantStatus",
+  async ({ projectId, applyId, status }, { dispatch, rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await axios.patch(
+        `http://localhost:8080/api/projects/${projectId}/applicants/${applyId}/status`,
+        { status },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      dispatch(
+        showToastMessage({
+          message: response.data.message || "지원자 상태가 변경되었습니다.",
+          status: "success",
+        })
+      );
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message:
+            error.response?.data?.message || "지원자 상태 변경에 실패했습니다.",
+          status: "error",
+        })
+      );
+      return rejectWithValue(
+        error.response?.data || "지원자 상태 변경에 실패했습니다."
+      );
     }
   }
 );
@@ -81,7 +167,7 @@ export const applyToProject = createAsyncThunk(
 // 비동기 액션: 프로젝트 지원자 목록 조회
 export const fetchProjectApplicants = createAsyncThunk(
   "project/fetchProjectApplicants",
-  async (projectId, { rejectWithValue }) => {
+  async (projectId, { dispatch, rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem("access_token");
       const response = await axios.get(
@@ -92,8 +178,20 @@ export const fetchProjectApplicants = createAsyncThunk(
           },
         }
       );
+      // dispatch(
+      //   showToastMessage({
+      //     message: "지원자 목록 조회에 성공했습니다.",
+      //     status: "success",
+      //   })
+      // );
       return response.data;
     } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "지원자 목록 조회에 실패했습니다.",
+          status: "error",
+        })
+      );
       return rejectWithValue(error.response?.data || "지원자 목록 조회 실패");
     }
   }
