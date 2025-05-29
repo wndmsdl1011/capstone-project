@@ -178,7 +178,6 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [userType, setUserType] = useState('personal');
-  // const [role, setRole] = useState("USER");
   const { user, loginError } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -195,8 +194,9 @@ const LoginPage = () => {
 
   const handleLoginWithEmail = async (event) => {
     event.preventDefault();
-    console.log(email);
-    if (email === 'admin@bu.ac.kr') {
+    const localPart = email.split('@')[0]; // 이메일의 @ 앞부분 추출
+
+    if (localPart.includes('admin')) {
       role = 'ADMIN';
     } else if (userType === 'personal') {
       role = 'USER';
@@ -218,10 +218,6 @@ const LoginPage = () => {
     //   alert('로그인 실패');
     // }
   };
-
-  // if (user) {
-  //   navigate("/");
-  // }
 
   const selectBusiness = userType === 'business';
   const registerText = selectBusiness ? '기업 회원가입' : '개인 회원가입';

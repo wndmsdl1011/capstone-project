@@ -9,6 +9,7 @@ import {
   faIdBadge,
   faBookmark,
   faBell,
+  faWandMagicSparkles
 } from '@fortawesome/free-solid-svg-icons';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -17,6 +18,7 @@ import MyResume from '../personalMypage/component/MyResume';
 import ScrappedProjects from '../personalMypage/component/ScrappedProjects';
 import Notification from './component/Notification';
 import { logout } from '../../../features/user/userSlice';
+import ResumeAiMatching from './component/ResumeAiMatching';
 const Container = styled.div`
   width: 100%;
   min-height: 100vh;
@@ -192,6 +194,16 @@ const MyPage = () => {
       ),
     },
     {
+      label: '이력서 AI매칭',
+      icon: (
+        <FontAwesomeIcon
+          icon={faWandMagicSparkles}
+          color={iconColor}
+          style={{ marginRight: '2px', fontSize: '21px' }}
+        />
+      ),
+    },
+    {
       label: '스크랩한 프로젝트',
       icon: (
         <FontAwesomeIcon
@@ -259,6 +271,7 @@ const MyPage = () => {
 
             {selectedMenu === '지원한 프로젝트' && <AppliedProject />}
             {selectedMenu === '이력서 관리' && <MyResume />}
+            {selectedMenu === '이력서 AI매칭' && <ResumeAiMatching/>}
             {selectedMenu === '스크랩한 프로젝트' && <ScrappedProjects />}
             {selectedMenu === '알림함' && <Notification />}
 

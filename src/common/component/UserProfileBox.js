@@ -103,7 +103,7 @@ const { profile} = useSelector((state) => state.user);
     <UserTab>
       <UserProfile>
         <AccountCircleIcon className="user-profile-icon" style={{marginTop:"2px"}} />
-        <UserName>{profile.name || "없음"}</UserName>
+        <UserName>{userRole === 'ADMIN' ? '관리자' : (profile?.name || '이름없음')}</UserName>
 
         <DropdownToggle onClick={toggleDropdown}>
           {isDropdownOpen ? (
