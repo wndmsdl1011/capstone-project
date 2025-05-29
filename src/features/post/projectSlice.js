@@ -132,13 +132,17 @@ export const updateApplicantStatus = createAsyncThunk(
   "project/updateApplicantStatus",
   async ({ projectId, applyId, status }, { dispatch, rejectWithValue }) => {
     try {
+      console.log("status", projectId, applyId, status);
       const token = sessionStorage.getItem("access_token");
       const response = await axios.patch(
         `http://localhost:8080/api/projects/${projectId}/applicants/${applyId}/status`,
-        { status },
+        {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
+          },
+          params: {
+            status: status,
           },
         }
       );
@@ -273,6 +277,7 @@ const projectSlice = createSlice({
       .addCase(fetchProjectApplicants.fulfilled, (state, action) => {
         state.loading = false;
         state.applicants = action.payload.map((applicant) => ({
+          applyId: applicant.applyId,
           accountId: applicant.accountId,
           name: applicant.name,
           photo: applicant.photo,
