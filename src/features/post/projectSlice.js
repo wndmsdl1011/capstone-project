@@ -132,13 +132,17 @@ export const updateApplicantStatus = createAsyncThunk(
   "project/updateApplicantStatus",
   async ({ projectId, applyId, status }, { dispatch, rejectWithValue }) => {
     try {
+      console.log("status", projectId, applyId, status);
       const token = sessionStorage.getItem("access_token");
       const response = await axios.patch(
         `http://localhost:8080/api/projects/${projectId}/applicants/${applyId}/status`,
-        { status },
+        {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
+          },
+          params: {
+            status: status,
           },
         }
       );
