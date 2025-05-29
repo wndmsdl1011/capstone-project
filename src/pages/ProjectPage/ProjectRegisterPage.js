@@ -195,24 +195,26 @@ const ProjectRegisterPage = () => {
     };
 
     dispatch(postProject(postData)).then((resultAction) => {
-      if (postProject.rejected.match(resultAction)) {
-        dispatch(
-          showToastMessage({
-            message:
-              resultAction.payload?.message ||
-              "프로젝트 등록 중 문제가 발생했습니다. (권한 또는 서버 오류)",
-            status: "error",
-          })
-        );
-      } else {
-        dispatch(
-          showToastMessage({
-            message: "성공적으로 등록되었습니다.",
-            status: "success",
-          })
-        );
-        navigate("/projects");
-      }
+      // Removed error toast dispatch for duplicate handling
+      // if (postProject.rejected.match(resultAction)) {
+      //   dispatch(
+      //     showToastMessage({
+      //       message:
+      //         resultAction.payload?.message ||
+      //         "프로젝트 등록 중 문제가 발생했습니다. (권한 또는 서버 오류)",
+      //       status: "error",
+      //     })
+      //   );
+      // } else {
+      //   // dispatch(
+      //   //   showToastMessage({
+      //   //     message: "성공적으로 등록되었습니다.",
+      //   //     status: "success",
+      //   //   })
+      //   // );
+      //   navigate("/projects");
+      // }
+      navigate("/projects");
     });
   };
 

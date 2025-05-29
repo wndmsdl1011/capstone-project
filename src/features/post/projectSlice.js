@@ -273,6 +273,7 @@ const projectSlice = createSlice({
       .addCase(fetchProjectApplicants.fulfilled, (state, action) => {
         state.loading = false;
         state.applicants = action.payload.map((applicant) => ({
+          applyId: applicant.applyId,
           accountId: applicant.accountId,
           name: applicant.name,
           photo: applicant.photo,
