@@ -5,7 +5,7 @@ export const getHomeProjectList = createAsyncThunk(
     "home/getHomeProjectList",
     async (_, { rejectWithValue }) => {
         try {
-            const response = await api.get("/api/프로젝트url");
+            const response = await api.get("/api/projects/recent");
 
             return response.data;
         } catch (error) {
@@ -17,8 +17,8 @@ export const getHomeProjectList = createAsyncThunk(
 const homeSlice = createSlice({
     name: "home",
     initialState: {
-        project: null,
-        error: null,
+        project: [],
+        error: "",
     },
     reducers: {
     },

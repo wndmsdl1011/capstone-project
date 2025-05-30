@@ -2,6 +2,8 @@ import React from 'react'
 import styled from "styled-components";
 import { useInView } from 'react-intersection-observer';
 import { motion } from 'framer-motion';
+import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
 
 const ProjectIcon = styled.div`
   width: 72.45px;
@@ -91,69 +93,82 @@ const ProjectBottomContainer = styled.div`
 `;
 
 const ShowProject = ({ delay = 0, project }) => {
-    const { ref, inView } = useInView({
-        triggerOnce: true,
-        threshold: 0.9
-    });
+  const navigate = useNavigate();
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.9
+  });
 
-    return (
-        <motion.div
-            ref={ref}
-            initial={{ opacity: 0, y: 30 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay, ease: 'easeOut' }}
-        >
-            <Container>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: "space-between",
-                    alignItems: 'center',
-                    width: '346.66px',
-                    height: '28px'
-                }}>
-                    <ProjectIcon>
-                        <ProjectIconText>
-                            프로젝트
-                        </ProjectIconText>
-                    </ProjectIcon>
-                    <div style={{ fontSize: '11.9px', color: '#9CA3AF', fontWeight: '700' }}>
-                        {/* {project.date} */}
-                        2023.05.24
-                    </div>
-                </div>
-                <ProjectTitleContainer>
-                    <ProjectTitleText>
-                        {/* {project.title} */}
-                        IT 직군 취업과 커리어 성장을 위한 사이드 프로젝트
-                    </ProjectTitleText>
-                </ProjectTitleContainer>
-                <ProjectContentContainer>
-                    <ProjectContentText>
-                        {/* {project.content} */}
-                        실무 경험을 쌓고 포트폴리오를 만들 수 있는 기회를 제공합니다.
-                    </ProjectContentText>
-                </ProjectContentContainer>
-                <ProjectBottomContainer>
-                    <div style={{
-                        width: '52.34px',
-                        height: '20px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                    }}>
-                        <div style={{ width: '8px', height: '8px', borderRadius: '9999px', backgroundColor: '#4ade80' }} />
-                        <div style={{ fontWeight: '700', fontSize: '11.9px', color: '#4b5563' }}>
-                            모집중
-                        </div>
-                    </div>
-                    <div style={{ fontWeight: '700', fontSize: '11.9px', color: '#9ca3af' }}>
-                        {/* 조회수 {project.views} */}
-                        조회수 1,234
-                    </div>
-                </ProjectBottomContainer>
-            </Container>
-        </motion.div>
-    )
+  const today = dayjs();
+  const deadline = dayjs(project.recruitDeadline);
+  const diffDays = deadline.diff(today, 'day');
+
+  const statusText = diffDays < 0
+    ? '모집마감'
+    : diffDays <= 7
+      ? '마감임박'
+      : '모집중';
+  const statusColor =
+    statusText === '모집마감' ? '#9CA3AF' :
+      statusText === '마감임박' ? '#facc15' :
+        '#4ade80';
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 30 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay, ease: 'easeOut' }}
+    >
+      <Container onClick={() => navigate(`/projects/${project.projectId}`)}>
+        <div style={{
+          display: 'flex',
+          justifyContent: "space-between",
+          alignItems: 'center',
+          width: '346.66px',
+          height: '28px',
+          opacity: statusText === '모집마감' ? 0.6 : 1
+        }}>
+          <ProjectIcon>
+            <ProjectIconText>
+              프로젝트
+            </ProjectIconText>
+          </ProjectIcon>
+          <div style={{ fontSize: '11.9px', color: '#9CA3AF', fontWeight: '700' }}>
+            {project.createdAt}
+          </div>
+        </div>
+        <ProjectTitleContainer>
+          <ProjectTitleText>
+            {project.title}
+          </ProjectTitleText>
+        </ProjectTitleContainer>
+        <ProjectContentContainer>
+          <ProjectContentText>
+            {project.description}
+          </ProjectContentText>
+        </ProjectContentContainer>
+        <ProjectBottomContainer>
+          <div style={{
+            width: '62.34px',
+            height: '20px',
+            display: 'flex',
+            gap: '8px',
+            alignItems: 'center'
+          }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '9999px', backgroundColor: statusColor }} />
+            <div style={{ fontWeight: '700', fontSize: '11.9px', color: '#4b5563' }}>
+              {statusText}
+            </div>
+          </div>
+          <div style={{ fontWeight: '700', fontSize: '11.9px', color: '#9ca3af' }}>
+            {/* 조회수 {project.views} */}
+            조회수 1,234
+          </div>
+        </ProjectBottomContainer>
+      </Container>
+    </motion.div>
+  )
 }
 
 export default ShowProject

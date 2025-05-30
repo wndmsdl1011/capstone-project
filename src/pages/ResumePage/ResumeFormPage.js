@@ -169,6 +169,7 @@ const AddButton = styled.button`
   align-items: center;
   gap: 6px;
 `;
+
 const ProjectItem = styled.div`
   border-radius: 12px;
   padding: 20px;

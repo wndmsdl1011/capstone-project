@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux';
 import styled from "styled-components";
 import ShowProject from './ShowProject';
 import { getHomeProjectList } from '../../../features/home/homeSlice';
@@ -59,11 +59,24 @@ const ButtonText = styled.div`
 const ProjectHome = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  // const { error, project } = useSelector((state) => state.home);
+  const [projects, setProjects] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // useEffect(() => {
-  //   dispatch(getHomeProjectList());
-  // }, [dispatch, project, error])
+  useEffect(() => {
+    const token = sessionStorage.getItem("access_token");
+    if (token) setIsLoggedIn(true);
+    else setIsLoggedIn(false);
+    const fetchProjects = async () => {
+      try {
+        const response = await dispatch(getHomeProjectList());
+        setProjects(response.payload.recentProjects);
+      } catch (error) {
+        console.error("프로젝트 불러오기 실패", error);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const MoveLogin = (userType) => {
     navigate("login", { state: { userType } });
@@ -77,30 +90,25 @@ const ProjectHome = () => {
           <div style={{ fontSize: '15.3px', color: '#4B5563', fontWeight: '700' }}>학생과 기업이 만나 새로운 가치를 만들어냅니다</div>
         </div>
         <ProjectContainer>
-          {/* {error ? (
-            <div style={{ width: '100%', textAlign: 'center', color: '#ef4444', fontWeight: '700' }}>
-              프로젝트 데이터를 불러오는 데 실패했습니다.
-            </div>
-          ) : (
-            project.slice(0, 3).map((proj, i) => (
-              <ShowProject key={proj.id || i} delay={i * 0.8} project={proj} />
-            ))
-          )} */}
-          {[0, 1, 2].map((i) => (
-            <ShowProject key={i} delay={i * 0.8} />
+          {projects.map((proj, i) => (
+            <ShowProject key={proj.id || i} delay={i * 0.8} project={proj} />
           ))}
         </ProjectContainer>
-        <div style={{ fontWeight: '700', fontSize: '20.4px', color: '#1f2937', marginTop: '64px' }}>
-          지금 바로 시작하세요
-        </div>
-        <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
-          <Button variant="student">
-            <ButtonText variant="student" onClick={() => MoveLogin("personal")}>학생으로 시작하기</ButtonText>
-          </Button>
-          <Button variant="company">
-            <ButtonText variant="company" onClick={() => MoveLogin("business")}>기업으로 시작하기</ButtonText>
-          </Button>
-        </div>
+        {!isLoggedIn && (
+          <>
+            <div style={{ fontWeight: '700', fontSize: '20.4px', color: '#1f2937', marginTop: '64px' }}>
+              지금 바로 시작하세요
+            </div>
+            <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
+              <Button variant="student">
+                <ButtonText variant="student" onClick={() => MoveLogin("personal")}>학생으로 시작하기</ButtonText>
+              </Button>
+              <Button variant="company">
+                <ButtonText variant="company" onClick={() => MoveLogin("business")}>기업으로 시작하기</ButtonText>
+              </Button>
+            </div>
+          </>
+        )}
       </Container>
     </div>
   )
