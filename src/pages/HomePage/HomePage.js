@@ -1,8 +1,13 @@
 import React from 'react'
+import Notice from './component/Notice';
+import ProjectHome from './component/ProjectHome';
 
 const HomePage = () => {
   return (
-    <div>HomePage</div>
+    <div>
+      <Notice />
+      <ProjectHome />
+    </div>
   )
 }
 

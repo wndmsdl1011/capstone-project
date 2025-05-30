@@ -187,7 +187,10 @@ const LoginPage = () => {
     if (loginError) {
       dispatch(clearErrors());
     }
-  }, [loginError, dispatch]);
+    if (location.state?.userType) {
+      setUserType(location.state.userType);
+    }
+  }, [loginError, dispatch, location.state]);
 
   const handleLoginWithEmail = async (event) => {
     event.preventDefault();

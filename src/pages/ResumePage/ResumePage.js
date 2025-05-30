@@ -12,7 +12,7 @@ import {
   originResume,
   resumelistPage,
 } from "../../features/resume/resumeSlice";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -145,7 +145,6 @@ const ResumePage = () => {
   const [resumes, setResumes] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const { profile } = useSelector((state) => state.user);
   const { resumeNumber } = useSelector((state) => state.resume);
   const today = new Date().toISOString().slice(2, 10).replace(/-/g, "");
@@ -154,9 +153,7 @@ const ResumePage = () => {
     const token = sessionStorage.getItem("access_token");
 
     if (!token) {
-      navigate("/login", {
-        state: { from: location.pathname },
-      });
+      navigate("/login", { replace: true });
       return;
     }
 
@@ -168,7 +165,7 @@ const ResumePage = () => {
     };
 
     fetchResumes();
-  }, [dispatch, navigate, location]);
+  }, [dispatch, navigate]);
 
   const handleResumeClick = (resumeId) => {
     dispatch(originResume());

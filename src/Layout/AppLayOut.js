@@ -130,7 +130,7 @@ const Footer = styled.footer`
   background-color: #2d3282;
   color: #d1d5db;
   padding: 48px 16px;
-  margin-top: 80px;
+  // margin-top: 80px;
   font-family: "Inter";
   font-size: 13px;
 `;
