@@ -201,6 +201,28 @@ export const fetchProjectApplicants = createAsyncThunk(
   }
 );
 
+// 비동기 액션: 지원한 프로젝트 목록 조회(작성자 강전하)
+export const GetSupportedProjects = createAsyncThunk(
+  "project/GetSupportedProjects",
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await axios.get(
+        'http://localhost:8080/api/projects/applied',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "지원한 프로젝트 목록 조회 실패");
+    }
+  }
+)
+
 const projectSlice = createSlice({
   name: "project",
   initialState: {
@@ -255,7 +277,7 @@ const projectSlice = createSlice({
           typeof action.payload === "string"
             ? action.payload
             : action.payload?.message ||
-              "프로젝트 목록을 불러오는 데 실패했습니다.";
+            "프로젝트 목록을 불러오는 데 실패했습니다.";
       })
       .addCase(fetchProjectDetail.pending, (state) => {
         state.loading = true;

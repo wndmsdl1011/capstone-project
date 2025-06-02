@@ -1,5 +1,7 @@
 import React from "react";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import dayjs from 'dayjs';
 
 const Card = styled.div`
   background: white;
@@ -81,22 +83,39 @@ const DetailButton = styled.button`
     background-color: #eff6ff;
   }
 `;
-const ProjectCard = () => {
-  const title="애니메이션 큐레이션 - AniPick"
-  const subtitle="사이드 프로젝트"
-  const tags=['React', 'TypeScript']
-  const date="2023.05.31"
-  const views=238
-  const status="진행중"
+const ProjectCard = ({ project }) => {
+  const navigate = useNavigate();
+
+  const subtitle = "사이드 프로젝트"
+  const tags = project.requiredSkills
+
+  const today = dayjs();
+  const deadline = dayjs(project.recruitDeadline);
+  const diffDays = deadline.diff(today, 'day');
+
+  const statusText = diffDays < 0
+    ? '모집마감'
+    : diffDays <= 7
+      ? '마감임박'
+      : '모집중';
+  const statusColor =
+    statusText === '모집마감' ? '#f8d7da' :
+      statusText === '마감임박' ? '#fff3cd' :
+        '#d1ecf1';
+  const statusTextColor =
+    statusText === '모집마감' ? '#721c24' :
+      statusText === '마감임박' ? '#856404' :
+        '#0c5460';
+
   return (
     <Card>
       <CardTop>
-        <StatusBadge>{status}</StatusBadge>
-        <ViewCount>👁 {views}</ViewCount>
+        <StatusBadge style={{ backgroundColor: statusColor, color: statusTextColor }}>{statusText}</StatusBadge>
+        <ViewCount>👁 {project.viewCount}</ViewCount>
       </CardTop>
 
       <Title>
-        [{subtitle}] <strong>{title}</strong>
+        [{subtitle}] <strong>{project.title}</strong>
       </Title>
 
       <Tags>
@@ -104,15 +123,13 @@ const ProjectCard = () => {
           <Tag key={tag}>{tag}</Tag>
         ))}
       </Tags>
-        <hr/>
+      <hr />
       <CardBottom>
-        <DateText>{date}</DateText>
-        <DetailButton>상세보기</DetailButton>
+        <DateText>{project.appliedAt}</DateText>
+        <DetailButton onClick={() => navigate(`/projects/${project.projectId}`)}>상세보기</DetailButton>
       </CardBottom>
     </Card>
   );
 };
 
 export default ProjectCard;
-
-
