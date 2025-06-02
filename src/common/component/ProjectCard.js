@@ -125,7 +125,7 @@ const ProjectCard = ({ project }) => {
       </Tags>
       <hr />
       <CardBottom>
-        <DateText>{project.appliedAt}</DateText>
+        <DateText>지원일 : {project.appliedAt}</DateText>
         <DetailButton onClick={() => navigate(`/projects/${project.projectId}`)}>상세보기</DetailButton>
       </CardBottom>
     </Card>
