@@ -17,19 +17,10 @@ export const getHomeProjectList = createAsyncThunk(
 const homeSlice = createSlice({
     name: "home",
     initialState: {
-        project: [],
-        error: "",
     },
     reducers: {
     },
     extraReducers: (builder) => {
-        builder
-            .addCase(getHomeProjectList.fulfilled, (state, action) => {
-                state.project = action.payload;
-            })
-            .addCase(getHomeProjectList.rejected, (state, action) => {
-                state.error = action.payload;
-            })
     },
 });
 

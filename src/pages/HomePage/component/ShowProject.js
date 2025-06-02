@@ -162,8 +162,7 @@ const ShowProject = ({ delay = 0, project }) => {
             </div>
           </div>
           <div style={{ fontWeight: '700', fontSize: '11.9px', color: '#9ca3af' }}>
-            {/* 조회수 {project.views} */}
-            조회수 1,234
+            조회수 {project.viewCount}
           </div>
         </ProjectBottomContainer>
       </Container>
