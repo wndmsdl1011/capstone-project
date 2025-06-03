@@ -44,8 +44,14 @@ export const fetchProjectList = createAsyncThunk(
   "project/fetchProjectList",
   async ({ page, size }, { dispatch, rejectWithValue }) => {
     try {
+      const token = sessionStorage.getItem("access_token");
       const response = await axios.get(
-        `http://localhost:8080/api/project/list?page=${page}&size=${size}`
+        `http://localhost:8080/api/project/list?page=${page}&size=${size}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       // dispatch(
       //   showToastMessage({
@@ -208,20 +214,22 @@ export const GetSupportedProjects = createAsyncThunk(
     try {
       const token = sessionStorage.getItem("access_token");
       const response = await axios.get(
-        'http://localhost:8080/api/projects/applied',
+        "http://localhost:8080/api/projects/applied",
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
-      )
-      
+      );
+
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "지원한 프로젝트 목록 조회 실패");
+      return rejectWithValue(
+        error.response?.data || "지원한 프로젝트 목록 조회 실패"
+      );
     }
   }
-)
+);
 
 const projectSlice = createSlice({
   name: "project",
@@ -277,7 +285,7 @@ const projectSlice = createSlice({
           typeof action.payload === "string"
             ? action.payload
             : action.payload?.message ||
-            "프로젝트 목록을 불러오는 데 실패했습니다.";
+              "프로젝트 목록을 불러오는 데 실패했습니다.";
       })
       .addCase(fetchProjectDetail.pending, (state) => {
         state.loading = true;
