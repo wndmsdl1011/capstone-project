@@ -133,6 +133,79 @@ export const applyToProject = createAsyncThunk(
   }
 );
 
+// 비동기 액션: 프로젝트 스크랩 신청
+export const scrapProject = createAsyncThunk(
+  "project/scrapProject",
+  async (projectId, { dispatch, rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await axios.post(
+        `http://localhost:8080/api/project/${projectId}/scrap`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      dispatch(
+        showToastMessage({
+          message: response.data.message || "프로젝트를 스크랩했습니다.",
+          status: "success",
+        })
+      );
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message:
+            error.response?.data?.message || "프로젝트 스크랩에 실패했습니다.",
+          status: "error",
+        })
+      );
+      return rejectWithValue(
+        error.response?.data || "프로젝트 스크랩에 실패했습니다."
+      );
+    }
+  }
+);
+
+// 비동기 액션: 프로젝트 스크랩 취소
+export const cancelScrapProject = createAsyncThunk(
+  "project/cancelScrapProject",
+  async (projectId, { dispatch, rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await axios.delete(
+        `http://localhost:8080/api/project/${projectId}/scrap/delete`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      dispatch(
+        showToastMessage({
+          message: response.data.message || "스크랩이 취소되었습니다.",
+          status: "success",
+        })
+      );
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message:
+            error.response?.data?.message || "스크랩 취소에 실패했습니다.",
+          status: "error",
+        })
+      );
+      return rejectWithValue(
+        error.response?.data || "스크랩 취소에 실패했습니다."
+      );
+    }
+  }
+);
+
 // 비동기 액션: 프로젝트 지원자 선택 (합격/불합격 처리)
 export const updateApplicantStatus = createAsyncThunk(
   "project/updateApplicantStatus",
@@ -231,6 +304,34 @@ export const GetSupportedProjects = createAsyncThunk(
   }
 );
 
+export const fetchScrapProjectList = createAsyncThunk(
+  "project/fetchScrapProjectList",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await axios.get(
+        "http://localhost:8080/api/project/scrap/list",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "스크랩한 프로젝트 목록 조회에 실패했습니다.",
+          status: "error",
+        })
+      );
+      return rejectWithValue(
+        error.response?.data || "스크랩한 프로젝트 목록 조회 실패"
+      );
+    }
+  }
+);
+
 const projectSlice = createSlice({
   name: "project",
   initialState: {
@@ -242,6 +343,7 @@ const projectSlice = createSlice({
     totalPages: 0,
     projectDetail: null,
     applicants: [],
+    scrapProjectList: [],
   },
   reducers: {
     resetProjectState: (state) => {
@@ -334,6 +436,9 @@ const projectSlice = createSlice({
           typeof action.payload === "string"
             ? action.payload
             : action.payload?.message || "지원자 목록 조회에 실패했습니다.";
+      })
+      .addCase(fetchScrapProjectList.fulfilled, (state, action) => {
+        state.scrapProjectList = action.payload;
       });
   },
 });

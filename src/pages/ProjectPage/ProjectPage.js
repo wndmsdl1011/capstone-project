@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProjectList } from "../../features/post/projectSlice";
+import {
+  fetchProjectList,
+  scrapProject,
+  cancelScrapProject,
+} from "../../features/post/projectSlice";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
@@ -25,10 +29,18 @@ const ProjectPage = () => {
   const [page, setPage] = useState(1);
   const [bookmarkedProjects, setBookmarkedProjects] = useState([]);
 
-  const toggleBookmark = (id) => {
+  const toggleBookmark = (project) => {
+    const isBookmarked = bookmarkedProjects.includes(project.projectId);
     setBookmarkedProjects((prev) =>
-      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
+      isBookmarked
+        ? prev.filter((pid) => pid !== project.projectId)
+        : [...prev, project.projectId]
     );
+    if (isBookmarked) {
+      dispatch(cancelScrapProject(project.projectId));
+    } else {
+      dispatch(scrapProject(project.projectId));
+    }
   };
 
   const getDeadlineStatus = (deadline) => {
@@ -72,7 +84,7 @@ const ProjectPage = () => {
               <BookmarkButton
                 onClick={(e) => {
                   e.preventDefault();
-                  toggleBookmark(project.projectId);
+                  toggleBookmark(project);
                 }}
               >
                 {bookmarkedProjects.includes(project.projectId) ? (
