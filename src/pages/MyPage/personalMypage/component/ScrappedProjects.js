@@ -12,20 +12,39 @@ const ScrappedProjects = () => {
   }, [dispatch]);
 
   return (
-    <div>
+    <div
+      style={{ display: "flex", flexDirection: "column-reverse", gap: "20px" }}
+    >
       {scrapProjects && scrapProjects.length > 0 ? (
-        scrapProjects.map((scrap, index) =>
-          scrap.project ? (
-            <ProjectCard
-              key={scrap.project.projectId}
-              project={scrap.project}
-            />
-          ) : (
-            <div key={index}>잘못된 프로젝트 데이터입니다.</div>
-          )
-        )
+        scrapProjects.map((project) => (
+          <ProjectCard
+            key={project.projectId}
+            project={{
+              ...project,
+              requiredSkills:
+                project.requiredSkills || project.requiredSkill || [],
+              views: project.viewCount ?? 0,
+              comments: 0,
+              managername: "운영자",
+              recruitDeadline: project.endDate,
+              appliedAt: project.endDate,
+            }}
+            dateLabel="마감일"
+            dateField="recruitDeadline"
+          />
+        ))
       ) : (
-        <p>스크랩한 프로젝트가 없습니다.</p>
+        <div
+          style={{
+            width: "100%",
+            textAlign: "center",
+            color: "#888",
+            fontSize: "18px",
+            padding: "40px 0",
+          }}
+        >
+          스크랩한 프로젝트가 없습니다.
+        </div>
       )}
     </div>
   );

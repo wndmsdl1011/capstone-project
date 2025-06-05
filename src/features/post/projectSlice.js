@@ -317,6 +317,8 @@ export const fetchScrapProjectList = createAsyncThunk(
           },
         }
       );
+      // Assuming the latest API spec returns an array of objects with these fields:
+      // projectId, projectTitle, projectStartDate, projectEndDate, recruitDeadline, viewCount, createdAt
       return response.data;
     } catch (error) {
       dispatch(
@@ -438,7 +440,15 @@ const projectSlice = createSlice({
             : action.payload?.message || "지원자 목록 조회에 실패했습니다.";
       })
       .addCase(fetchScrapProjectList.fulfilled, (state, action) => {
-        state.scrapProjectList = action.payload;
+        state.scrapProjectList = action.payload.map((item) => ({
+          projectId: item.projectId,
+          title: item.projectTitle,
+          startDate: item.projectStartDate,
+          endDate: item.projectEndDate,
+          recruitDeadline: item.recruitDeadline,
+          viewCount: item.viewCount,
+          createdAt: item.createdAt,
+        }));
       });
   },
 });
