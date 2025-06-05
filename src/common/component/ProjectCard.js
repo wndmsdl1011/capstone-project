@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import dayjs from 'dayjs';
+import TechIcon from "../../components/TechIcon";
 
 const Card = styled.div`
   background: white;
@@ -13,6 +14,7 @@ const Card = styled.div`
   flex-direction: column;
   justify-content: space-between;
   min-height: 180px;
+  width: 400px;
 `;
 
 const CardTop = styled.div`
@@ -47,7 +49,7 @@ const Title = styled.div`
 const Tags = styled.div`
   display: flex;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: -6px;
 `;
 
 const Tag = styled.div`
@@ -120,7 +122,7 @@ const ProjectCard = ({ project }) => {
 
       <Tags>
         {tags.map((tag) => (
-          <Tag key={tag}>{tag}</Tag>
+          <TechIcon key={tag} tech={tag} size={24} />
         ))}
       </Tags>
       <hr />
