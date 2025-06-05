@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from "styled-components";
 import ShowProject from './ShowProject';
 import { getHomeProjectList } from '../../../features/home/homeSlice';
@@ -59,6 +59,7 @@ const ButtonText = styled.div`
 const ProjectHome = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { profile } = useSelector((state) => state.user);
   const [projects, setProjects] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -82,6 +83,14 @@ const ProjectHome = () => {
     navigate("login", { state: { userType } });
   };
 
+  const goToResume = () => {
+    navigate("/resumelist", { state: { selectedMenu: "이력서 관리" } });
+  };
+
+  const goToProjects = () => {
+    navigate("/projects");
+  };
+
   return (
     <div>
       <Container>
@@ -94,6 +103,21 @@ const ProjectHome = () => {
             <ShowProject key={proj.id || i} delay={i * 0.8} project={proj} />
           ))}
         </ProjectContainer>
+        {isLoggedIn && (
+          <>
+            <div style={{ fontWeight: '700', fontSize: '20.4px', color: '#1f2937', marginTop: '64px' }}>
+              {profile?.name}님을 위한 추천!
+            </div>
+            <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
+              <Button variant="company">
+                <ButtonText variant="company" onClick={goToResume}>이력서 작성하러 가기</ButtonText>
+              </Button>
+              <Button variant="student">
+                <ButtonText variant="student" onClick={goToProjects}>프로젝트 보러가기</ButtonText>
+              </Button>
+            </div>
+          </>
+        )}
         {!isLoggedIn && (
           <>
             <div style={{ fontWeight: '700', fontSize: '20.4px', color: '#1f2937', marginTop: '64px' }}>

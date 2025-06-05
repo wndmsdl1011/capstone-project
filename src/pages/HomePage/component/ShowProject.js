@@ -96,7 +96,7 @@ const ShowProject = ({ delay = 0, project }) => {
   const navigate = useNavigate();
   const { ref, inView } = useInView({
     triggerOnce: true,
-    threshold: 0.9
+    threshold: 0
   });
 
   const today = dayjs();
