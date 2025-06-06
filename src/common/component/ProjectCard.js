@@ -89,10 +89,10 @@ const ProjectCard = ({ project }) => {
   const navigate = useNavigate();
 
   const subtitle = "사이드 프로젝트"
-  const tags = project.requiredSkills
+  const tags = project?.requiredSkills
 
   const today = dayjs();
-  const deadline = dayjs(project.recruitDeadline);
+  const deadline = dayjs(project?.recruitDeadline);
   const diffDays = deadline.diff(today, 'day');
 
   const statusText = diffDays < 0
@@ -113,22 +113,22 @@ const ProjectCard = ({ project }) => {
     <Card>
       <CardTop>
         <StatusBadge style={{ backgroundColor: statusColor, color: statusTextColor }}>{statusText}</StatusBadge>
-        <ViewCount>👁 {project.viewCount}</ViewCount>
+        <ViewCount>👁 {project?.viewCount}</ViewCount>
       </CardTop>
 
       <Title>
-        [{subtitle}] <strong>{project.title}</strong>
+        [{subtitle}] <strong>{project?.title}</strong>
       </Title>
 
       <Tags>
-        {tags.map((tag) => (
+        {tags?.map((tag) => (
           <TechIcon key={tag} tech={tag} size={24} />
         ))}
       </Tags>
       <hr />
       <CardBottom>
-        <DateText>지원일 : {project.appliedAt}</DateText>
-        <DetailButton onClick={() => navigate(`/projects/${project.projectId}`)}>상세보기</DetailButton>
+        <DateText>지원일 : {project?.appliedAt}</DateText>
+        <DetailButton onClick={() => navigate(`/projects/${project?.projectId}`)}>상세보기</DetailButton>
       </CardBottom>
     </Card>
   );
