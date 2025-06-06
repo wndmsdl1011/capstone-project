@@ -297,6 +297,7 @@ const CommunityWrite = () => {
         studyEndDate: values.studyEndDate,
         studyCurriculum: values.studyCurriculum,
         studyWarning: values.studyWarning,
+        requiredSkills: values.requiredSkills.map((s) => s.value),
         applyMethod: values.applyMethod,
       };
     } else {
@@ -529,6 +530,16 @@ const CommunityWrite = () => {
                     name="recruitCount"
                     type="number"
                     placeholder="숫자로 입력해주세요"
+                  />
+                  <Label>스터디 항목</Label>
+                  <Select
+                    isMulti
+                    options={techOptions}
+                    name="requiredSkills"
+                    value={values.requiredSkills}
+                    onChange={(selected) =>
+                      setFieldValue('requiredSkills', selected)
+                    }
                   />
 
                   <Label>스터디 관련 주의사항</Label>
