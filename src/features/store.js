@@ -4,6 +4,7 @@ import uiSlice from "./common/uiSlice";
 import projectSlice from "./post/projectSlice";
 import resumeSlice from "./resume/resumeSlice";
 import adminSlice from "./admin/adminSlice";
+import communitySlice from "./community/communitySlice"
 const store = configureStore({
   reducer: {
     user: userSlice,
@@ -11,6 +12,7 @@ const store = configureStore({
     ui: uiSlice,
     resume:resumeSlice,
     admin:adminSlice,
+    community:communitySlice
   },
 });
 
