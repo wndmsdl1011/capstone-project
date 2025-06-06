@@ -19,6 +19,7 @@ import CompanyProjectDetailPage from "../pages/ProjectPage/CompanyProjectDetailP
 import ApplyFormPage from "../pages/ProjectPage/ApplyFormPage";
 import ApplicantsManagePage from "../pages/ProjectPage/ApplicantsManagePage";
 import AdminPage from '../pages/AdminPage/AdminPage';
+import CommunityWrite from '../pages/CommunityPage/CommunityWrite.js';
 
 const AppRouter = () => {
   const userRole = useSelector((state) => state.user.userRole); // added
@@ -49,6 +50,8 @@ const AppRouter = () => {
         <Route path="/projects/:id/apply" element={<ApplyFormPage />} />
         <Route path="/projects/:id/applicants" element={<ApplicantsManagePage />} />
         <Route path="/community" element={<CommunityPage />} />
+        <Route path="/community/write" element={<CommunityWrite/>} />
+        <Route path="/community/edit/:boardId" element={<CommunityWrite />} />
         <Route path="/resume/:resumeId" element={<ResumeFormPage />} />
         <Route path="/resumelist" element={<ResumePage />} />
         <Route path="/adminpage" element={<AdminPage />} />
