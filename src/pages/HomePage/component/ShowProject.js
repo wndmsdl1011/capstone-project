@@ -100,7 +100,7 @@ const ShowProject = ({ delay = 0, project }) => {
   });
 
   const today = dayjs();
-  const deadline = dayjs(project.recruitDeadline);
+  const deadline = dayjs(project?.recruitDeadline);
   const diffDays = deadline.diff(today, 'day');
 
   const statusText = diffDays < 0
@@ -120,7 +120,7 @@ const ShowProject = ({ delay = 0, project }) => {
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay, ease: 'easeOut' }}
     >
-      <Container onClick={() => navigate(`/projects/${project.projectId}`)}>
+      <Container onClick={() => navigate(`/projects/${project?.projectId}`)}>
         <div style={{
           display: 'flex',
           justifyContent: "space-between",
@@ -135,17 +135,17 @@ const ShowProject = ({ delay = 0, project }) => {
             </ProjectIconText>
           </ProjectIcon>
           <div style={{ fontSize: '11.9px', color: '#9CA3AF', fontWeight: '700' }}>
-            {project.createdAt}
+            {project?.createdAt}
           </div>
         </div>
         <ProjectTitleContainer>
           <ProjectTitleText>
-            {project.title}
+            {project?.title}
           </ProjectTitleText>
         </ProjectTitleContainer>
         <ProjectContentContainer>
           <ProjectContentText>
-            {project.description}
+            {project?.description}
           </ProjectContentText>
         </ProjectContentContainer>
         <ProjectBottomContainer>
@@ -162,7 +162,7 @@ const ShowProject = ({ delay = 0, project }) => {
             </div>
           </div>
           <div style={{ fontWeight: '700', fontSize: '11.9px', color: '#9ca3af' }}>
-            조회수 {project.viewCount}
+            조회수 {project?.viewCount}
           </div>
         </ProjectBottomContainer>
       </Container>
