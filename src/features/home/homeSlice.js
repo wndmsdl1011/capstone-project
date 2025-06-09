@@ -17,10 +17,29 @@ export const getHomeProjectList = createAsyncThunk(
 const homeSlice = createSlice({
     name: "home",
     initialState: {
+        loading: false,
+        success: false,
+        error: null,
     },
     reducers: {
     },
     extraReducers: (builder) => {
+        builder
+            .addCase(getHomeProjectList.pending, (state) => {
+                state.loading = true;
+                state.success = false;
+                state.error = null;
+            })
+            .addCase(getHomeProjectList.fulfilled, (state) => {
+                state.loading = false;
+                state.success = true;
+                state.error = null;
+            })
+            .addCase(getHomeProjectList.rejected, (state) => {
+                state.loading = false;
+                state.success = false;
+                state.error = "프로젝트를 조회하는데 실패했습니다.";
+            })
     },
 });
 

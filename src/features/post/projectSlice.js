@@ -215,7 +215,7 @@ export const GetSupportedProjects = createAsyncThunk(
           },
         }
       )
-      
+
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "지원한 프로젝트 목록 조회 실패");
@@ -326,7 +326,22 @@ const projectSlice = createSlice({
           typeof action.payload === "string"
             ? action.payload
             : action.payload?.message || "지원자 목록 조회에 실패했습니다.";
-      });
+      })
+      .addCase(GetSupportedProjects.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(GetSupportedProjects.fulfilled, (state) => {
+        state.loading = false;
+        state.success = true;
+        state.error = null;
+      })
+      .addCase(GetSupportedProjects.rejected, (state) => {
+        state.loading = false;
+        state.success = false;
+        state.error = "프로젝트를 조회하는데 실패했습니다.";
+      })
   },
 });
 

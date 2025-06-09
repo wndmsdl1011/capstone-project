@@ -5,14 +5,17 @@ import projectSlice from "./post/projectSlice";
 import resumeSlice from "./resume/resumeSlice";
 import adminSlice from "./admin/adminSlice";
 import communitySlice from "./community/communitySlice"
+import homeSlice from "./home/homeSlice"
+
 const store = configureStore({
   reducer: {
     user: userSlice,
     project: projectSlice,
     ui: uiSlice,
-    resume:resumeSlice,
-    admin:adminSlice,
-    community:communitySlice
+    resume: resumeSlice,
+    admin: adminSlice,
+    community: communitySlice,
+    home: homeSlice
   },
 });
 
