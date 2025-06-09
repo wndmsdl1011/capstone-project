@@ -4,6 +4,7 @@ import styled from "styled-components";
 import ShowProject from './ShowProject';
 import { getHomeProjectList } from '../../../features/home/homeSlice';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinner from '../../../components/LoadingSpinner';
 
 const Container = styled.div`
   font-family: 'Pretendard', sans-serif;
@@ -60,6 +61,7 @@ const ProjectHome = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { profile } = useSelector((state) => state.user);
+  const { loading, success, error } = useSelector((state) => state.home);
   const [projects, setProjects] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -99,7 +101,13 @@ const ProjectHome = () => {
           <div style={{ fontSize: '15.3px', color: '#4B5563', fontWeight: '700' }}>학생과 기업이 만나 새로운 가치를 만들어냅니다</div>
         </div>
         <ProjectContainer>
-          {projects.map((proj, i) => (
+          {loading && (
+            <LoadingSpinner />
+          )}
+          {error && (
+            <div>{error}</div>
+          )}
+          {success && projects.map((proj, i) => (
             <ShowProject key={proj.id || i} delay={i * 0.8} project={proj} />
           ))}
         </ProjectContainer>
