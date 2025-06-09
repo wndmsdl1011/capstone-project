@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import dayjs from 'dayjs';
+import TechIcon from "../../components/TechIcon";
 
 const Card = styled.div`
   background: white;
@@ -13,6 +14,7 @@ const Card = styled.div`
   flex-direction: column;
   justify-content: space-between;
   min-height: 180px;
+  width: 400px;
 `;
 
 const CardTop = styled.div`
@@ -47,7 +49,7 @@ const Title = styled.div`
 const Tags = styled.div`
   display: flex;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: -6px;
 `;
 
 const Tag = styled.div`
@@ -87,10 +89,10 @@ const ProjectCard = ({ project }) => {
   const navigate = useNavigate();
 
   const subtitle = "사이드 프로젝트"
-  const tags = project.requiredSkills
+  const tags = project?.requiredSkills
 
   const today = dayjs();
-  const deadline = dayjs(project.recruitDeadline);
+  const deadline = dayjs(project?.recruitDeadline);
   const diffDays = deadline.diff(today, 'day');
 
   const statusText = diffDays < 0
@@ -111,22 +113,22 @@ const ProjectCard = ({ project }) => {
     <Card>
       <CardTop>
         <StatusBadge style={{ backgroundColor: statusColor, color: statusTextColor }}>{statusText}</StatusBadge>
-        <ViewCount>👁 {project.viewCount}</ViewCount>
+        <ViewCount>👁 {project?.viewCount}</ViewCount>
       </CardTop>
 
       <Title>
-        [{subtitle}] <strong>{project.title}</strong>
+        [{subtitle}] <strong>{project?.title}</strong>
       </Title>
 
       <Tags>
-        {tags.map((tag) => (
-          <Tag key={tag}>{tag}</Tag>
+        {tags?.map((tag) => (
+          <TechIcon key={tag} tech={tag} size={24} />
         ))}
       </Tags>
       <hr />
       <CardBottom>
-        <DateText>지원일 : {project.appliedAt}</DateText>
-        <DetailButton onClick={() => navigate(`/projects/${project.projectId}`)}>상세보기</DetailButton>
+        <DateText>지원일 : {project?.appliedAt}</DateText>
+        <DetailButton onClick={() => navigate(`/projects/${project?.projectId}`)}>상세보기</DetailButton>
       </CardBottom>
     </Card>
   );
