@@ -1,15 +1,15 @@
 import React from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 import TechIcon from "../../components/TechIcon";
 
 const Card = styled.div`
   background: white;
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid #e5e7eb;  // 💡 연한 회색 테두리 추가
-  
+  border: 1px solid #e5e7eb; // 💡 연한 회색 테두리 추가
+
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -88,31 +88,36 @@ const DetailButton = styled.button`
 const ProjectCard = ({ project }) => {
   const navigate = useNavigate();
 
-  const subtitle = "사이드 프로젝트"
-  const tags = project?.requiredSkills
+  const subtitle = "사이드 프로젝트";
+  const tags = project?.requiredSkills ?? project?.skills ?? [];
 
   const today = dayjs();
   const deadline = dayjs(project?.recruitDeadline);
-  const diffDays = deadline.diff(today, 'day');
+  const diffDays = deadline.diff(today, "day");
 
-  const statusText = diffDays < 0
-    ? '모집마감'
-    : diffDays <= 7
-      ? '마감임박'
-      : '모집중';
+  const statusText =
+    diffDays < 0 ? "모집마감" : diffDays <= 7 ? "마감임박" : "모집중";
   const statusColor =
-    statusText === '모집마감' ? '#f8d7da' :
-      statusText === '마감임박' ? '#fff3cd' :
-        '#d1ecf1';
+    statusText === "모집마감"
+      ? "#f8d7da"
+      : statusText === "마감임박"
+      ? "#fff3cd"
+      : "#d1ecf1";
   const statusTextColor =
-    statusText === '모집마감' ? '#721c24' :
-      statusText === '마감임박' ? '#856404' :
-        '#0c5460';
+    statusText === "모집마감"
+      ? "#721c24"
+      : statusText === "마감임박"
+      ? "#856404"
+      : "#0c5460";
 
   return (
     <Card>
       <CardTop>
-        <StatusBadge style={{ backgroundColor: statusColor, color: statusTextColor }}>{statusText}</StatusBadge>
+        <StatusBadge
+          style={{ backgroundColor: statusColor, color: statusTextColor }}
+        >
+          {statusText}
+        </StatusBadge>
         <ViewCount>👁 {project?.viewCount}</ViewCount>
       </CardTop>
 
@@ -128,7 +133,11 @@ const ProjectCard = ({ project }) => {
       <hr />
       <CardBottom>
         <DateText>지원일 : {project?.appliedAt}</DateText>
-        <DetailButton onClick={() => navigate(`/projects/${project?.projectId}`)}>상세보기</DetailButton>
+        <DetailButton
+          onClick={() => navigate(`/projects/${project?.projectId}`)}
+        >
+          상세보기
+        </DetailButton>
       </CardBottom>
     </Card>
   );

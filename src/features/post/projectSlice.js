@@ -133,6 +133,79 @@ export const applyToProject = createAsyncThunk(
   }
 );
 
+// 비동기 액션: 프로젝트 스크랩 신청
+export const scrapProject = createAsyncThunk(
+  "project/scrapProject",
+  async (projectId, { dispatch, rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await axios.post(
+        `http://localhost:8080/api/project/${projectId}/scrap`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      dispatch(
+        showToastMessage({
+          message: response.data.message || "프로젝트를 스크랩했습니다.",
+          status: "success",
+        })
+      );
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message:
+            error.response?.data?.message || "프로젝트 스크랩에 실패했습니다.",
+          status: "error",
+        })
+      );
+      return rejectWithValue(
+        error.response?.data || "프로젝트 스크랩에 실패했습니다."
+      );
+    }
+  }
+);
+
+// 비동기 액션: 프로젝트 스크랩 취소
+export const cancelScrapProject = createAsyncThunk(
+  "project/cancelScrapProject",
+  async (projectId, { dispatch, rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await axios.delete(
+        `http://localhost:8080/api/project/${projectId}/scrap/delete`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      dispatch(
+        showToastMessage({
+          message: response.data.message || "스크랩이 취소되었습니다.",
+          status: "success",
+        })
+      );
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message:
+            error.response?.data?.message || "스크랩 취소에 실패했습니다.",
+          status: "error",
+        })
+      );
+      return rejectWithValue(
+        error.response?.data || "스크랩 취소에 실패했습니다."
+      );
+    }
+  }
+);
+
 // 비동기 액션: 프로젝트 지원자 선택 (합격/불합격 처리)
 export const updateApplicantStatus = createAsyncThunk(
   "project/updateApplicantStatus",
@@ -231,6 +304,36 @@ export const GetSupportedProjects = createAsyncThunk(
   }
 );
 
+export const fetchScrapProjectList = createAsyncThunk(
+  "project/fetchScrapProjectList",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      const response = await axios.get(
+        "http://localhost:8080/api/project/scrap/list",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      // Assuming the latest API spec returns an array of objects with these fields:
+      // projectId, projectTitle, projectStartDate, projectEndDate, recruitDeadline, viewCount, createdAt
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "스크랩한 프로젝트 목록 조회에 실패했습니다.",
+          status: "error",
+        })
+      );
+      return rejectWithValue(
+        error.response?.data || "스크랩한 프로젝트 목록 조회 실패"
+      );
+    }
+  }
+);
+
 const projectSlice = createSlice({
   name: "project",
   initialState: {
@@ -242,6 +345,7 @@ const projectSlice = createSlice({
     totalPages: 0,
     projectDetail: null,
     applicants: [],
+    scrapProjectList: [],
   },
   reducers: {
     resetProjectState: (state) => {
@@ -338,9 +442,8 @@ const projectSlice = createSlice({
       .addCase(GetSupportedProjects.pending, (state) => {
         state.loading = true;
         state.success = false;
-        state.error = null;
       })
-      .addCase(GetSupportedProjects.fulfilled, (state) => {
+      .addCase(GetSupportedProjects.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
         state.error = null;
@@ -349,6 +452,18 @@ const projectSlice = createSlice({
         state.loading = false;
         state.success = false;
         state.error = "프로젝트를 조회하는데 실패했습니다.";
+      })
+      .addCase(fetchScrapProjectList.fulfilled, (state, action) => {
+        state.scrapProjectList = action.payload.map((item) => ({
+          projectId: item.projectId,
+          title: item.projectTitle,
+          startDate: item.projectStartDate,
+          endDate: item.projectEndDate,
+          recruitDeadline: item.recruitDeadline,
+          viewCount: item.viewCount,
+          createdAt: item.createdAt,
+          requiredSkills: item.skills, // corrected from item.requiredSkills
+        }));
       });
   },
 });
