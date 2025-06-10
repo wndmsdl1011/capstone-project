@@ -462,6 +462,10 @@ const projectSlice = createSlice({
           recruitDeadline: item.recruitDeadline,
           viewCount: item.viewCount,
           createdAt: item.createdAt,
+<<<<<<< HEAD
+=======
+          requiredSkills: item.skills, // corrected from item.requiredSkills
+>>>>>>> develop
         }));
       });
   },

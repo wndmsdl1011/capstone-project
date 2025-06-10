@@ -93,7 +93,7 @@ const ProjectCard = ({
   const navigate = useNavigate();
 
   const subtitle = "사이드 프로젝트";
-  const tags = project?.requiredSkills;
+  const tags = project?.requiredSkills ?? project?.skills ?? [];
 
   const today = dayjs();
   const deadline = dayjs(project?.recruitDeadline);
