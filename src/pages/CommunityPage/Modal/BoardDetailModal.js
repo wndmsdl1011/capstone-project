@@ -247,9 +247,10 @@ const tagTranslations = {
 const BoardDetailModal = ({ boardId, onClose, page, selectedTab }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
   const { boardDetailList } = useSelector((state) => state.community);
-  // const isMyPost = currentUserId === postWriterId;
-  const isMyPost = true;
+  // const isMyPost = boardId === postWriterId;
+  // const isMyPost = true;
   useEffect(() => {
     if (boardId) {
       dispatch(fetchBoardDetail({ boardId }));
@@ -277,6 +278,7 @@ const BoardDetailModal = ({ boardId, onClose, page, selectedTab }) => {
     studyEndDate,
     studyStartDate,
     studyWarning,
+    mine
   } = boardDetailList;
 
   const formattedDate = createdAt?.replace("T", " ");
@@ -330,7 +332,7 @@ const BoardDetailModal = ({ boardId, onClose, page, selectedTab }) => {
               </div>
             </div>
             <div className="right">
-  {isMyPost ? (
+  {mine ? (
     <>
       <div className="icon-with-tooltip">
         <FiEdit2 className="edit-icon" onClick={onEdit} />
@@ -470,7 +472,7 @@ const BoardDetailModal = ({ boardId, onClose, page, selectedTab }) => {
           </div>
         </Stats>
         <hr />
-        <CommentSection />
+        <CommentSection  boardId={boardId}/>
       </Modal.Body>
     </StyledModal>
   );

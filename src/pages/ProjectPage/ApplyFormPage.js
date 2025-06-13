@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   applyToProject,
   fetchProjectDetail,
+  sendProjectApplyNotification,
 } from "../../features/post/projectSlice";
 import {
   getResumeList,
@@ -27,6 +28,7 @@ const ApplyFormPage = () => {
     if (id) {
       dispatch(fetchProjectDetail(id));
     }
+    
   }, [id, dispatch]);
 
   // Fetch resume list on mount
@@ -143,7 +145,7 @@ const ApplyFormPage = () => {
         </Section>
 
         <SubmitButton
-          onClick={() => {
+          onClick={async() => {
             if (!selectedResume) {
               dispatch(
                 showToastMessage({
@@ -163,11 +165,13 @@ const ApplyFormPage = () => {
               .unwrap()
               .then(() => {
                 // toast.success("지원이 완료되었습니다!");
+                dispatch(sendProjectApplyNotification({receiverId : id})).unwrap();
                 navigate("/projects");
               })
               .catch((err) => {
                 // toast.error(err || "지원에 실패했습니다.");
               });
+
           }}
         >
           지원하기

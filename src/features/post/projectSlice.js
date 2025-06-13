@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { showToastMessage } from "../common/uiSlice";
+import api from '../../utils/api';
 
 // 비동기 액션: 프로젝트 공고 등록
 export const postProject = createAsyncThunk(
@@ -330,6 +331,32 @@ export const fetchScrapProjectList = createAsyncThunk(
       return rejectWithValue(
         error.response?.data || "스크랩한 프로젝트 목록 조회 실패"
       );
+    }
+  }
+);
+
+export const sendProjectApplyNotification = createAsyncThunk(
+  "project/sendProjectApplyNotification",
+  async ({ receiverId }, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await api.post(`/api/sse/broadcast/${receiverId}`,
+        {},
+      );
+      dispatch(
+        showToastMessage({
+          message: "알림 성공했습니다.",
+          status: "success",
+        })
+      );
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "알림 실패",
+          status: "error",
+        })
+      );
+      return rejectWithValue(error.response?.data || "알림 실패");
     }
   }
 );

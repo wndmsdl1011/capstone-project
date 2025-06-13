@@ -70,6 +70,24 @@ export const fetchBoardDetail = createAsyncThunk(
   }
 );
 
+export const fetchBoardMine = createAsyncThunk(
+  'community/fetchBoardMine',
+  async ({ boardType }, { rejectWithValue }) => {
+    try {
+      console.log("boardId", boardType);
+      const response = await api.get(`/api/boards/mine`,{
+        params:{
+          boardType : boardType
+        }
+      });
+      console.log("내가 작성한 게시글 데이터",response.data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 export const UpdateBoard = createAsyncThunk(
   'community/UpdateBoard',
   async ({ postData, navigate,boardId}, { dispatch, rejectWithValue }) => {
@@ -125,6 +143,78 @@ export const DeleteBoard = createAsyncThunk(
   }
 );
 
+
+
+export const WriteComments = createAsyncThunk(
+  'community/WriteComments',
+  async ({ boardId, content }, { dispatch, rejectWithValue }) => {
+    console.log('values', content);
+    try {
+      const response = await api.post(`/api/boards/${boardId}/comments`,{content});
+
+      dispatch(
+        showToastMessage({
+          message: '댓글을 등록하였습니다!',
+          status: 'success',
+        })
+      );
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: '댓글 등록 실패',
+          status: 'error',
+        })
+      );
+
+      return rejectWithValue(error.response?.data || '댓글 등록 실패.');
+    }
+  }
+);
+export const fetchComments = createAsyncThunk(
+  'community/fetchComments',
+  async ({ boardId }, { rejectWithValue }) => {
+    try {
+      console.log("boardId", boardId);
+      const response = await api.get(`/api/boards/${boardId}/comment/list`,);
+      console.log("댓글 조회  데이터",response.data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const DeleteComments = createAsyncThunk(
+  'community/DeleteComments',
+  async ({commentId}, { dispatch, rejectWithValue }) => {
+    
+    try {
+      const response = await api.delete(`/api/comments/${commentId}/delete`);
+
+      dispatch(
+        showToastMessage({
+          message: '댓글을 삭제하였습니다!',
+          status: 'success',
+        })
+      );
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: '댓글 삭제 실패',
+          status: 'error',
+        })
+      );
+
+      return rejectWithValue(error.response?.data || '댓글 삭제 실패.');
+    }
+  }
+);
+
+
+
+
 const communitySlice = createSlice({
   name: 'community',
   initialState: {
@@ -138,6 +228,10 @@ const communitySlice = createSlice({
     totalPages: 0,
     projectDetail: null,
     applicants: [],
+    commentsList:[],
+    commentsByBoardId: {}, // 새로운 댓글 상태 이름
+    boardMineList:[],
+    
   },
   reducers: {
     // 직접적으로 호출
@@ -194,6 +288,17 @@ const communitySlice = createSlice({
       .addCase(fetchBoardDetail.rejected, (state, action) => {
         state.error = action.payload;
       })
+      .addCase(fetchBoardMine.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchBoardMine.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.boardMineList = action.payload;
+      })
+      .addCase(fetchBoardMine.rejected, (state, action) => {
+        state.error = action.payload;
+      })
       .addCase(DeleteBoard.pending, (state) => {
         state.loading = true;
       })
@@ -204,6 +309,23 @@ const communitySlice = createSlice({
       .addCase(DeleteBoard.rejected, (state, action) => {
         state.error = action.payload;
       })
+      .addCase(fetchComments.pending, (state) => {
+        state.loadingComments = 'pending';
+        state.error = null;
+      })
+      .addCase(fetchComments.fulfilled, (state, action) => {
+        state.loadingComments = 'succeeded';
+        const { boardId } = action.meta.arg; // fetchComments에 전달된 boardId를 가져옴
+        // 해당 boardId의 댓글 목록을 업데이트합니다.
+        state.commentsByBoardId[boardId] = action.payload; // payload는 댓글 배열이어야 함
+      })
+      .addCase(fetchComments.rejected, (state, action) => {
+        state.loadingComments = 'failed';
+        state.error = action.payload;
+        const { boardId } = action.meta.arg;
+        state.commentsByBoardId[boardId] = []; // 실패 시 해당 boardId의 댓글 목록 초기화
+      })
+      
   },
 });
 export const { clearErrors } = communitySlice.actions;

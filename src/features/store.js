@@ -6,7 +6,7 @@ import resumeSlice from "./resume/resumeSlice";
 import adminSlice from "./admin/adminSlice";
 import communitySlice from "./community/communitySlice"
 import homeSlice from "./home/homeSlice"
-
+import notificationSlice from "./notification/notificationSlice"
 const store = configureStore({
   reducer: {
     user: userSlice,
@@ -15,7 +15,8 @@ const store = configureStore({
     resume: resumeSlice,
     admin: adminSlice,
     community: communitySlice,
-    home: homeSlice
+    home: homeSlice,
+    notification:notificationSlice
   },
 });
 

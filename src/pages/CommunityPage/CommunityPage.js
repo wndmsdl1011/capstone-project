@@ -674,6 +674,7 @@ const filteredBoards = boardList.filter((item) => {
                 boardId={item.boardId}
                 tags={item.tags}
                 skills={item.skills}
+                commentCount={item.commentCount}
                 page={page}
               />
             ))}

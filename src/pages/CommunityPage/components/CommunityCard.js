@@ -8,7 +8,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useNavigate } from 'react-router-dom';
 import BoardDetailModal from '../Modal/BoardDetailModal';
 import { useDispatch } from 'react-redux';
-import { DeleteBoard, fetchBoardList } from '../../../features/community/communitySlice';
+import { DeleteBoard, fetchBoardList, fetchBoardMine } from '../../../features/community/communitySlice';
 const Card = styled.div`
   background: white;
   border-radius: 12px;
@@ -196,6 +196,7 @@ const CommunityCard = ({
   boardType, // GENERAL | PROJECT | STUDY
   skills,
   page,
+  commentCount
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showFull, setShowFull] = useState(false);
@@ -203,6 +204,7 @@ const CommunityCard = ({
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const formattedDate = createdAt?.replace("T", " ");
+  const [currentCommentCount, setCurrentCommentCount] = useState(0); // 초기 댓글 수
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
   const toggleShowFull = (e) => {
     e.stopPropagation();
@@ -228,6 +230,7 @@ const CommunityCard = ({
     .unwrap()
     .then(() => {
       dispatch(fetchBoardList({ page, size: 10, selectedTab }));
+      dispatch(fetchBoardMine({boardType:selectedTab}))
     });
     // 만약 2페이지에 데이터가 1개뿐인데 삭제했을 시 페이지가 1로 이동하는 로직
 //     .then(() => {
@@ -240,6 +243,10 @@ const CommunityCard = ({
     setDropdownOpen(false);
     //신고 처리 로직 추가 예정.
   }
+
+   const handleCommentCountChange = (newCount) => {
+    setCurrentCommentCount(newCount);
+  };
   const lineCount = content?.split('\n').length || 0;
   const shouldShowMore = content.length > MAX_PREVIEW_LENGTH;
   const contentToShow =
@@ -332,13 +339,13 @@ const CommunityCard = ({
         <StatsSection>
           <StatGroup>
             <StatItem>
-              <FiThumbsUp /> 좋아요 {stats.likes}
+              <FiThumbsUp /> 좋아요 {0}
             </StatItem>
             <StatItem>
-              <BiMessageDetail /> 답변 {stats.answers}
-            </StatItem>
+              <BiMessageDetail /> 답변 {0}
+            </StatItem> 
             <StatItem>
-              <BiCommentDetail /> 댓글 {stats.comments}
+              <BiCommentDetail /> 댓글 {currentCommentCount}
             </StatItem>
           </StatGroup>
           <StatItem>
@@ -346,7 +353,7 @@ const CommunityCard = ({
           </StatItem>
         </StatsSection>
         <hr />
-        <CommentSection />
+        <CommentSection boardId={boardId} onCommentCountChange={handleCommentCountChange}/>
       </Card>
       {showModal && (
         <BoardDetailModal

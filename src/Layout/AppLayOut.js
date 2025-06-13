@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchUserProfile, logout } from "../features/user/userSlice";
 import UserProfileBox from "../common/component/UserProfileBox";
 import { useCookies } from "react-cookie";
+import NewNotice from '../common/NewNotice.js';
 
 const Container = styled.div`
   margin: 0 auto;
@@ -188,6 +189,8 @@ const AppLayout = ({ authenticate, setAuthenticate }) => {
             비즈니스 문의
           </NavButton>
           {token ? ( // 관리자 UI이슈로 profile => token으로 변경 오류시 수정 필요.
+            <>
+            <NewNotice/>
             <NavRight>
               <div style={{ position: "relative" }}>
                 <NotificationButton
@@ -209,6 +212,7 @@ const AppLayout = ({ authenticate, setAuthenticate }) => {
 
               {/* <NavButton primary onClick={handleLogout}>로그아웃</NavButton> */}
             </NavRight>
+            </>
           ) : (
             <NavButton primary onClick={() => navigate("/login")}>
               로그인
