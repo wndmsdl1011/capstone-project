@@ -111,6 +111,7 @@ function NewNotice() {
     if (!token) {
       console.warn('Access token not found in session storage. SSE connection not established.');
       return;
+      
     }
 
     const EventSource = EventSourcePolyfill || NativeEventSource;

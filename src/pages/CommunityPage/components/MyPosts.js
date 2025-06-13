@@ -169,9 +169,10 @@ const MyPosts = ({ selectedMenu }) => {
             boardType={selectedBoardType}
             boardId={item.boardId}
             tags={item.tags}
-            skills={item.skills}
+            skills={item.requiredSkills}
             commentCount={item.commentCount}
             page={page}
+            
           />
         ))
       ) : (

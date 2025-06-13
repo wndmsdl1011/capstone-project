@@ -11,7 +11,6 @@ const Card = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 16px;
 `;
 
 const ActionBar = styled.div`
@@ -20,7 +19,7 @@ const ActionBar = styled.div`
   align-items: center;
   font-size: 14px;
   color: #555;
-  border-top: 1px solid #eee;
+  
   padding-top: 12px;
 
   svg {

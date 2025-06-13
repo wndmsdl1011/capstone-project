@@ -165,7 +165,7 @@ const ApplyFormPage = () => {
               .unwrap()
               .then(() => {
                 // toast.success("지원이 완료되었습니다!");
-                dispatch(sendProjectApplyNotification({receiverId : id})).unwrap();
+                // dispatch(sendProjectApplyNotification({receiverId : id})).unwrap();
                 navigate("/projects");
               })
               .catch((err) => {
