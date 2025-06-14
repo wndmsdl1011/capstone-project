@@ -246,22 +246,25 @@ const AppLayout = ({ authenticate, setAuthenticate }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user, profile } = useSelector((state) => state.user);
-  const { notifications } = useSelector((state) => state.notification); // 알림 상태 가져오기
+  const { notifications, loading } = useSelector((state) => state.notification); // 알림 상태 가져오기
   const [cookies] = useCookies(["refresh"]);
   const token = sessionStorage.getItem("access_token");
-
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef(null); // 드롭다운 외부 클릭 감지를 위한 ref
-
+  const userRole = sessionStorage.getItem("userRole");
   useEffect(() => {
+    const userRole = sessionStorage.getItem("userRole");
     // 사용자 프로필과 알림을 동시에 가져옵니다.
+    console.log("userRole in effect:", userRole); // 👈 얘가 null이면 100% 이게 원인
     if (token){
       dispatch(fetchUserProfile());
-
-      dispatch(fetchNotifications()); // 알림 목록 가져오기
-    }
+      dispatch(fetchNotifications());
+    } 
+    console.log("loading",loading);
   }, [dispatch, token]);
 
+
+  
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -306,88 +309,80 @@ const AppLayout = ({ authenticate, setAuthenticate }) => {
           </Link>
         </NavCenter>
         <ButtonGroup>
-          <NavButton onClick={() => alert("비즈니스 문의")}>
-            비즈니스 문의
-          </NavButton>
-          {token && notifications ? (
-            <>
-              <NewNotice />
-              <NavRight>
-                <div style={{ position: "relative" }} ref={notificationRef}>
-                  {" "}
-                  {/* ref 연결 */}
-                  <NotificationButton
-                    onClick={() => setShowNotifications(!showNotifications)}
-                  >
-                    <FontAwesomeIcon icon={faBell} />
-                    {notifications.length > 0 && ( // 알림이 있을 때만 배지 표시
-                      <NotificationBadge>
-                        {notifications.length}
-                      </NotificationBadge>
-                    )}
-                  </NotificationButton>
-                  {showNotifications && (
-                    <NotificationDropdown>
-                      {notifications.length > 0 ? (
-                        notifications.map((notification) => (
-                          <NotificationItem
-                            key={notification.eventId}
-                            onClick={() => handleNotificationClick(notification)}
-                          >
-                            <NotificationIcon>
-                              {notification.eventType === "apply" ? (
-                                <FontAwesomeIcon icon={faUserTie} />
-                              ) : notification.eventType === "accept" ? ( // 예시: 합격 알림
-                                <FontAwesomeIcon icon={faCheckCircle} />
-                              ) : (
-                                "🔔"
-                              )}
-                            </NotificationIcon>
-                            <NotificationContent>
-                              <NotificationHeader>
-                                <NotificationType>
-                                  {notification.eventType === "apply"
-                                    ? "지원 알림"
-                                    : notification.eventType === "accept"
-                                    ? "📩 합격 알림"
-                                    : "알림"}
-                                </NotificationType>
-                                <NotificationTime>
-                                  {formatTimeAgo(notification.createdAt)}
-                                </NotificationTime>
-                              </NotificationHeader>
-                              <NotificationMessage>
-                                {notification.message}
-                              </NotificationMessage>
-                            </NotificationContent>
-                          </NotificationItem>
-                        ))
-                      ) : (
-                        <div
-                          style={{
-                            textAlign: "center",
-                            padding: "20px",
-                            color: "#6b7280",
-                          }}
-                        >
-                          🔔 새로운 알림이 없습니다.
-                        </div>
-                      )}
-                    </NotificationDropdown>
-                  )}
-                </div>
+  <NavButton onClick={() => alert("비즈니스 문의")}>비즈니스 문의</NavButton>
 
-                <UserBox>
-                  <UserProfileBox />
-                </UserBox>
-              </NavRight>
-            </>
-          ) : (
-            <NavButton primary onClick={() => navigate("/login")}>
-              로그인
-            </NavButton>
+  {token ? (
+  <>
+    <NewNotice />
+    <NavRight>
+      <div style={{ position: "relative" }} ref={notificationRef}>
+        <NotificationButton onClick={() => setShowNotifications(!showNotifications)}>
+          <FontAwesomeIcon icon={faBell} />
+          {notifications.length > 0 && (
+            <NotificationBadge>{notifications.length}</NotificationBadge>
           )}
-        </ButtonGroup>
+        </NotificationButton>
+
+        {showNotifications && (
+          <NotificationDropdown>
+            {notifications.length > 0 ? (
+              notifications.map((notification) => (
+                <NotificationItem
+                  key={notification.eventId}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  <NotificationIcon>
+                    {notification.eventType === "apply" ? (
+                      <FontAwesomeIcon icon={faUserTie} />
+                    ) : notification.eventType === "accept" ? (
+                      <FontAwesomeIcon icon={faCheckCircle} />
+                    ) : (
+                      "🔔"
+                    )}
+                  </NotificationIcon>
+                  <NotificationContent>
+                    <NotificationHeader>
+                      <NotificationType>
+                        {notification.eventType === "apply"
+                          ? "지원 알림"
+                          : notification.eventType === "accept"
+                          ? "📩 합격 알림"
+                          : "알림"}
+                      </NotificationType>
+                      <NotificationTime>
+                        {formatTimeAgo(notification.createdAt)}
+                      </NotificationTime>
+                    </NotificationHeader>
+                    <NotificationMessage>{notification.message}</NotificationMessage>
+                  </NotificationContent>
+                </NotificationItem>
+              ))
+            ) : (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "20px",
+                  color: "#6b7280",
+                }}
+              >
+                🔔 새로운 알림이 없습니다.
+              </div>
+            )}
+          </NotificationDropdown>
+        )}
+      </div>
+
+      <UserBox>
+        <UserProfileBox />
+      </UserBox>
+    </NavRight>
+  </>
+) : (
+  <NavButton primary onClick={() => navigate("/login")}>
+    로그인
+  </NavButton>
+)}
+</ButtonGroup>
       </Navbar>
 
       <main>

@@ -15,7 +15,9 @@ export const fetchNotifications = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const userRole = sessionStorage.getItem("userRole");
-      const response = await api.get(`/api/received`,{
+      console.log("userRole",userRole);
+      const response = await api.get(`/api/received`,
+        {
         params: {
             role : userRole
           },
@@ -32,7 +34,10 @@ export const fetchNotifications = createAsyncThunk(
 const initialState = {
   latestNotification: null,
   // 나중에 알림 목록을 관리하게 된다면 여기에 추가할 수 있습니다.
+  loading:false,
+  error:null,
   notifications: [],
+
 };
 
 const notificationSlice = createSlice({

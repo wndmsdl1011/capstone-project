@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/api"; // api.js가 'src/utils/api.js'에 있을 경우
 
 import { showToastMessage } from "../common/uiSlice";
+import { fetchNotifications } from '../notification/notificationSlice';
 
 // 지침 사항
 // 툴킷 로그인, 회원가입 샘플
@@ -33,6 +34,7 @@ export const loginWithEmail = createAsyncThunk(
       const accessToken = authHeader.replace("Bearer ", "").trim();
       sessionStorage.setItem("access_token", accessToken);
       await dispatch(fetchUserProfile());
+      await dispatch(fetchNotifications());
       dispatch(
         showToastMessage({
           message: "로그인을 성공했습니다!",
@@ -296,7 +298,8 @@ const userSlice = createSlice({
       })
       .addCase(loginWithEmail.fulfilled, (state, action) => {
         state.loading = false;
-        sessionStorage.setItem("userRole", action.payload.role); // ✅ 여기에서 저장 // 로그인이 성공적이라면 이 user값을 init initialState: { user: null, 여기에 넣어주겠다
+        sessionStorage.setItem("userRole", action.payload.role); // 여기에서 저장 // 로그인이 성공적이라면 이 user값을 init initialState: { user: null, 여기에 넣어주겠다
+        
         state.loginError = null; // 로그인 에러는 null로 바꿔주고
       })
       .addCase(loginWithEmail.rejected, (state, action) => {

@@ -416,7 +416,7 @@ const CompanyMyPage = () => {
             {selectedMenu === '받은 메시지/문의' && <InquiryList />}
             {selectedMenu === '저장한 이력서' && <SavedResumes />}
             {selectedMenu === '알림함' && <NotificationBox />}
-            <Link to={'/mypage/user'}>마이페이지</Link>
+            
           </ProjectGrid>
         </MainContent>
       </GridWrapper>

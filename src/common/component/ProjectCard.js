@@ -88,7 +88,7 @@ const DetailButton = styled.button`
 const ProjectCard = ({
   project,
   dateLabel = "지원일",
-  dateValue = project.appliedAt,
+  dateValue = project?.appliedAt,
 }) => {
   const navigate = useNavigate();
 
