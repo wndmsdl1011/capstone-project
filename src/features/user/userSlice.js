@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/api"; // api.js가 'src/utils/api.js'에 있을 경우
 
 import { showToastMessage } from "../common/uiSlice";
+import { fetchNotifications } from '../notification/notificationSlice';
 
 // 지침 사항
 // 툴킷 로그인, 회원가입 샘플
@@ -14,7 +15,10 @@ import { showToastMessage } from "../common/uiSlice";
 // page나 라우터도 어떤 대략적인 페이지들만 설정해논거라 알아서 유동적으로 페이지 추가시 라우터도 수정 바람.
 export const loginWithEmail = createAsyncThunk(
   "user/loginWithEmail",
-  async ({ email, password, role }, { rejectWithValue }) => {
+  async (
+    { email, password, role, navigate },
+    { dispatch, rejectWithValue }
+  ) => {
     console.log("email,role", email, role);
     try {
       const response = await api.post("/api/login", { email, password, role }); // post로 보내줌
@@ -29,11 +33,26 @@ export const loginWithEmail = createAsyncThunk(
 
       const accessToken = authHeader.replace("Bearer ", "").trim();
       sessionStorage.setItem("access_token", accessToken);
-
+      await dispatch(fetchUserProfile());
+      await dispatch(fetchNotifications());
+      dispatch(
+        showToastMessage({
+          message: "로그인을 성공했습니다!",
+          status: "success",
+        })
+      );
+      navigate("/");
+      console.log("로그인 데이터", response.data);
       return response.data; // response.data.user이렇게 해도 됨
     } catch (error) {
       //실패
       //실패시 생긴 에러값을 reducer에 저장
+      dispatch(
+        showToastMessage({
+          message: "아이디 또는 비밀번호가 일치하지 않습니다.",
+          status: "error",
+        })
+      );
       return rejectWithValue(error.response?.data?.error || error.message);
     }
   }
@@ -41,28 +60,32 @@ export const loginWithEmail = createAsyncThunk(
 
 export const loginWithGoogle = createAsyncThunk(
   "user/loginWithGoogle",
-  async (token, { rejectWithValue }) => {}
+  async (token, { rejectWithValue }) => { }
 );
 
 export const logout = createAsyncThunk(
   "user/logout",
-  async (_, { dispatch }) => {
+  async ({ token, navigate }, { dispatch }) => {
     try {
-      await api.post("/api/logout", {});
-      sessionStorage.removeItem("access_token");
-      dispatch(
-        showToastMessage({
-          message: "로그아웃을 완료했습니다!",
-          status: "success",
-        })
-      );
-      window.location.href = "/login";
+      if (token) {
+        await api.post(
+          "/api/logout",
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
     } catch (error) {
       console.log("로그아웃 실패", error);
+    } finally {
+      // 토큰 그냥 무조건 제거
+      sessionStorage.removeItem("access_token");
+      sessionStorage.removeItem("userRole");
+      navigate("/login")
     }
-    // user정보를 지우고
-
-    // session token의 값을 지운다.
   }
 );
 
@@ -82,13 +105,8 @@ export const registerUser = createAsyncThunk(
       navigate("/login");
       return response.data;
     } catch (error) {
-      dispatch(
-        showToastMessage({
-          message: "회원가입에 실패했습니다.",
-          status: "error",
-        })
-      );
-      return rejectWithValue(error.response?.data || "회원가입 실패");
+      alert("전화번호 중복입니다.");
+      return rejectWithValue(error.response?.data || "전화번호 중복입니다.");
     }
   }
 );
@@ -108,13 +126,10 @@ export const registerCompany = createAsyncThunk(
       navigate("/login");
       return response.data;
     } catch (error) {
-      dispatch(
-        showToastMessage({
-          message: "회원가입에 실패했습니다.",
-          status: "error",
-        })
+      alert("전화번호 및 사업자등록번호 중복입니다.");
+      return rejectWithValue(
+        error.response?.data || "전화번호 및 사업자등록번호 중복입니다."
       );
-      return rejectWithValue(error.response?.data || "회원가입 실패");
     }
   }
 );
@@ -123,13 +138,16 @@ export const checkEmailAvailability = createAsyncThunk(
   "user/checkEmailAvailability",
   async (email, { rejectWithValue }) => {
     try {
+      console.log("email", email);
       const response = await api.get("/api/email/exist", {
         params: { email: email },
       });
-      console.log("중복 데이터 확인인", response.data);
+      console.log("중복 데이터 확인", response.data);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.error);
+      alert("이미 사용 중인 이메일입니다.")
+      const errorMessage = error.response?.data || "이미 사용 중인 이메일입니다.";
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -139,7 +157,12 @@ export const fetchUserProfile = createAsyncThunk(
   "user/fetchUserProfile",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get("/mypage");
+      const token = sessionStorage.getItem("access_token");
+      const response = await api.get("/api/mypage", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log("Redux: 응답 데이터:", response.data);
       return response.data;
     } catch (error) {
@@ -204,16 +227,30 @@ export const loginWithToken = createAsyncThunk(
   }
 );
 
+export const RefreshWithToken = createAsyncThunk(
+  "user/loginWithToken",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/api/reissue");
+      console.log("refresh토큰", response.data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.error);
+    }
+  }
+);
 const userSlice = createSlice({
   name: "user",
   initialState: {
     user: null,
     loading: false,
     loginError: null,
+    checkEmailError: null,
     registrationError: null,
     success: false,
     profile: null,
-    emailmessage: "안녕하세요",
+    emailmessage: "",
+    userRole: "",
   },
   reducers: {
     // 직접적으로 호출
@@ -223,6 +260,11 @@ const userSlice = createSlice({
     clearErrors: (state) => {
       state.loginError = null;
       state.registrationError = null;
+      state.emailmessage = "";
+      state.checkEmailError = "";
+    },
+    setRole: (state, action) => {
+      state.userRole = action.payload;
     },
     logout,
   },
@@ -256,7 +298,8 @@ const userSlice = createSlice({
       })
       .addCase(loginWithEmail.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user; // 로그인이 성공적이라면 이 user값을 init initialState: { user: null, 여기에 넣어주겠다
+        sessionStorage.setItem("userRole", action.payload.role); // 여기에서 저장 // 로그인이 성공적이라면 이 user값을 init initialState: { user: null, 여기에 넣어주겠다
+        
         state.loginError = null; // 로그인 에러는 null로 바꿔주고
       })
       .addCase(loginWithEmail.rejected, (state, action) => {
@@ -289,12 +332,13 @@ const userSlice = createSlice({
       })
       .addCase(checkEmailAvailability.fulfilled, (state, action) => {
         state.loading = false;
-        state.emailmessage = action.payload;
-        state.loginError = null;
+        state.emailmessage = action.payload.message;
+        state.checkEmailError = null;
       })
       .addCase(checkEmailAvailability.rejected, (state, action) => {
         state.loading = false;
-        state.loginError = action.payload;
+        state.emailmessage = null;
+        state.checkEmailError = action.payload;
       })
       .addCase(logout.fulfilled, () => {
         return {
@@ -307,5 +351,5 @@ const userSlice = createSlice({
       });
   },
 });
-export const { clearErrors } = userSlice.actions;
+export const { clearErrors, setRole } = userSlice.actions;
 export default userSlice.reducer;

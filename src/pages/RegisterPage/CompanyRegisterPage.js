@@ -1,14 +1,30 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerCompany, registerUser } from '../../features/user/userSlice';
+import {
+  checkEmailAvailability,
+  clearErrors,
+  registerCompany,
+  registerUser,
+  resetEmailError,
+  resetEmailMessage,
+} from '../../features/user/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { ErrorMessage, Field, useFormik } from 'formik';
 import * as Yup from 'yup';
 import DaumPostcodeEmbed from 'react-daum-postcode';
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faEnvelope,
+  faLock,
+  faUser,
+  faPhone,
+  faBuilding,
+  faLocationDot,
+} from '@fortawesome/free-solid-svg-icons';
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -47,9 +63,46 @@ const FormWrapper = styled.div`
   text-align: center;
   margin-bottom: 10px;
 `;
+const StyledLabel = styled.label`
+  display: block;
+  text-align: left;
+  margin-top: 5px;
+  font-size: 15px; /* 폰트 사이즈 살짝 조정 가능 */
+  color: #333; /* 색상도 조정 가능 */
+`;
+const InputWrapper = styled.div`
+  position: relative;
+`;
 
+const StyledIcon = styled(FontAwesomeIcon)`
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #adb5bd; // 회색
+  font-size: 18px;
+  pointer-events: none; // 아이콘 위 클릭 막기 (옵션)
+`;
 const Input = styled.input`
   width: 100%;
+  padding: 12px 40px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+`;
+const PhoneInput = styled.input`
+  width: 110px;
+  padding: 12px 0px;
+  margin: 8px 0px 8px;
+  margin-right: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  text-align: center;
+`;
+const AddressInput = styled.input`
+  width: 73%;
   padding: 12px;
   margin: 8px 0;
   border: 1px solid #ddd;
@@ -57,23 +110,31 @@ const Input = styled.input`
   font-size: 16px;
 `;
 
-const AddressInput = styled.input`
-width: 73%;
-padding: 12px;
-margin: 8px 0;
-border: 1px solid #ddd;
-border-radius: 8px;
-font-size: 16px;
+const AddressButton = styled.button`
+  width: 25%;
+  padding: 12px;
+  margin: 8px 2px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
 `;
 
-const AddressButton = styled.button`
-width: 25%;
-padding: 12px;
-margin: 8px 2px 0;
-border: 1px solid #ddd;
-border-radius: 8px;
-font-size: 13px;
+const EmailInput = styled.input`
+  width: 73%;
+  padding: 12px 40px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+`;
 
+const EmailCheckButton = styled.button`
+  width: 25%;
+  padding: 12px;
+  margin: 8px 2px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
 `;
 
 const Select = styled.select`
@@ -83,6 +144,25 @@ const Select = styled.select`
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 16px;
+`;
+
+const RadioGroup = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* 왼쪽 정렬 */
+  gap: 20px; /* 버튼 사이 거리 띄우기 */
+  margin: 10px 0;
+`;
+
+const RadioLabel = styled.label`
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: #333;
+
+  input {
+    margin-right: 8px; /* 버튼과 텍스트 사이 간격 */
+  }
 `;
 
 const CheckboxContainer = styled.div`
@@ -108,8 +188,10 @@ const RegisterButton = styled.button`
 const PersonalRegisterPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const {emailmessage} = useSelector((state)=>state.user.emailmessage)
+  const { registrationError,emailmessage, checkEmailError } = useSelector((state) => state.user);
   // 사용자 입력값 저장 state
+  const [isEmailChecked, setIsEmailChecked] = useState(false);
+  const [showResult, setShowResult] = useState(false); // 클릭 여부 추적
   const [zonecode, setZonecode] = useState('');
   const [address, setAddress] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -121,6 +203,8 @@ const PersonalRegisterPage = () => {
   const businessNumberInputRef = useRef(null);
   const companyNameInputRef = useRef(null);
   const companyLocationInputRef = useRef(null);
+  const middleInputRef = useRef(null);
+  const lastInputRef = useRef(null);
   const validationSchema = Yup.object({
     name: Yup.string().min(2, '이름은 최소 2글자 입니다.').required('Required'),
 
@@ -143,9 +227,9 @@ const PersonalRegisterPage = () => {
     companyLocation: Yup.string().required('주소를 선택하세요'),
 
     businessNumber: Yup.string()
-    .min(12, '사업자등록번호는 - 제외 10자리 입니다.')
-    .max(12, '사업자등록번호는 - 제외 10자리 입니다.')
-    .required('사업자등록번호를 입력해주세요.'),
+      .min(12, '사업자등록번호는 - 제외 10자리 입니다.')
+      .max(12, '사업자등록번호는 - 제외 10자리 입니다.')
+      .required('사업자등록번호를 입력해주세요.'),
 
     companyName: Yup.string().required('회사명을 입력해주세요.'),
   });
@@ -154,16 +238,18 @@ const PersonalRegisterPage = () => {
     initialValues: {
       email: '',
       password: '',
-      checkPw:'',
+      checkPw: '',
       name: '',
       gender: 'MAN',
       phone: '',
-      businessNumber:'',
-      position: "인사담당자",
-      companyName: "",
+      phoneMiddle: '',
+      phoneLast: '',
+      businessNumber: '',
+      position: '인사담당자',
+      companyName: '',
       companyLocation: address,
-      role: "PENDING",
-      detailAddress:""
+      role: 'PENDING',
+      detailAddress: '',
     },
     validationSchema: validationSchema,
 
@@ -175,7 +261,7 @@ const PersonalRegisterPage = () => {
 
       // 모든 유효성 검사 OK → 여기서 dispatch 등 처리
       console.log('회원가입 데이터:', values);
-      dispatch(registerCompany({values, navigate}));
+      dispatch(registerCompany({ values, navigate }));
     },
     validateOnBlur: true,
     validateOnChange: false,
@@ -190,10 +276,20 @@ const PersonalRegisterPage = () => {
   //따라서 formik 하나만으로 여러개의 input 상태에 대한 제어가 가능하다. 이렇게 여러개의 input이 추가되더라도 formik 하나로 form 전체를 관리할 수 있는 것이 formik의 장점이다.
   // 막 target.value이용해서 state로 관리해야하고 코드가 많아지는데, state 필요 없다.
   //이 라이브러리 쓰면 코드가 상당히 감축됨, yup이란 유효성 검사(이메일, 비번형식) 라이브러리도 있어서 굿굿
+  useEffect(() => {
+    // 페이지 처음 들어올 때 초기화
+    setIsEmailChecked(false);
+    dispatch(clearErrors());
+  }, []);
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = await formik.validateForm();
-
+    if (!isEmailChecked) {
+      alert('이메일 중복 검사를 먼저 완료해주세요.');
+      emailInputRef.current?.focus();
+      return;
+    }
     if (errors.name) {
       alert(errors.name);
       nameInputRef.current?.focus();
@@ -233,7 +329,7 @@ const PersonalRegisterPage = () => {
   };
   // console.log("user", user);
 
-   // 모달 열기
+  // 모달 열기
   const toggleHandler = () => {
     setIsOpen(true);
   };
@@ -241,14 +337,14 @@ const PersonalRegisterPage = () => {
   // 주소 선택 완료 시
   const completeHandler = (data) => {
     if (data) {
-      const newZonecode = data.zonecode || "";
-      const newAddress = data.address || "";
-  
+      const newZonecode = data.zonecode || '';
+      const newAddress = data.address || '';
+
       setZonecode(newZonecode);
       setAddress(newAddress);
-  
+
       // Formik에 직접 반영
-      formik.setFieldValue("companyLocation", newAddress);
+      formik.setFieldValue('companyLocation', newAddress);
     }
     setIsOpen(false);
   };
@@ -257,112 +353,215 @@ const PersonalRegisterPage = () => {
   const closeHandler = () => {
     setIsOpen(false);
   };
-  // const checkEmail = () => {
-  //   checkEmailAvailability();
-  //   console.log(emailmessage);
-  // }
-  
+  const checkEmail = async () => {
+    const email = formik.values.email;
+
+    // 이메일 빈값이거나 형식에 안 맞으면 alert 띄우기
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert('이메일 형식에 맞게 입력해주세요.');
+      return; // 더 이상 진행하지 않게 return
+    }
+    const result = await dispatch(checkEmailAvailability(formik.values.email));
+    console.log('emailresult', result);
+    if (result.payload?.status == 200) {
+      // 서버 응답: false면 "존재하지 않는 이메일" = 사용 가능
+      setIsEmailChecked(true);
+    } else {
+      // true면 "이미 존재하는 이메일" = 사용 불가
+      setIsEmailChecked(false);
+    }
+  };
+  const handleMiddleChange = (e) => {
+    let value = e.target.value.replace(/\D/g, ''); // 숫자만
+    if (value.length > 4) value = value.slice(0, 4);
+
+    formik.setFieldValue('phoneMiddle', value);
+
+    if (value.length === 4) {
+      lastInputRef.current?.focus();
+    }
+
+    updateFullPhone(value, formik.values.phoneLast);
+  };
+
+  const handleLastChange = (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 4) value = value.slice(0, 4);
+
+    formik.setFieldValue('phoneLast', value);
+
+    // middle + last 완성된 phone 업데이트
+    updateFullPhone(formik.values.phoneMiddle, value);
+  };
+
+  const updateFullPhone = (middle, last) => {
+    const middleFixed = middle || formik.values.phoneMiddle || '';
+    const lastFixed = last || formik.values.phoneLast || '';
+
+    const fullPhone = `010${middleFixed}${lastFixed}`;
+    formik.setFieldValue('phone', fullPhone);
+  };
   return (
     <Container>
       <SelectedTabStyle>기업회원</SelectedTabStyle>
       <FormWrapper>
         <form onSubmit={handleSubmit}>
-          <Input
-            name="email"
-            type="email"
-            placeholder="이메일"
-            value={formik.values.email}
-            onChange={formik.handleChange}
-            ref={emailInputRef}
-          />
-          {/* <AddressButton type="button" onClick={checkEmail}>
-          중복검사
-        </AddressButton> */}
-        <div>{emailmessage}</div>
-          <Input
-            name="password"
-            type="password"
-            placeholder="비밀번호 (8자 이상)"
-            value={formik.values.password}
-            onChange={formik.handleChange}
-            ref={pwInputRef}
-          />
-          <Input
-            name="checkPw"
-            type="password"
-            placeholder="비밀번호 확인"
-            value={formik.values.checkPw}
-            onChange={formik.handleChange}
-            ref={pwCheckInputRef}
-          />
-          <Input
-            name="name"
-            type="text"
-            placeholder="이름"
-            value={formik.values.name}
-            onChange={formik.handleChange}
-            ref={nameInputRef}
-          />
-          <Select
-            name="gender"
-            value={formik.values.gender}
-            onChange={formik.handleChange}
-          >
-            <option value="MAN">남성</option>
-            <option value="FEMALE">여성</option>
-          </Select>
+          <StyledLabel>이메일</StyledLabel>
+          <InputWrapper>
+            <StyledIcon icon={faEnvelope} />
+            <EmailInput
+              name="email"
+              type="email"
+              placeholder="이메일을 입력해주세요"
+              value={formik.values.email}
+              onChange={(e) => {
+                setIsEmailChecked(false); // 이메일 수정하면 다시 중복검사해야 함
+                formik.handleChange(e);
+              }}
+              ref={emailInputRef}
+            />
+            <EmailCheckButton type="button" onClick={checkEmail}>
+              중복검사
+            </EmailCheckButton>
+          </InputWrapper>
+          <div>{emailmessage}</div>
+          <div style={{ color: 'red' }}>{checkEmailError}</div>
+          <StyledLabel>비밀번호</StyledLabel>
+          <InputWrapper>
+            <StyledIcon icon={faLock} />
+            <Input
+              name="password"
+              type="password"
+              placeholder="비밀번호 (8자 이상)"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              ref={pwInputRef}
+            />
+          </InputWrapper>
+          <StyledLabel>비밀번호 확인</StyledLabel>
+          <InputWrapper>
+            <StyledIcon icon={faLock} />
+            <Input
+              name="checkPw"
+              type="password"
+              placeholder="비밀번호를 다시 입력해주세요"
+              value={formik.values.checkPw}
+              onChange={formik.handleChange}
+              ref={pwCheckInputRef}
+            />
+          </InputWrapper>
+          <StyledLabel>이름</StyledLabel>
+          <InputWrapper>
+            <StyledIcon icon={faUser} />
+            <Input
+              name="name"
+              type="text"
+              placeholder="이름을 입력해주세요"
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              ref={nameInputRef}
+            />
+          </InputWrapper>
+          <StyledLabel>성별</StyledLabel>
+          <RadioGroup role="group" aria-labelledby="gender-radio-group">
+            <RadioLabel>
+              <input
+                type="radio"
+                name="gender"
+                value="MAN"
+                checked={formik.values.gender === 'MAN'}
+                onChange={formik.handleChange}
+              />
+              남성
+            </RadioLabel>
 
-          <Input
-            name="phone"
-            type="text"
-            placeholder="전화번호를 입력하세요."
-            value={formik.values.phone}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            required
-          />
-
-          <Input
-            name="businessNumber"
-            type="text"
-            placeholder="사업자등록번호 / 예 : 123-12-12345 (-포함)" 
-            value={formik.values.businessNumber}
-            onChange={formik.handleChange}
-            ref={businessNumberInputRef}
-          />
-          <Input
-            name="companyName"
-            type="text"
-            placeholder="회사명"
-            value={formik.values.companyName}
-            onChange={formik.handleChange}
-            ref={companyNameInputRef}
-          />
+            <RadioLabel>
+              <input
+                type="radio"
+                name="gender"
+                value="FEMALE"
+                checked={formik.values.gender === 'FEMALE'}
+                onChange={formik.handleChange}
+              />
+              여성
+            </RadioLabel>
+          </RadioGroup>
+          <StyledLabel>연락처</StyledLabel>
+          <InputWrapper>
+            
+            <PhoneInput
+              value="010"
+              disabled
+              style={{ backgroundColor: '#f0f0f0', textAlign: 'center' }}
+            />
+            <PhoneInput
+              name="phoneMiddle"
+              type="text"
+              value={formik.values.phoneMiddle || ''}
+              onChange={handleMiddleChange}
+              maxLength={4}
+              ref={middleInputRef}
+            />
+            <PhoneInput
+              name="phoneLast"
+              type="text"
+              value={formik.values.phoneLast || ''}
+              onChange={handleLastChange}
+              maxLength={4}
+              ref={lastInputRef}
+            />
+          </InputWrapper>
+          <StyledLabel>사업자등록번호</StyledLabel>
+          <InputWrapper>
+            <StyledIcon icon={faLock} />
+            <Input
+              name="businessNumber"
+              type="text"
+              placeholder="예 : 123-12-12345 (-포함)"
+              value={formik.values.businessNumber}
+              onChange={formik.handleChange}
+              ref={businessNumberInputRef}
+            />
+          </InputWrapper>
+          <StyledLabel>회사명</StyledLabel>
+          <InputWrapper>
+            <StyledIcon icon={faBuilding} />
+            <Input
+              name="companyName"
+              type="text"
+              placeholder="회사 이름을 입력해주세요"
+              value={formik.values.companyName}
+              onChange={formik.handleChange}
+              ref={companyNameInputRef}
+            />
+          </InputWrapper>
           <div>
-
-          <div>
-        <AddressInput
-          name="zonecode"
-          type="text"
-          placeholder="우편번호"
-          value={zonecode}
-          onChange={formik.handleChange}
-          ref={companyLocationInputRef}
-        />
-        <AddressButton type="button" onClick={toggleHandler}>
-          주소 찾기
-        </AddressButton>
-      </div>
-
-      <Input
-        name="companyLocation"
-        type="text"
-        placeholder="주소"
-        value={formik.values.companyLocation}
-        onChange={formik.handleChange}
-        ref={companyLocationInputRef}
-      />
-      {/* <Input
+            <div>
+              <StyledLabel>회사 주소</StyledLabel>
+              <AddressInput
+                name="zonecode"
+                type="text"
+                placeholder="우편번호"
+                value={zonecode}
+                onChange={formik.handleChange}
+                ref={companyLocationInputRef}
+              />
+              <AddressButton type="button" onClick={toggleHandler}>
+                주소 찾기
+              </AddressButton>
+            </div>
+            <InputWrapper>
+              <StyledIcon icon={faLocationDot} />
+              <Input
+                name="companyLocation"
+                type="text"
+                placeholder="회사 주소를 입력해주세요"
+                value={formik.values.companyLocation}
+                onChange={formik.handleChange}
+                ref={companyLocationInputRef}
+              />
+            </InputWrapper>
+            {/* <Input
         name="detailAddress"
         type="text"
         placeholder="상세 주소"
@@ -371,21 +570,18 @@ const PersonalRegisterPage = () => {
         ref={companyLocationInputRef}
       /> */}
 
-          
-      <Modal show={isOpen} onHide={closeHandler} centered size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>주소 검색</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ height: "400px" }}>
-          <DaumPostcodeEmbed
-            onComplete={completeHandler}
-            style={{ width: "100%", height: "100%" }}
-          />
-        </Modal.Body>
-      </Modal>
-
-      </div>
-    
+            <Modal show={isOpen} onHide={closeHandler} centered size="lg">
+              <Modal.Header closeButton>
+                <Modal.Title>주소 검색</Modal.Title>
+              </Modal.Header>
+              <Modal.Body style={{ height: '400px' }}>
+                <DaumPostcodeEmbed
+                  onComplete={completeHandler}
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </Modal.Body>
+            </Modal>
+          </div>
 
           <CheckboxContainer>
             <input

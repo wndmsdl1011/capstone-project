@@ -4,52 +4,37 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { postProject } from "../../features/post/projectSlice";
 import styled from "styled-components";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer } from "react-toastify";
+// import { toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+// import { ToastContainer } from "react-toastify";
+import { showToastMessage } from "../../features/common/uiSlice";
 import Select from "react-select";
 
 const TECH_STACK_OPTIONS = [
+  { value: "HTML", label: "HTML" },
+  { value: "CSS", label: "CSS" },
+  { value: "JAVA", label: "Java" },
+  { value: "PYTHON", label: "Python" },
   { value: "REACT", label: "React" },
   { value: "VUE", label: "Vue" },
   { value: "ANGULAR", label: "Angular" },
-  { value: "NEXT.JS", label: "Next.js" },
+  { value: "NEXTJS", label: "Next.js" },
   { value: "TYPESCRIPT", label: "TypeScript" },
   { value: "JAVASCRIPT", label: "JavaScript" },
-  { value: "NODE.JS", label: "Node.js" },
+  { value: "NODEJS", label: "Node.js" },
   { value: "EXPRESS", label: "Express" },
   { value: "SPRING", label: "Spring" },
-  { value: "SPRING BOOT", label: "Spring Boot" },
+  { value: "SPRING_BOOT", label: "Spring Boot" },
   { value: "DJANGO", label: "Django" },
   { value: "FLASK", label: "Flask" },
-  { value: "LARAVEL", label: "Laravel" },
   { value: "MYSQL", label: "MySQL" },
   { value: "POSTGRESQL", label: "PostgreSQL" },
   { value: "MONGODB", label: "MongoDB" },
-  { value: "FIREBASE", label: "Firebase" },
   { value: "AWS", label: "AWS" },
-  { value: "GCP", label: "GCP" },
   { value: "KUBERNETES", label: "Kubernetes" },
   { value: "DOCKER", label: "Docker" },
   { value: "GIT", label: "Git" },
   { value: "FIGMA", label: "Figma" },
-  { value: "ZEPLIN", label: "Zeplin" }
-];
-
-
-const POSITION_OPTIONS = [
-  { value: "all", label: "전체" },
-  { value: "frontend", label: "프론트엔드" },
-  { value: "backend", label: "백엔드" },
-  { value: "designer", label: "디자이너" },
-  { value: "ios", label: "IOS" },
-  { value: "android", label: "안드로이드" },
-  { value: "devops", label: "데브옵스" },
-  { value: "pm", label: "PM" },
-  { value: "planner", label: "기획자" },
-  { value: "marketer", label: "마케터" },
-  { value: "qa", label: "QA" },
-  { value: "data_analyst", label: "데이터 분석가" },
 ];
 
 const Container = styled.div`
@@ -104,13 +89,6 @@ const Input = styled.input`
   border-radius: 8px;
 `;
 
-const SelectStyled = styled.select`
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-`;
-
 const TextArea = styled.textarea`
   width: 100%;
   height: 200px;
@@ -159,37 +137,52 @@ const ProjectRegisterPage = () => {
 
   const handleSubmit = () => {
     const {
-      category,
-      people,
-      method,
-      duration,
-      stack,
-      deadline,
-      position,
-      contact,
       title,
       description,
+      stack,
       startDate,
       endDate,
+      recruitCount,
+      recruitDeadline,
     } = form;
 
-    // 필수 항목 누락 시 toast 알림 표시
-    if (!category) return toast.error("모집 구분을 선택해주세요!");
-    if (!people) return toast.error("모집 인원을 선택해주세요!");
-    if (!method) return toast.error("진행 방식을 선택해주세요!");
-    if (!duration) return toast.error("진행 기간을 선택해주세요!");
-    if (!stack || stack.length === 0)
-      return toast.error("기술 스택을 선택해주세요!");
-    if (!deadline) return toast.error("모집 마감일을 선택해주세요!");
-    if (!position || position.length === 0)
-      return toast.error("모집 포지션을 선택해주세요!");
-    if (!contact) return toast.error("연락 방법을 선택해주세요!");
     if (!title || title.trim() === "")
-      return toast.error("제목을 입력해주세요!");
+      return dispatch(
+        showToastMessage({ message: "제목을 입력해주세요!", status: "error" })
+      );
     if (!description || description.trim() === "")
-      return toast.error("내용을 입력해주세요!");
-    if (!startDate) return toast.error("시작일을 선택해주세요!");
-    if (!endDate) return toast.error("종료일을 선택해주세요!");
+      return dispatch(
+        showToastMessage({ message: "내용을 입력해주세요!", status: "error" })
+      );
+    if (!stack || stack.length === 0)
+      return dispatch(
+        showToastMessage({
+          message: "기술 스택을 선택해주세요!",
+          status: "error",
+        })
+      );
+    if (!startDate)
+      return dispatch(
+        showToastMessage({ message: "시작일을 선택해주세요!", status: "error" })
+      );
+    if (!endDate)
+      return dispatch(
+        showToastMessage({ message: "종료일을 선택해주세요!", status: "error" })
+      );
+    if (!recruitCount)
+      return dispatch(
+        showToastMessage({
+          message: "모집 인원을 선택해주세요!",
+          status: "error",
+        })
+      );
+    if (!recruitDeadline)
+      return dispatch(
+        showToastMessage({
+          message: "모집 마감일을 선택해주세요!",
+          status: "error",
+        })
+      );
 
     const postData = {
       title,
@@ -197,10 +190,32 @@ const ProjectRegisterPage = () => {
       requiredSkill: stack,
       startDate,
       endDate,
+      recruitCount,
+      recruitDeadline,
     };
 
-    dispatch(postProject(postData));
-    console.log("전송할 데이터:", postData); // 나중에 제거 가능
+    dispatch(postProject(postData)).then((resultAction) => {
+      // Removed error toast dispatch for duplicate handling
+      // if (postProject.rejected.match(resultAction)) {
+      //   dispatch(
+      //     showToastMessage({
+      //       message:
+      //         resultAction.payload?.message ||
+      //         "프로젝트 등록 중 문제가 발생했습니다. (권한 또는 서버 오류)",
+      //       status: "error",
+      //     })
+      //   );
+      // } else {
+      //   // dispatch(
+      //   //   showToastMessage({
+      //   //     message: "성공적으로 등록되었습니다.",
+      //   //     status: "success",
+      //   //   })
+      //   // );
+      //   navigate("/projects");
+      // }
+      navigate("/projects");
+    });
   };
 
   useEffect(() => {
@@ -216,64 +231,27 @@ const ProjectRegisterPage = () => {
       </SectionTitle>
       <FormGrid>
         <div>
-          <Label>모집 구분</Label>
-          <SelectStyled
-            name="category"
-            value={form.category || ""}
-            onChange={handleChange}
-          >
-            <option value="" disabled hidden>
-              스터디/프로젝트
-            </option>
-            <option value="study">스터디</option>
-            <option value="project">프로젝트</option>
-          </SelectStyled>
-        </div>
-        <div>
           <Label>모집 인원</Label>
-          <SelectStyled
-            name="people"
-            value={form.people || ""}
+          <Input
+            as="select"
+            name="recruitCount"
+            value={form.recruitCount || ""}
             onChange={handleChange}
           >
             <option value="" disabled hidden>
               인원 미정~10명 이상
             </option>
-            <option value="undecided">인원 미정</option>
-            <option value="1-5">1~5명</option>
-            <option value="6-10">6~10명</option>
-            <option value="10+">10명 이상</option>
-          </SelectStyled>
-        </div>
-        <div>
-          <Label>진행 방식</Label>
-          <SelectStyled
-            name="method"
-            value={form.method || ""}
-            onChange={handleChange}
-          >
-            <option value="" disabled hidden>
-              온라인/오프라인
-            </option>
-            <option value="online">온라인</option>
-            <option value="offline">오프라인</option>
-            <option value="hybrid">온라인/오프라인</option>
-          </SelectStyled>
-        </div>
-        <div>
-          <Label>진행 기간</Label>
-          <SelectStyled
-            name="duration"
-            value={form.duration || ""}
-            onChange={handleChange}
-          >
-            <option value="" disabled hidden>
-              기간 미정~6개월 이상
-            </option>
-            <option value="1-month">1개월</option>
-            <option value="3-months">3개월</option>
-            <option value="6-months-plus">6개월 이상</option>
-          </SelectStyled>
+            <option value="1">1명</option>
+            <option value="2">2명</option>
+            <option value="3">3명</option>
+            <option value="4">4명</option>
+            <option value="5">5명</option>
+            <option value="6">6명</option>
+            <option value="7">7명</option>
+            <option value="8">8명</option>
+            <option value="9">9명</option>
+            <option value="10">10명 이상</option>
+          </Input>
         </div>
         <div>
           <Label>기술 스택</Label>
@@ -289,7 +267,7 @@ const ProjectRegisterPage = () => {
         </div>
         <div>
           <Label>모집 마감일</Label>
-          <Input type="date" name="deadline" onChange={handleChange} />
+          <Input type="date" name="recruitDeadline" onChange={handleChange} />
         </div>
         <div>
           <Label>시작일</Label>
@@ -298,38 +276,6 @@ const ProjectRegisterPage = () => {
         <div>
           <Label>종료일</Label>
           <Input type="date" name="endDate" onChange={handleChange} />
-        </div>
-        <div>
-          <Label>모집 포지션</Label>
-          <Select
-            isMulti
-            options={POSITION_OPTIONS}
-            className="basic-multi-select"
-            classNamePrefix="select"
-            onChange={(options) => handleSelectChange(options, "position")}
-            value={getValueFromArray(form.position)}
-            placeholder="프론트엔드, 백엔드..."
-          />
-        </div>
-        <div>
-          <Label>연락 방법</Label>
-          <SelectStyled
-            name="contact"
-            value={form.contact || ""}
-            onChange={handleChange}
-          >
-            <option value="" disabled hidden>
-              카카오톡/이메일
-            </option>
-            <option value="open_kakao">오픈톡</option>
-            <option value="email">이메일</option>
-            <option value="google_form">구글 폼</option>
-          </SelectStyled>
-          <Input
-            name="kakao-link"
-            placeholder="오픈 카톡방 링크"
-            onChange={handleChange}
-          />
         </div>
       </FormGrid>
 
@@ -356,14 +302,6 @@ const ProjectRegisterPage = () => {
         </Button>
       </ButtonGroup>
       {/* Toast 알림 표시용 컴포넌트 */}
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        closeOnClick
-        pauseOnHover
-        limit={3} //너무 많은 toast가 생성되면 충돌함.
-      />
     </Container>
   );
 };

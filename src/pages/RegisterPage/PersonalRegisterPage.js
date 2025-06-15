@@ -1,11 +1,25 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerUser } from '../../features/user/userSlice';
+import {
+  checkEmailAvailability,
+  clearErrors,
+  registerUser,
+  resetEmailError,
+  resetEmailMessage,
+} from '../../features/user/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { ErrorMessage, Field, useFormik } from 'formik';
 import * as Yup from 'yup';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faEnvelope,
+  faLock,
+  faUser,
+  faCakeCandles,
+  faPhone,
+} from '@fortawesome/free-solid-svg-icons';
 
 const Container = styled.div`
   display: flex;
@@ -45,16 +59,65 @@ const FormWrapper = styled.div`
   text-align: center;
   margin-bottom: 10px;
 `;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 12px;
+const EmailInput = styled.input`
+  width: 73%;
+  padding: 12px 40px;
   margin: 8px 0;
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 16px;
 `;
 
+const EmailCheckButton = styled.button`
+  width: 25%;
+  padding: 12px;
+  margin: 8px 2px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+`;
+
+const StyledLabel = styled.label`
+  display: block;
+  text-align: left;
+  margin-top: 5px;
+  
+  font-size: 15px; /* 폰트 사이즈 살짝 조정 가능 */
+  color: #333; /* 색상도 조정 가능 */
+`;
+
+const InputWrapper = styled.div`
+  position: relative;
+`;
+
+const StyledIcon = styled(FontAwesomeIcon)`
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #adb5bd; // 회색
+  font-size: 18px;
+  pointer-events: none; // 아이콘 위 클릭 막기 (옵션)
+`;
+const Input = styled.input`
+  width: 100%;
+  padding: 12px 40px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+`;
+
+const PhoneInput = styled.input`
+  width: 110px;
+  padding: 12px 0px;
+  margin: 8px 0px 0px;
+  margin-right: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  text-align: center;
+`;
 const Select = styled.select`
   width: 100%;
   padding: 12px;
@@ -62,6 +125,24 @@ const Select = styled.select`
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 16px;
+`;
+const RadioGroup = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* 왼쪽 정렬 */
+  gap: 20px; /* 버튼 사이 거리 띄우기 */
+  margin: 10px 0;
+`;
+
+const RadioLabel = styled.label`
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: #333;
+
+  input {
+    margin-right: 8px; /* 버튼과 텍스트 사이 간격 */
+  }
 `;
 
 const CheckboxContainer = styled.div`
@@ -87,15 +168,20 @@ const Button = styled.button`
 const PersonalRegisterPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const {user} = useSelector((state)=>state.user)
+  const { emailmessage, registrationError, checkEmailError } = useSelector(
+    (state) => state.user
+  );
   // 사용자 입력값 저장 state
   const [agreeTerms, setAgreeTerms] = useState(false); // 이용약관 동의 상태
+  const [isEmailChecked, setIsEmailChecked] = useState(false);
   const nameInputRef = useRef(null);
   const emailInputRef = useRef(null);
   const pwInputRef = useRef(null);
   const pwCheckInputRef = useRef(null);
   const majorSelectRef = useRef(null);
   const educationSelectRef = useRef(null);
+  const middleInputRef = useRef(null);
+  const lastInputRef = useRef(null);
   const validationSchema = Yup.object({
     name: Yup.string().min(2, '이름은 최소 2글자 입니다.').required('Required'),
 
@@ -128,9 +214,11 @@ const PersonalRegisterPage = () => {
       birthYear: '',
       gender: 'MAN',
       phone: '',
+      phoneMiddle: '',
+      phoneLast: '',
       major: '',
       education: '',
-      checkPw:'',
+      checkPw: '',
     },
     validationSchema: validationSchema,
 
@@ -142,7 +230,7 @@ const PersonalRegisterPage = () => {
 
       // 모든 유효성 검사 OK → 여기서 dispatch 등 처리
       console.log('회원가입 데이터:', values);
-      dispatch(registerUser({values, navigate}));
+      dispatch(registerUser({ values, navigate }));
     },
     validateOnBlur: true,
     validateOnChange: false,
@@ -157,10 +245,27 @@ const PersonalRegisterPage = () => {
   //따라서 formik 하나만으로 여러개의 input 상태에 대한 제어가 가능하다. 이렇게 여러개의 input이 추가되더라도 formik 하나로 form 전체를 관리할 수 있는 것이 formik의 장점이다.
   // 막 target.value이용해서 state로 관리해야하고 코드가 많아지는데, state 필요 없다.
   //이 라이브러리 쓰면 코드가 상당히 감축됨, yup이란 유효성 검사(이메일, 비번형식) 라이브러리도 있어서 굿굿
+  useEffect(() => {
+    // 페이지 처음 들어올 때 초기화
+    setIsEmailChecked(false);
+    dispatch(clearErrors());
+    
+  }, []);
+  useEffect(() => {
+    if (registrationError === "전화번호 중복입니다.") {
+      middleInputRef.current?.focus();
+    }
+  }, [registrationError]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = await formik.validateForm();
-
+    console.log(formik.values.phone);
+    if (!isEmailChecked) {
+      alert('이메일 중복 검사를 먼저 완료해주세요.');
+      emailInputRef.current?.focus();
+      return;
+    }
     if (errors.name) {
       alert(errors.name);
       nameInputRef.current?.focus();
@@ -191,63 +296,158 @@ const PersonalRegisterPage = () => {
       educationSelectRef.current?.focus();
       return;
     }
+    
+
     formik.handleSubmit();
   };
-  // console.log("user", user);
+  const checkEmail = async () => {
+    const email = formik.values.email;
+    console.log(formik.values.phone);
+    // 이메일 빈값이거나 형식에 안 맞으면 alert 띄우기
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert('이메일 형식에 맞게 입력해주세요.');
+      return; // 더 이상 진행하지 않게 return
+    }
+    const result = await dispatch(checkEmailAvailability(formik.values.email));
+    console.log('emailresult', result);
+    if (result.payload?.status == 200) {
+      // 서버 응답: status 200이면 이메일 사용 가능
+      setIsEmailChecked(true);
+    } else {
+      // 나머지 서버 응답은 에러기 때문에 이메일 중복
+      setIsEmailChecked(false);
+    }
+  };
+  const handleMiddleChange = (e) => {
+    let value = e.target.value.replace(/\D/g, ''); // 숫자만
+    if (value.length > 4) value = value.slice(0, 4);
+
+    formik.setFieldValue('phoneMiddle', value);
+
+    if (value.length === 4) {
+      lastInputRef.current?.focus();
+    }
+
+    updateFullPhone(value, formik.values.phoneLast);
+  };
+
+  const handleLastChange = (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 4) value = value.slice(0, 4);
+
+    formik.setFieldValue('phoneLast', value);
+
+    // middle + last 완성된 phone 업데이트
+    updateFullPhone(formik.values.phoneMiddle, value);
+  };
+
+  const updateFullPhone = (middle, last) => {
+    const middleFixed = middle || formik.values.phoneMiddle || '';
+    const lastFixed = last || formik.values.phoneLast || '';
+
+    const fullPhone = `010${middleFixed}${lastFixed}`;
+    formik.setFieldValue('phone', fullPhone);
+  };
   return (
     <Container>
       <SelectedTabStyle>개인회원</SelectedTabStyle>
       <FormWrapper>
         <form onSubmit={handleSubmit}>
-          <Input
-            name="email"
-            type="email"
-            placeholder="이메일"
-            value={formik.values.email}
-            onChange={formik.handleChange}
-            ref={emailInputRef}
-          />
-          <Input
-            name="password"
-            type="password"
-            placeholder="비밀번호 (8자 이상)"
-            value={formik.values.password}
-            onChange={formik.handleChange}
-            ref={pwInputRef}
-          />
-          <Input
-            name="checkPw"
-            type="password"
-            placeholder="비밀번호 확인"
-            value={formik.values.checkPw}
-            onChange={formik.handleChange}
-            ref={pwCheckInputRef}
-          />
-          <Input
-            name="name"
-            type="text"
-            placeholder="이름"
-            value={formik.values.name}
-            onChange={formik.handleChange}
-            ref={nameInputRef}
-          />
-          <Select
-            name="gender"
-            value={formik.values.gender}
-            onChange={formik.handleChange}
-          >
-            <option value="MAN">남성</option>
-            <option value="FEMALE">여성</option>
-          </Select>
-          <Input
-            name="birthYear"
-            type="number"
-            placeholder="생년월일 예:1999"
-            value={formik.values.birthYear}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            required
-          />
+          <StyledLabel>이메일</StyledLabel>
+          <InputWrapper>
+            <StyledIcon icon={faEnvelope} />
+            <EmailInput
+              name="email"
+              type="email"
+              placeholder="이메일을 입력해주세요"
+              value={formik.values.email}
+              onChange={(e) => {
+                setIsEmailChecked(false); // input창 이메일 수정하면 다시 중복검사해야 함
+                formik.handleChange(e);
+              }}
+              ref={emailInputRef}
+            />
+            <EmailCheckButton type="button" onClick={checkEmail}>
+              중복검사
+            </EmailCheckButton>
+          </InputWrapper>
+          <div>{emailmessage}</div>
+          <div style={{ color: 'red' }}>{checkEmailError}</div>
+          <StyledLabel>비밀번호</StyledLabel>
+          <InputWrapper>
+            <StyledIcon icon={faLock} />
+            <Input
+              name="password"
+              type="password"
+              placeholder="비밀번호 (8자 이상)"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              ref={pwInputRef}
+            />
+          </InputWrapper>
+          <StyledLabel>비밀번호 확인</StyledLabel>
+          <InputWrapper>
+            <StyledIcon icon={faLock} />
+            <Input
+              name="checkPw"
+              type="password"
+              placeholder="비밀번호를 다시 입력해주세요"
+              value={formik.values.checkPw}
+              onChange={formik.handleChange}
+              ref={pwCheckInputRef}
+            />
+          </InputWrapper>
+          <StyledLabel>이름</StyledLabel>
+          <InputWrapper>
+            <StyledIcon icon={faUser} />
+            <Input
+              name="name"
+              type="text"
+              placeholder="이름을 입력해주세요"
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              ref={nameInputRef}
+            />
+          </InputWrapper>
+          <StyledLabel>성별</StyledLabel>
+
+          <RadioGroup role="group" aria-labelledby="gender-radio-group">
+            <RadioLabel>
+              <input
+                type="radio"
+                name="gender"
+                value="MAN"
+                checked={formik.values.gender === 'MAN'}
+                onChange={formik.handleChange}
+              />
+              남성
+            </RadioLabel>
+
+            <RadioLabel>
+              <input
+                type="radio"
+                name="gender"
+                value="FEMALE"
+                checked={formik.values.gender === 'FEMALE'}
+                onChange={formik.handleChange}
+              />
+              여성
+            </RadioLabel>
+          </RadioGroup>
+          <StyledLabel>생년월일</StyledLabel>
+          <InputWrapper>
+            <StyledIcon icon={faCakeCandles} />
+            <Input
+              name="birthYear"
+              type="number"
+              placeholder="생년월일 (예:1999)"
+              value={formik.values.birthYear}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              required
+            />
+          </InputWrapper>
+          <StyledLabel>전공</StyledLabel>
           <Select
             name="major"
             value={formik.values.major}
@@ -255,7 +455,7 @@ const PersonalRegisterPage = () => {
             ref={majorSelectRef}
           >
             <option value="" disabled hidden>
-              전공
+              전공을 선택해주세요
             </option>
             <option value="CHRISTIANITY">기독교학부</option>
             <option value="LANGUAGE_CULTURE">언어학부</option>
@@ -287,15 +487,31 @@ const PersonalRegisterPage = () => {
             <option value="LIBERAL_ARTS">자유전공학부</option>
             <option value="INTERNATIONAL_STUDIES">국제학부</option>
           </Select>
-          <Input
-            name="phone"
-            type="text"
-            placeholder="전화번호를 입력하세요."
-            value={formik.values.phone}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            required
-          />
+          <StyledLabel>연락처</StyledLabel>
+          <InputWrapper>
+            <PhoneInput
+              value="010"
+              disabled
+              style={{ backgroundColor: '#f0f0f0', textAlign: 'center' }}
+            />
+            <PhoneInput
+              name="phoneMiddle"
+              type="text"
+              value={formik.values.phoneMiddle || ''}
+              onChange={handleMiddleChange}
+              maxLength={4}
+              ref={middleInputRef}
+            />
+            <PhoneInput
+              name="phoneLast"
+              type="text"
+              value={formik.values.phoneLast || ''}
+              onChange={handleLastChange}
+              maxLength={4}
+              ref={lastInputRef}
+            />
+          </InputWrapper>
+          <StyledLabel>학력</StyledLabel>
           <Select
             name="education"
             value={formik.values.education}
@@ -303,7 +519,7 @@ const PersonalRegisterPage = () => {
             ref={educationSelectRef}
           >
             <option value="" disabled hidden>
-              학력
+              학력을 선택해주세요
             </option>
             <option value="HIGH_SCHOOL">고등학교 졸업</option>
             <option value="COLLEGE_FRESHMAN">대학교 1학년</option>
