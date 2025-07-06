@@ -17,6 +17,7 @@ import UserProfileBox from "../common/component/UserProfileBox";
 import { useCookies } from "react-cookie";
 import NewNotice from '../common/NewNotice.js';
 import { fetchNotifications } from '../features/notification/notificationSlice.js';
+import RefreshTokenTimer from '../common/RefreshTokenTimer.js';
 
 const Container = styled.div`
   margin: 0 auto;
@@ -313,6 +314,7 @@ const AppLayout = ({ authenticate, setAuthenticate }) => {
 
   {token ? (
   <>
+  
     <NewNotice />
     <NavRight>
       <div style={{ position: "relative" }} ref={notificationRef}>
@@ -371,8 +373,9 @@ const AppLayout = ({ authenticate, setAuthenticate }) => {
           </NotificationDropdown>
         )}
       </div>
-
+        
       <UserBox>
+        <RefreshTokenTimer/>
         <UserProfileBox />
       </UserBox>
     </NavRight>

@@ -466,10 +466,10 @@ const BoardDetailModal = ({ boardId, onClose, page, selectedTab }) => {
             <FiThumbsUp />
             <span>{stats?.likes ?? 0}</span>
           </div>
-          <div className="stat">
+          {/* <div className="stat">
             <FiMessageCircle />
             <span>{stats?.comments ?? 0}</span>
-          </div>
+          </div> */}
         </Stats>
         <hr />
         <CommentSection  boardId={boardId}/>

@@ -74,7 +74,8 @@ const ProjectPage = () => {
       {loading ? (
         <p>불러오는 중...</p>
       ) : (
-        projectList.map((project) => (
+        <CardGrid>
+        {projectList.map((project) => (
           <Link
             to={`/projects/${project.projectId}`}
             key={project.projectId}
@@ -184,7 +185,8 @@ const ProjectPage = () => {
               </MetaRow>
             </Card>
           </Link>
-        ))
+        ))}
+        </CardGrid>
       )}
 
       <PaginationWrapper>
@@ -252,7 +254,11 @@ const Card = styled.div`
   flex-direction: column;
   min-height: 240px;
 `;
-
+const CardGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+  gap: 24px;
+`;
 const BookmarkButton = styled.button`
   position: absolute;
   top: 20px;

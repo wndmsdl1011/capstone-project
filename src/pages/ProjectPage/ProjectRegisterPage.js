@@ -265,10 +265,7 @@ const ProjectRegisterPage = () => {
             placeholder="프로젝트 사용 스택"
           />
         </div>
-        <div>
-          <Label>모집 마감일</Label>
-          <Input type="date" name="recruitDeadline" onChange={handleChange} />
-        </div>
+        
         <div>
           <Label>시작일</Label>
           <Input type="date" name="startDate" onChange={handleChange} />
@@ -277,8 +274,12 @@ const ProjectRegisterPage = () => {
           <Label>종료일</Label>
           <Input type="date" name="endDate" onChange={handleChange} />
         </div>
+        <div>
+          <Label>모집 마감일</Label>
+          <Input type="date" name="recruitDeadline" onChange={handleChange} />
+        </div>
       </FormGrid>
-
+      
       <SectionTitle data-step="2">프로젝트에 대해 소개해주세요.</SectionTitle>
       <div style={{ marginBottom: "40px" }}>
         <Label>제목</Label>

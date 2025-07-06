@@ -7,6 +7,7 @@ import adminSlice from "./admin/adminSlice";
 import communitySlice from "./community/communitySlice"
 import homeSlice from "./home/homeSlice"
 import notificationSlice from "./notification/notificationSlice"
+import authSlice from "./auth/authSlice"
 const store = configureStore({
   reducer: {
     user: userSlice,
@@ -16,7 +17,8 @@ const store = configureStore({
     admin: adminSlice,
     community: communitySlice,
     home: homeSlice,
-    notification:notificationSlice
+    notification:notificationSlice,
+    auth:authSlice,
   },
 });
 

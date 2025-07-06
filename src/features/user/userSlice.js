@@ -3,6 +3,7 @@ import api from "../../utils/api"; // api.js가 'src/utils/api.js'에 있을 경
 
 import { showToastMessage } from "../common/uiSlice";
 import { fetchNotifications } from '../notification/notificationSlice';
+import { setTokenData } from '../auth/authSlice';
 
 // 지침 사항
 // 툴킷 로그인, 회원가입 샘플
@@ -30,9 +31,19 @@ export const loginWithEmail = createAsyncThunk(
       //2. session storage (새로고침하면 유지, 페이지 닫히면 유지x)
 
       const authHeader = response.headers.authorization;
-
+      const {expiresAt} = response.data;
       const accessToken = authHeader.replace("Bearer ", "").trim();
       sessionStorage.setItem("access_token", accessToken);
+      sessionStorage.setItem("expires_at", expiresAt); // ⬅️ 추가 저장
+       // 상태 저장
+      // dispatch(
+      //   setTokenData({
+      //     accessToken,
+      //     issuedAt,
+      //     expiresIn
+      //   })
+      // );
+
       await dispatch(fetchUserProfile());
       await dispatch(fetchNotifications());
       dispatch(
@@ -43,7 +54,11 @@ export const loginWithEmail = createAsyncThunk(
       );
       navigate("/");
       console.log("로그인 데이터", response.data);
-      return response.data; // response.data.user이렇게 해도 됨
+      return {
+        ...response.data,
+        // expiresIn을 ms → 초 변환
+        expiresIn: Math.floor(response.data.expiresIn / 1000),
+      };
     } catch (error) {
       //실패
       //실패시 생긴 에러값을 reducer에 저장
@@ -51,6 +66,48 @@ export const loginWithEmail = createAsyncThunk(
         showToastMessage({
           message: "아이디 또는 비밀번호가 일치하지 않습니다.",
           status: "error",
+        })
+      );
+      return rejectWithValue(error.response?.data?.error || error.message);
+    }
+  }
+);
+
+export const reissueToken = createAsyncThunk(
+  "user/reissueToken",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      console.log(token);
+      const response = await api.post("/api/reissue",
+        {},
+        {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      const {accessToken, expiresIn, expiresAt} = response.data;
+
+      sessionStorage.setItem("access_token", accessToken);
+      sessionStorage.setItem("expires_at", expiresAt); // ⬅️ 추가 저장
+      dispatch(
+        showToastMessage({
+          message: "세션이 연장되었습니다.",
+          status: "success"
+        })
+      );
+      console.log("리프래시 데이터",response.data);
+      return {
+        ...response.data,
+        expiresAt,
+        expiresIn: Math.floor(expiresIn / 1000),
+      }
+    } catch (error) {
+      dispatch(
+        showToastMessage({
+          message: "세션 연장에 실패했습니다.",
+          status: "error"
         })
       );
       return rejectWithValue(error.response?.data?.error || error.message);
@@ -84,6 +141,7 @@ export const logout = createAsyncThunk(
       // 토큰 그냥 무조건 제거
       sessionStorage.removeItem("access_token");
       sessionStorage.removeItem("userRole");
+      sessionStorage.removeItem("expires_at");
       navigate("/login")
     }
   }
@@ -239,10 +297,16 @@ export const RefreshWithToken = createAsyncThunk(
     }
   }
 );
+
+const storedExpiresAt = sessionStorage.getItem("expires_at");
+const currentTime = new Date();
+const expireTime = storedExpiresAt ? new Date(storedExpiresAt) : null;
+const calculatedExpiresIn = expireTime ? Math.floor((expireTime - currentTime) / 1000) : 0;
+
 const userSlice = createSlice({
   name: "user",
   initialState: {
-    user: null,
+    user: {},
     loading: false,
     loginError: null,
     checkEmailError: null,
@@ -251,6 +315,11 @@ const userSlice = createSlice({
     profile: null,
     emailmessage: "",
     userRole: "",
+
+  accessToken: null,
+  issuedAt: null,
+  expiresAt: storedExpiresAt,
+  expiresIn: calculatedExpiresIn > 0 ? calculatedExpiresIn : 0,
   },
   reducers: {
     // 직접적으로 호출
@@ -267,6 +336,20 @@ const userSlice = createSlice({
       state.userRole = action.payload;
     },
     logout,
+    decrementRemaining: (state) => {
+      if (state.expiresIn > 0) {
+        state.expiresIn -= 1;
+      }
+    },
+    clearAuth: (state) => {
+      state.user = {};
+      state.accessToken = null;
+      state.expiresAt = null;
+      state.expiresIn = 0;
+      sessionStorage.removeItem("access_token");
+      sessionStorage.removeItem("expires_at");
+    },
+
   },
   extraReducers: (builder) => {
     // async처럼 외부의 함수를 통해 호출
@@ -299,10 +382,28 @@ const userSlice = createSlice({
       .addCase(loginWithEmail.fulfilled, (state, action) => {
         state.loading = false;
         sessionStorage.setItem("userRole", action.payload.role); // 여기에서 저장 // 로그인이 성공적이라면 이 user값을 init initialState: { user: null, 여기에 넣어주겠다
-        
+        const {expiresIn, expiresAt} = action.payload;
+        state.expiresAt = expiresAt;
+        state.expiresIn = expiresIn;
+        state.user = action.payload;
         state.loginError = null; // 로그인 에러는 null로 바꿔주고
       })
       .addCase(loginWithEmail.rejected, (state, action) => {
+        state.loading = false;
+        state.loginError = action.payload;
+      })
+      .addCase(reissueToken.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(reissueToken.fulfilled, (state, action) => {
+        state.loading = false;
+        const {expiresIn, expiresAt} = action.payload;
+        state.expiresAt = expiresAt;
+        state.expiresIn = expiresIn;
+        state.user = action.payload;
+        state.loginError = null; // 로그인 에러는 null로 바꿔주고
+      })
+      .addCase(reissueToken.rejected, (state, action) => {
         state.loading = false;
         state.loginError = action.payload;
       })
@@ -351,5 +452,5 @@ const userSlice = createSlice({
       });
   },
 });
-export const { clearErrors, setRole } = userSlice.actions;
+export const { clearErrors, setRole, decrementRemaining,clearAuth} = userSlice.actions;
 export default userSlice.reducer;
