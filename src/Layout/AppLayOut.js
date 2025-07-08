@@ -262,7 +262,7 @@ const AppLayout = ({ authenticate, setAuthenticate }) => {
       dispatch(fetchNotifications());
     } 
     console.log("loading",loading);
-  }, [dispatch, token]);
+  }, [dispatch]);
 
 
   

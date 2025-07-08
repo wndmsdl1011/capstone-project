@@ -285,18 +285,18 @@ export const loginWithToken = createAsyncThunk(
   }
 );
 
-export const RefreshWithToken = createAsyncThunk(
-  "user/loginWithToken",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await api.post("/api/reissue");
-      console.log("refresh토큰", response.data);
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.error);
-    }
-  }
-);
+// export const RefreshWithToken = createAsyncThunk(
+//   "user/loginWithToken",
+//   async (_, { rejectWithValue }) => {
+//     try {
+//       const response = await api.post("/api/reissue");
+//       console.log("refresh토큰", response.data);
+//       return response.data;
+//     } catch (error) {
+//       return rejectWithValue(error.error);
+//     }
+//   }
+// );
 
 const storedExpiresAt = sessionStorage.getItem("expires_at");
 const currentTime = new Date();

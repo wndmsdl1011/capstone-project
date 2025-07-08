@@ -10,7 +10,6 @@ function RefreshTokenTimer() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { expiresIn, expiresAt } = useSelector((state) => state.user || {});
-
   const hasShownFiveMinAlert = useRef(false);
   const [showModal, setShowModal] = useState(false);
   // 1. 타이머 카운트다운
@@ -26,7 +25,7 @@ function RefreshTokenTimer() {
 
   // 2. 5분 알림
   useEffect(() => {
-    if (expiresIn === 1780 && !hasShownFiveMinAlert.current) {
+    if (expiresIn === 500 && !hasShownFiveMinAlert.current) {
       // alert("세션이 5분 후 만료됩니다. 연장해주세요.");
       setShowModal(true);
       hasShownFiveMinAlert.current = true;
@@ -37,20 +36,20 @@ function RefreshTokenTimer() {
   useEffect(() => {
     if (!expiresAt) return;
 
-    const interval = setInterval(() => { // 살짝 중복 수정 필요
+    const interval = setInterval(() => { 
       const now = new Date();
       const expireTime = new Date(expiresAt);
       if (now >= expireTime) {
-        dispatch(clearAuth());
         alert("세션이 만료되었습니다. 다시 로그인해주세요.");
         const token = sessionStorage.getItem("access_token");
         dispatch(logout({ token, navigate }));  
-        window.location.href = "/login";
+        dispatch(clearAuth());
+        navigate("/login", { replace: true });
       }
     }, 5000); // 5초마다 검사
 
     return () => clearInterval(interval);
-  }, [expiresAt, dispatch]);
+  }, [expiresAt, dispatch, navigate]);
 
  /* ---------- 버튼 핸들러 ---------- */
   const handleLogout = useCallback(() => {
@@ -80,7 +79,6 @@ function RefreshTokenTimer() {
         연장
       </ExtendButton>
     </TimerWrapper>
-     {/* 5분 전 모달 */}
       <StyledModal
         show={showModal}
         onHide={() => setShowModal(false)}
