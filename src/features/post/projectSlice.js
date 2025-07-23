@@ -8,6 +8,7 @@ export const postProject = createAsyncThunk(
   "project/postProject",
   async (formData, { dispatch, rejectWithValue }) => {
     try {
+      console.log("프젝 등록 formData",formData);
       const token = sessionStorage.getItem("access_token");
       console.log("accessToken:", token);
       const response = await axios.post(

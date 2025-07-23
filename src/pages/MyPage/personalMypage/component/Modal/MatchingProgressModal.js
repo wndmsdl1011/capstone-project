@@ -1,10 +1,8 @@
-// components/MatchingProgressModal.jsx
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { keyframes } from 'styled-components';
 import { Modal } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
 import MatchingResultModal from './MatchingResultModal';
 const StyledModal = styled(Modal)`
@@ -149,7 +147,7 @@ const steps = [
   { label: '결과 정리 중', description: '최적의 프로젝트를 선별하고 있습니다' },
 ];
 
-const MatchingProgressModal = ({ show, onClose, onComplete }) => {
+const MatchingProgressModal = ({ show, onClose }) => {
   const { aiMatchingTop3 } = useSelector((state) => state.resume);
   const [stepIndex, setStepIndex] = useState(0);
   const [showResultModal, setShowResultModal] = useState(false);
@@ -169,12 +167,6 @@ const MatchingProgressModal = ({ show, onClose, onComplete }) => {
 
     return () => clearInterval(interval);
   }, [show]);
-
-  useEffect(() => {
-    if (aiMatchingTop3) {
-      onComplete();
-    }
-  }, [aiMatchingTop3, onComplete]);
 
   useEffect(() => {
     if (aiMatchingTop3 && aiMatchingTop3?.recommendations?.length > 0) {

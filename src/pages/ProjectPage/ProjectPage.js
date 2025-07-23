@@ -256,7 +256,7 @@ const Card = styled.div`
 `;
 const CardGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
   gap: 24px;
 `;
 const BookmarkButton = styled.button`

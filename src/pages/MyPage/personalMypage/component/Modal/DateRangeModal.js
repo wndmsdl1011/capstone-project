@@ -1,10 +1,8 @@
-// components/DateRangeModal.jsx
 import React, { useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-// import { MatchButton } from './YourStyledComponentsPath'; // MatchButton 스타일 컴포넌트 import 경로 수정 필요
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { resumeAImatching } from '../../../../../features/resume/resumeSlice';
 import styled, {createGlobalStyle, css } from 'styled-components';
 import MatchingProgressModal from './MatchingProgressModal';
@@ -45,7 +43,9 @@ const MatchButton = styled.button`
   }
 `;
 
-const DateRangeModal = ({ show, onClose, resumeId, startDate, endDate, setDateRange }) => {
+const DateRangeModal = ({ show, onClose, resumeId }) => {
+  const [dateRange, setDateRange] = useState([null, null]);
+  const [startDate, endDate] = dateRange;
   const [showLoadingModal, setShowLoadingModal] = useState(false);
   const dispatch = useDispatch();
   const handleModalMatch = async () => {
@@ -53,27 +53,21 @@ const DateRangeModal = ({ show, onClose, resumeId, startDate, endDate, setDateRa
       alert('기간을 선택해주세요.');
       return;
     }
-    try {
       dispatch(resumeAImatching({
       resumeId,
       startDate: startDate.toISOString().split('T')[0],
       endDate: endDate.toISOString().split('T')[0],
     }))
+    
   // 순서를 바꾼다. 먼저 로딩모달 띄움
     setShowLoadingModal(true);
-
     // 모달을 닫는 동작을 약간 늦춤 (비동기 상태 업데이트 보장)
     setTimeout(() => {
       onClose();
     }, 100); // 100ms면 충분
-  } catch (error) {
-    console.error("매칭 중 오류 발생:", error);
-  }
+  
   };
-  const handleMatchingComplete = () => {
-  // setShowLoadingModal(false);
-  // 여기에 결과 모달로 이동하거나 상태를 바꾸는 로직 추가 가능
-};
+
   return (
     <>
     <DatePickerStyles />
@@ -100,7 +94,7 @@ const DateRangeModal = ({ show, onClose, resumeId, startDate, endDate, setDateRa
     <MatchingProgressModal
   show={showLoadingModal}
   onClose={() => setShowLoadingModal(false)}
-  onComplete={handleMatchingComplete}
+  
 />
     </>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -199,7 +199,7 @@ const MyPage = () => {
         <FontAwesomeIcon
           icon={faWandMagicSparkles}
           color={iconColor}
-          style={{ marginRight: '2px', fontSize: '21px' }}
+          style={{ marginRight: '-5px', fontSize: '21px' }}
         />
       ),
     },
@@ -224,6 +224,12 @@ const MyPage = () => {
       ),
     },
   ];
+
+useEffect(() => {
+  if (location.state?.selectedMenu) {
+    setSelectedMenu(location.state.selectedMenu);
+  }
+}, [location.state?.selectedMenu]);
 
   const handleLogout = () => {
     if (token) {

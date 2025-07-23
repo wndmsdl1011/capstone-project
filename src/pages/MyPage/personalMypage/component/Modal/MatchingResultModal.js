@@ -122,7 +122,7 @@ const SkillBadge = styled(Badge)`
 const MySkillTitle = styled.div`
   font-size: 14px;
   font-weight: 600;
-  color: #6b7280; /* 추천 이유 박스 텍스트 색상 */
+  color: #6b7280; 
   margin: 8px 0 6px;
 `;
 
@@ -189,14 +189,14 @@ const MatchingResultModal = ({ show, onHide }) => {
   const handleNavigate = () => {
     onHide(); // 모달 닫기
     navigate('/projects'); // 프로젝트 페이지로 이동
-    dispatch(aiListClear());
+    // dispatch(aiListClear());
   };
   const handleApply = (id) => {
     navigate(`/projects/${id}`);
-    dispatch(aiListClear());
+    // dispatch(aiListClear());
   };
   const handleClose = () => {
-    dispatch(aiListClear());
+    // dispatch(aiListClear());
     if (onHide) onHide(); // 외부에도 닫기 알림
   }; //테스트 해봐야할듯.
 

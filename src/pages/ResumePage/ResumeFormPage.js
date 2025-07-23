@@ -433,6 +433,7 @@ const ResumeFormPage = () => {
   };
   return (
     <Container>
+      
       <form onSubmit={handleSubmit}>
         <Header>
           <TitleInput

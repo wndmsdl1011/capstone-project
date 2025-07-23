@@ -58,12 +58,7 @@ export const getResumeList = createAsyncThunk(
   "resume/getResumeList",
   async (_, { rejectWithValue }) => {
     try {
-      const token = sessionStorage.getItem("access_token");
-      const response = await api.get("/api/resume/list", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get("/api/resume/list", {});
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "이력서 리스트 조회 실패");
@@ -214,16 +209,12 @@ export const resumeVisible = createAsyncThunk(
 export const resumeAImatching = createAsyncThunk(
   "resume/resumeAImatching",
   async ({ startDate, endDate , resumeId }, { dispatch, rejectWithValue }) => {
+    console.log("ai데이터",startDate, endDate, resumeId)
     try {
-      const token = sessionStorage.getItem("access_token");
-      console.log("duration, resumeId", startDate, endDate, resumeId);
       const response = await api.post(
         `/api/gemini/completion/top3/${resumeId}`,
         {},
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
           params : {
             startDate : startDate,
             endDate : endDate
@@ -266,6 +257,7 @@ const resumeSlice = createSlice({
     resumeNumber: null,
     wherePage: '',
     aiMatchingTop3:[],
+    resumeList:[]
   },
   reducers: {
     aiListClear: (state) => {
@@ -276,6 +268,7 @@ const resumeSlice = createSlice({
       state.success = false;
       state.error = null;
       state.message = null;
+      state.aiMatchingTop3 = [];
     },
     originResume: (state) => {
       state.newResume = false;
@@ -313,13 +306,14 @@ const resumeSlice = createSlice({
       .addCase(getResumeList.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
-        state.message = action.payload?.message || null;
+        state.message = action.payload.message || null;
         state.resumeNumber = action.payload?.length;
+        state.resumeList = action.payload
       })
       .addCase(getResumeList.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
-        state.error = action.payload?.message || "오류가 발생했습니다.";
+        state.error = action.payload.message || "오류가 발생했습니다.";
       })
       .addCase(getResumeDetail.pending, (state) => {
         state.loading = true;
@@ -371,18 +365,15 @@ const resumeSlice = createSlice({
         state.resumeNumber = state.resumeNumber - 1;
       })
       .addCase(resumeAImatching.pending, (state) => {
-        state.loading = true;
         state.success = false;
         state.error = null;
       })
       .addCase(resumeAImatching.fulfilled, (state, action) => {
-        state.loading = false;
         state.success = true;
         state.aiMatchingTop3 = action.payload;
         state.message = action.payload?.message || null;
       })
       .addCase(resumeAImatching.rejected, (state, action) => {
-        state.loading = false;
         state.success = false;
         state.error = action.payload?.message || "오류가 발생했습니다.";
       });

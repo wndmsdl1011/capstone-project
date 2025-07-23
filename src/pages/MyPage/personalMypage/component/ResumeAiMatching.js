@@ -1,40 +1,17 @@
-// ResumeAiMatching.jsx
 import React, { useEffect, useState } from 'react';
-import styled, {createGlobalStyle, css } from 'styled-components';
+import styled, { createGlobalStyle, css } from 'styled-components';
 import { faCheck, faFileAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  aiListClear,
   getResumeList,
-  myPageResume,
-  resumeAImatching,
+  resetResumeState,
 } from '../../../../features/resume/resumeSlice';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { Modal, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DateRangeModal from './Modal/DateRangeModal';
-
-const DatePickerStyles = createGlobalStyle`
-  .react-datepicker {
-    border: 1px solid #d0e2f2;
-  }
-  .react-datepicker__header {
-    background-color: #e7f3ff;
-    border-bottom: 1px solid #b3d4fc;
-  }
-  .react-datepicker__day--selected,
-  .react-datepicker__day--in-selecting-range,
-  .react-datepicker__day--in-range {
-    background-color: #b3d4fc;
-    color: #004085;
-  }
-  .react-datepicker__day--keyboard-selected {
-    background-color: #9ac8fa;
-  }
-`;
-
+import { faFileCircleXmark } from '@fortawesome/free-solid-svg-icons';
+import { showToastMessage } from '../../../../features/common/uiSlice';
+import { useNavigate } from 'react-router-dom';
 const Container = styled.div`
   padding: 24px;
   background-color: #fff;
@@ -69,6 +46,10 @@ const ResumeCard = styled.div`
   background-color: #f9fafb;
   cursor: pointer;
   transition: 0.3s;
+
+  &:hover {
+    border-color: #34d399;
+  }
 
   ${({ selected }) =>
     selected &&
@@ -130,79 +111,142 @@ const MatchButton = styled.button`
     background-color: #2dd4bf;
   }
 `;
+const StatusMessage = styled.p`
+  color: #9ca3af;
+  font-size: 14px;
+  margin-top: 8px;
+  text-align: center;
+`;
 
+const ErrorMessage = styled.p`
+  color: #ef4444;
+  font-size: 15px;
+  text-align: center;
+  margin-top: 20px;
+`;
+
+const LoadingMessage = styled.p`
+  color: #6b7280;
+  font-size: 15px;
+  text-align: center;
+  margin-top: 20px;
+`;
+
+const ResumeEmptyBox = styled.div`
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+  margin-top: 16px;
+`;
+
+const ResumeWriteButton = styled.button`
+  margin-top: 12px;
+  background-color: #60a5fa;
+  color: white;
+  font-size: 14px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #3b82f6;
+  }
+`;
 const ResumeAiMatching = () => {
+  const { resumeList, error, loading } = useSelector((state) => state.resume);
+  const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState(null);
   const dispatch = useDispatch();
-  const [resumes, setResumes] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [dateRange, setDateRange] = useState([null, null]);
-  const [startDate, endDate] = dateRange;
-  useEffect(() => {
-    dispatch(myPageResume());
-    dispatch(aiListClear());
-    const fetchResumes = async () => {
-      const result = await dispatch(getResumeList());
-      const list = Array.isArray(result.payload) ? result.payload : [];
-      setResumes(list);
-    };
 
-    fetchResumes();
+  useEffect(() => {
+    dispatch(resetResumeState());
+    dispatch(getResumeList());
   }, [dispatch]);
 
-  const handleSelect = (id) => {
-    setSelectedId(id); // 하나만 선택
-  };
   const openModal = () => {
     if (!selectedId) {
-      alert('이력서를 선택해주세요.');
+      dispatch(
+        showToastMessage({
+          message: '이력서를 선택해주세요.',
+          status: 'error',
+        })
+      );
       return;
     }
     setIsModalOpen(true);
   };
 
+  if (loading)
+    return <LoadingMessage>이력서를 불러오는 중입니다...</LoadingMessage>;
+  if (error)
+    return (
+      <ErrorMessage>
+        이력서 목록을 불러오는 중 에러가 발생했습니다: {error}
+      </ErrorMessage>
+    );
+
   return (
-     <>
-    <DatePickerStyles />
-    <Container>
-      <Title>이력서 선택</Title>
-      <Warning>※ 이력서는 한 개만 선택 가능합니다.</Warning>
-      {resumes && resumes.length > 0 ? (
-      <ResumeList>
-        {resumes?.map((resume) => (
-          <ResumeCard
-            key={resume?.resumeId}
-            selected={resume?.resumeId === selectedId}
-            onClick={() => handleSelect(resume?.resumeId)}
-          >
-            <IconBox>
-              <FontAwesomeIcon icon={faFileAlt} />
-            </IconBox>
-            <ResumeInfo>
-              <ResumeTitle>{resume?.title}</ResumeTitle>
-              <ResumeDate>최근 수정일: {resume?.updatedAt}</ResumeDate>
-            </ResumeInfo>
-            {resume?.resumeId === selectedId && <CheckIcon icon={faCheck} />}
-          </ResumeCard>
-        ))}
-      </ResumeList>
-      ) : (
-         <p style={{ color: '#9ca3af', fontSize: '14px', marginTop: '8px' }}>
-      로그인 후 이력서를 불러올 수 있습니다.
-    </p>
-      )}
-      <MatchButton onClick={openModal}>기업 AI 매칭하기</MatchButton>
+    <>
+      <Container>
+        {resumeList && resumeList.length > 0 ? (
+          <>
+            <Title>이력서 선택</Title>
+            <Warning>※ 이력서는 한 개만 선택 가능합니다.</Warning>
+            <ResumeList>
+              {resumeList.map((resume) => {
+                const isSelected = selectedId === resume.resumeId;
+                return (
+                  <ResumeCard
+                    key={resume.resumeId}
+                    selected={isSelected}
+                    onClick={() =>
+                      setSelectedId(isSelected ? null : resume.resumeId)
+                    }
+                  >
+                    <IconBox>
+                      <FontAwesomeIcon icon={faFileAlt} />
+                    </IconBox>
+                    <ResumeInfo>
+                      <ResumeTitle>{resume.title}</ResumeTitle>
+                      <ResumeDate>최근 수정일: {resume.updatedAt}</ResumeDate>
+                    </ResumeInfo>
+                    {isSelected && <CheckIcon icon={faCheck} />}
+                  </ResumeCard>
+                );
+              })}
+            </ResumeList>
+            <MatchButton onClick={openModal}>기업 AI 매칭하기</MatchButton>
+          </>
+        ) : (
+          <ResumeEmptyBox>
+            <FontAwesomeIcon
+              icon={faFileCircleXmark}
+              style={{
+                fontSize: '32px',
+                color: '#cbd5e1',
+                marginBottom: '12px',
+              }}
+            />
+            <div>
+              등록된 이력서가 없습니다.
+              <br />
+              기업 AI 매칭을 위해 먼저 이력서를 작성해 주세요.
+            </div>
+            <ResumeWriteButton onClick={() => navigate('/resumelist')}>
+              이력서 작성하러 가기
+            </ResumeWriteButton>
+          </ResumeEmptyBox>
+        )}
       </Container>
       <DateRangeModal
-  show={isModalOpen}
-  onClose={() => setIsModalOpen(false)}
-  resumeId={selectedId}
-  startDate={startDate}
-  endDate={endDate}
-  setDateRange={setDateRange}
-/>
-      </>
-    
+        show={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        resumeId={selectedId}
+      />
+    </>
   );
 };
 
